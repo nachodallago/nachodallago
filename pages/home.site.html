@@ -1,0 +1,94 @@
+<div class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class="col-12 col-md-9 text-center py-5">
+            <h1 class="text-welcome"></h1>
+            <p class="text-secondary pt-3">¡Hola! Gracias por visitar mi página 😁 aquí verás todos mis proyectos, trabajos, una síntesis sobre mí y mis conocimientos en varias áreas. <br>Para empezar, te dejo estos cuadros de colores, tocá en cualquiera de ellos.</p>
+            <div class="swiper-container swiper-sections">
+                <!-- Additional required wrapper -->
+                <div class="swiper-wrapper my-5 ">
+                    <div class="swiper-slide mx-2">
+                        <div class="card card-sections shadow bg-gradient-venice-blue border-0 border-radius">
+                            <div class="card-body">
+                                <i class="fa fa-code fa-3x py-3"></i>
+                                <h4>DEV</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="card card-sections shadow bg-gradient-electric-violet border-0 border-radius">
+                            <div class="card-body">
+                                <i class="fab fa-instagram fa-3x py-3"></i>
+                                <h4>CM</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="card card-sections shadow bg-gradient-mojito border-0 border-radius">
+                            <div class="card-body">
+                                <i class="fa fa-store fa-3x py-3"></i>
+                                <h4>SHOP</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="card card-sections shadow bg-gradient-electric-violet border-0 border-radius">
+                            <div class="card-body">
+                                <i class="fa fa-project-diagram fa-3x py-3"></i>
+                                <h4>PROY</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="card card-sections shadow bg-gradient-cherry border-0 border-radius">
+                            <div class="card-body">
+                                <i class="fa fa-photo-video fa-3x py-3"></i>
+                                <h4>VIDEO</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+<script>
+    var hora_actual = new Date().getHours(), text_welcome="";
+    if(hora_actual >= 00 && hora_actual < 06){
+        text_welcome="Buenas noches";
+    } else {
+        if(hora_actual >= 06 && hora_actual < 13){
+            text_welcome="Buenos días";
+        } else {
+            if(hora_actual >= 13 && hora_actual < 19){
+                text_welcome="Buenas tardes";
+            } else {
+                if(hora_actual >= 06 && hora_actual <= 13){
+                    text_welcome="Buenas noches";
+                }
+            }
+        }
+    }
+    
+    $(document).ready(function() {
+        $('.text-welcome').text(text_welcome);
+        var sections = new Swiper('.swiper-sections', {
+            // Optional parameters
+            slidesPerView: 1,
+            spaceBetween: 5,
+            breakpoints: {
+                640: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                },
+                768: {
+                    slidesPerView: 3,
+                    spaceBetween: 10,
+                },
+                1024: {
+                    slidesPerView: 4,
+                    spaceBetween: 15,
+                },
+            }
+        })
+    });
+</script>

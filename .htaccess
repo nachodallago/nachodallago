@@ -1,0 +1,10 @@
+Options -Indexes
+
+RewriteEngine On
+# internally add a trailing slash to directories
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.*?[^/])$ %{REQUEST_URI}/ [L]
+
+RewriteRule ^([^/.]+)/?$ index.php?pag=$1&%{QUERY_STRING} [NC,L,QSA]
+#RewriteRule ^([^/.]+)/?$ pages/$1.site.html&%{QUERY_STRING} [NC,L,QSA]
+#RewriteRule ^([^/.]+)/([^/.]+)/?$ index.php?pag=blog&id=$1 [NC,L,QSA]

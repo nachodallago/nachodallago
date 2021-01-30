@@ -1,0 +1,44 @@
+.bg-gradient-venice-blue{
+    color: white;
+    background: #085078;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #85D8CE, #085078);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #85D8CE, #085078); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.bg-gradient-electric-violet{
+    color: white;
+    background: #4776E6;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #8E54E9, #4776E6);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #8E54E9, #4776E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.bg-gradient-mojito{
+    color: white;
+    background: #1D976C;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #93F9B9, #1D976C);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #93F9B9, #1D976C); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.bg-gradient-cherry{
+    color: white;
+    background: #EB3349;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to top, #F45C43, #EB3349);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to top, #F45C43, #EB3349); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.border-radius{
+    border-radius: 10px;
+}
+body.bg-obscure-mode{
+    background-color: #080808!important;
+}
+.bg-obscure-mode nav, .bg-obscure-mode .nav-link{
+    background-color: #171717!important;
+    color: var(--gray)!important;
+}
+.bg-obscure-mode .card-sections {
+    filter: brightness(0.5);
+}
+.setting-obscure-mode{
+    font-size: 20px;
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    cursor: pointer;
+}
