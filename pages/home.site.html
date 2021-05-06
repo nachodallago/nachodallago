@@ -2,9 +2,12 @@
     <div class="row justify-content-md-center">
         <div class="col-12 col-md-9 text-center py-5">
             <h1 class="text-welcome"></h1>
-            <p class="text-secondary pt-3">¡Hola! Gracias por visitar mi página 😁 aquí verás todos mis proyectos, trabajos, una síntesis sobre mí y mis conocimientos en varias áreas. <br>Para empezar, te dejo estos cuadros de colores, tocá en cualquiera de ellos.</p>
-            <div class="swiper-container swiper-sections">
-                <!-- Additional required wrapper -->
+			<p class="text-secondary pt-3">¡Hola! Gracias por visitar mi primer página alojada en Amazon (AWS)😁 aquí verás próximamente mi portfolio. <br>Aquí te dejo la IP para conectarte directamente desde Amazon <a href="http://75.101.240.64/">75.101.240.64</a>.</p>
+			<h4 class="text-center">¿Cómo se esta conectando ahora?</h4>
+			<p>Si estás viendo esta página desde aws.nachodallago.com, podrás notar que accediste con certificado SSL, eso es gracias a la conexión que tiene mi sitio web con CloudFlare, esta conexión ya se mantiene activa desde hace 3 años. Por lo cual permite tener esta conexión desde mi domino actualmente. ¡Pero es sólo temporalmente! Hasta que termine de configurar AWS.</p>
+			<h6 class="text-center">Nunca pares de aprender</h6>
+            <!--<p class="text-secondary pt-3">¡Hola! Gracias por visitar mi primer página alojada en Amazon (AWS)😁 aquí verás todos mis proyectos, trabajos, una síntesis sobre mí y mis conocimientos en varias áreas. <br>Para empezar, te dejo estos cuadros de colores, tocá en cualquiera de ellos.</p>
+            <div class="swiper-container swiper-sections d-none">
                 <div class="swiper-wrapper my-5 ">
                     <div class="swiper-slide mx-2">
                         <div class="card card-sections shadow bg-gradient-venice-blue border-0 border-radius">
@@ -47,23 +50,23 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
     </div>    
 </div>
 <script>
     var hora_actual = new Date().getHours(), text_welcome="";
     if(hora_actual >= 00 && hora_actual < 06){
-        text_welcome="Buenas noches";
+        text_welcome="Buenas noches 🌙✨";
     } else {
         if(hora_actual >= 06 && hora_actual < 13){
-            text_welcome="Buenos días";
+            text_welcome="Buenos días 🌞";
         } else {
             if(hora_actual >= 13 && hora_actual < 19){
-                text_welcome="Buenas tardes";
+                text_welcome="Buenas tardes 🌇";
             } else {
                 if(hora_actual >= 06 && hora_actual <= 13){
-                    text_welcome="Buenas noches";
+                    text_welcome="Buenas noches 🌚";
                 }
             }
         }
