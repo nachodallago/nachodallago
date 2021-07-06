@@ -1,97 +1,198 @@
-<div class="container-fluid">
+<div class="container-fluid background-home">
     <div class="row justify-content-md-center">
-        <div class="col-12 col-md-9 text-center py-5">
-            <h1 class="text-welcome"></h1>
-			<p class="text-secondary pt-3">¡Hola! Gracias por visitar mi primer página alojada en Amazon (AWS)😁 aquí verás próximamente mi portfolio. <br>Aquí te dejo la IP para conectarte directamente desde Amazon <a href="http://75.101.240.64/">75.101.240.64</a>.</p>
-			<h4 class="text-center">¿Cómo se esta conectando ahora?</h4>
-			<p>Si estás viendo esta página desde aws.nachodallago.com, podrás notar que accediste con certificado SSL, eso es gracias a la conexión que tiene mi sitio web con CloudFlare, esta conexión ya se mantiene activa desde hace 3 años. Por lo cual permite tener esta conexión desde mi domino actualmente. ¡Pero es sólo temporalmente! Hasta que termine de configurar AWS.</p>
-			<h6 class="text-center">Nunca pares de aprender</h6>
-            <!--<p class="text-secondary pt-3">¡Hola! Gracias por visitar mi primer página alojada en Amazon (AWS)😁 aquí verás todos mis proyectos, trabajos, una síntesis sobre mí y mis conocimientos en varias áreas. <br>Para empezar, te dejo estos cuadros de colores, tocá en cualquiera de ellos.</p>
-            <div class="swiper-container swiper-sections d-none">
-                <div class="swiper-wrapper my-5 ">
-                    <div class="swiper-slide mx-2">
-                        <div class="card card-sections shadow bg-gradient-venice-blue border-0 border-radius">
-                            <div class="card-body">
-                                <i class="fa fa-code fa-3x py-3"></i>
-                                <h4>DEV</h4>
-                            </div>
+        <div class="col-md-6 py-5">
+            <div class="card card-home-top mt-5">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <!-- <h class="p-3 rounded-pill bg-light my-4 d-inline-block display-3">👋</h2> -->
+                            <img src="/static/img/emojis/waving-hand.png">
                         </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="card card-sections shadow bg-gradient-electric-violet border-0 border-radius">
-                            <div class="card-body">
-                                <i class="fab fa-instagram fa-3x py-3"></i>
-                                <h4>CM</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="card card-sections shadow bg-gradient-mojito border-0 border-radius">
-                            <div class="card-body">
-                                <i class="fa fa-store fa-3x py-3"></i>
-                                <h4>SHOP</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="card card-sections shadow bg-gradient-electric-violet border-0 border-radius">
-                            <div class="card-body">
-                                <i class="fa fa-project-diagram fa-3x py-3"></i>
-                                <h4>PROY</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="card card-sections shadow bg-gradient-cherry border-0 border-radius">
-                            <div class="card-body">
-                                <i class="fa fa-photo-video fa-3x py-3"></i>
-                                <h4>VIDEO</h4>
-                            </div>
+                        <div class="col-md-9">
+                            <h2 class="fw-bold">¡Hola<span class="text-welcome"></span>!</h2>
+                            <p>Soy Ignacio Dal Lago, desarrollador fullstack backend y frontend. Desde 2012 comencé a
+                                adentrarme al mundo de la programación de manera autodidacta, ¡y desde allí nunca más
+                                pare!</p>
                         </div>
                     </div>
                 </div>
-            </div>-->
+            </div>
         </div>
-    </div>    
+    </div>
 </div>
-<script>
-    var hora_actual = new Date().getHours(), text_welcome="";
-    if(hora_actual >= 00 && hora_actual < 06){
-        text_welcome="Buenas noches 🌙✨";
-    } else {
-        if(hora_actual >= 06 && hora_actual < 13){
-            text_welcome="Buenos días 🌞";
-        } else {
-            if(hora_actual >= 13 && hora_actual < 19){
-                text_welcome="Buenas tardes 🌇";
-            } else {
-                if(hora_actual >= 06 && hora_actual <= 13){
-                    text_welcome="Buenas noches 🌚";
-                }
-            }
-        }
-    }
-    
-    $(document).ready(function() {
-        $('.text-welcome').text(text_welcome);
-        var sections = new Swiper('.swiper-sections', {
-            // Optional parameters
-            slidesPerView: 1,
-            spaceBetween: 5,
-            breakpoints: {
-                640: {
-                    slidesPerView: 2,
-                    spaceBetween: 20,
-                },
-                768: {
-                    slidesPerView: 3,
-                    spaceBetween: 10,
-                },
-                1024: {
-                    slidesPerView: 4,
-                    spaceBetween: 15,
-                },
-            }
-        })
-    });
-</script>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card border-0 border-radius shadow section-home-cards">
+                <div class="card-body">
+                    <h2 class="text-center fw-bold">Habilidades</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 my-5">
+            <div class="row">
+                <!-- Slider main container -->
+                <div class="swiper-container swiper-sections">
+                    <!-- Additional required wrapper -->
+                    <div class="swiper-wrapper">
+                        <!-- Slides -->
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="HTML5" src="/static/img/skills/html5.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="CSS3" src="/static/img/skills/css3.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="JavaScript" src="/static/img/skills/javascript.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="jQuery" src="/static/img/skills/jquery.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="Ionic" src="/static/img/skills/ionic.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="Angular" src="/static/img/skills/angular.svg">
+                        </div>
+                        <div class="swiper-slide">
+                            <img data-toggle="tooltip" title="Spark AR" src="/static/img/skills/sparkar.png"
+                                style="filter: grayscale(1);width: 80px;">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="React Native" src="/static/img/skills/react-native.svg">
+                        </div>
+                        <div class="swiper-slide">
+                            <img data-toggle="tooltip" title="Mercado Libre API" src="/static/img/skills/meli.svg"
+                                style="filter: grayscale(1)opacity(0.5);width: 80px;">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="Amazon Web Services" src="/static/img/skills/aws.png" class="mt-2">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="Git" src="/static/img/skills/git.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="WordPress" src="/static/img/skills/wordpress.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="PHP" src="/static/img/skills/php.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="Progressive Web Apps" src="/static/img/skills/pwa.png"
+                                class="pt-4 skills-logo">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="Postman" src="/static/img/skills/postman.svg">
+                        </div>
+                        <div class="swiper-slide skills-logo">
+                            <img data-toggle="tooltip" title="MySQL" src="/static/img/skills/mysql.svg">
+                        </div>
+                        <div class="swiper-slide">
+                            <img data-toggle="tooltip" title="Boostrap" src="/static/img/skills/bootstrap.svg"
+                                style="filter: grayscale(1);width: 80px;">
+                        </div>
+                        <div class="swiper-slide">
+                            <img data-toggle="tooltip" title="ASP.NET" src="/static/img/skills/aspnet.svg"
+                                style="filter: grayscale(1)opacity(0.5);width: 80px;">
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 text-secondary mb-5 text-center">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2>4</h2>
+                    <p class="small">Años programando profesionalmente</p>
+                </div>
+                <div class="col-md-4">
+                    <h2>+10</h2>
+                    <p class="small">Clientes satisfechos</p>
+                </div>
+                <div class="col-md-4">
+                    <h2>+400</h2>
+                    <p class="small">Tazas de café</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 my-5">
+                <h4 class="text-center fw-bold">Mis Trabajos Recientes<br>
+                    <small class="fw-light text-secondary" style="font-size: 14px;">‎Aquí hay algunos proyectos en los que
+                        he trabajado recientemente. ¿Quieres ver más? ‎‎<a href="#" class="text-primary text-decoration-none">Contáctame</a>.‎</small>
+                </h4>
+            </div>
+            <div class="col-12 mt-3 mb-5">
+                <div class="row">
+                    <div class="col-md-4">
+                        <a href="#" class="card border-radius border-0 shadow-sm text-decoration-none">
+                            <img src="//via.placeholder.com/350x200" class="border-radius">
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="card border-radius border-0 shadow-sm text-decoration-none">
+                            <img src="//via.placeholder.com/350x200" class="border-radius">
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="card border-radius border-0 shadow-sm text-decoration-none">
+                            <img src="//via.placeholder.com/350x200" class="border-radius">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-6 py-5">
+                <h4 class="text-center fw-bold">‎Estoy orgulloso de haber colaborado con algunos organismos increíbles:‎</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/local-guides.png" class="logo-trust pt-5"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/translate-facebook.png" class="logo-trust"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/wikipedia.png" class="logo-trust"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/giphy.png" class="logo-trust"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/peu.jpg" class="logo-trust"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="//ndlweb.s3.amazonaws.com/assets/img/empresas/sieger.svg" class="logo-trust"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/seedmatriz.svg" class="logo-trust pt-5"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="//ndlweb.s3.amazonaws.com/assets/img/empresas/7.png" class="logo-trust" style="filter: invert();"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="//ndlweb.s3.amazonaws.com/assets/img/empresas/geovision.png" class="logo-trust pt-5"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="/static/img/companies/guiasdelsur.svg" class="logo-trust pt-5"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="//ndlweb.s3.amazonaws.com/assets/img/empresas/alican.svg" class="logo-trust"></a>
+            </div>
+            <div class="col-6 col-md-2">
+                <a href="#"><img src="//ndlweb.s3.amazonaws.com/assets/img/empresas/16.png" class="logo-trust"></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script> -->
+<script src="https://unpkg.com/swiper@6.7.0/swiper-bundle.min.js"></script>
+<script src="/static/js/home.js" async></script>
