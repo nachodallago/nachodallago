@@ -44,11 +44,12 @@ if (window.location.pathname == '/') {
  */
 
 /* Obscure Mode */
-// if (localStorage.getItem("obscure-mode") == 'true') {
-//   $('body').addClass('bg-obscure-mode');
-// } else {
-//   $('body').removeClass('bg-obscure-mode');
-// }
+var body = document.getElementsByTagName('body');
+if (localStorage.getItem("obscure-mode") == 'true') {
+  body.classList.add('bg-obscure-mode');
+} else {
+  body.classList.remove('bg-obscure-mode');
+}
 
 // if (typeof (Storage) !== "undefined") {
 //   if (localStorage.getItem("obscure-mode") == 'true') {
@@ -72,13 +73,13 @@ if (window.location.pathname == '/') {
 //     return false;
 //   });
 // }
-// document.querySelector('.setting-obscure-mode').addEventListener("click", function () {
-//   if (localStorage.getItem("obscure-mode") == 'true') {
-//     $('body').addClass('bg-obscure-mode');
-//   } else {
-//     $('body').removeClass('bg-obscure-mode');
-//   }
-// });
+document.querySelector('.setting-obscure-mode').addEventListener("click", function () {
+  if (localStorage.getItem("obscure-mode") == 'true') {
+    $('body').addClass('bg-obscure-mode');
+  } else {
+    $('body').removeClass('bg-obscure-mode');
+  }
+});
 
 // /* General */
 // $(document).ready(function () {

@@ -77,9 +77,11 @@ body{
     filter: contrast(0);
 }
 .background-home{
-    background-image: url('/static/img/background.jpg');
+    /* background-image: url('/static/img/background.jpg'); */
+    background-image: url('/static/img/background-dark.jpg');
     background-size: cover;
     height: 600px;
+    padding-top: 2rem;
 }
 
 .bg-gradient-venice-blue{
@@ -300,11 +302,17 @@ body.bg-obscure-mode{
     background: linear-gradient(to right, #0072ff, #8200f4, #ff6c5f) !important;
 }
 @media screen and (max-width: 992px){
+    .background-home{
+        margin-top: -8rem;
+    }
     .logo-trust{
         width: 130px;
     }
 }
 @media screen and (min-width: 992px){
+    .background-home{
+        margin-top: -4rem;
+    }
     .section-home-cards{
         margin-top: -40px!important;
     }
