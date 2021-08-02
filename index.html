@@ -43,35 +43,6 @@
   <link href="/static/img/favicon.ico" rel="shortcut icon" />
   <link href="/static/css/main.css" rel="stylesheet" />
   <style>
-    @import url(https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800);
-    @import url(https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&subset=devanagari,latin-ext);
-
-    body {
-      font-family: "Nunito", sans-serif;
-      background-color: #f2f3f5 !important;
-    }
-
-    .navbar li a {
-      font-family: "Poppins", sans-serif !important;
-    }
-
-    .navbar-brand {
-      font-family: "Poppins", sans-serif;
-      font-size: 20px !important;
-    }
-
-    .cursor {
-      cursor: default;
-    }
-
-    .poppins {
-      font-family: "Poppins", sans-serif;
-    }
-
-    .nunito {
-      font-family: "Nunito", sans-serif;
-    }
-
     .page-header {
       color: #fff;
       font-family: 'Nunito', sans-serif;
@@ -86,36 +57,6 @@
       display: block;
     }
 
-    .swiper-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    .swiper-slide {
-      text-align: center;
-      font-size: 18px;
-
-      /* Center slide text vertically */
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: -webkit-flex;
-      display: flex;
-      -webkit-box-pack: center;
-      -ms-flex-pack: center;
-      -webkit-justify-content: center;
-      justify-content: center;
-      -webkit-box-align: center;
-      -ms-flex-align: center;
-      -webkit-align-items: center;
-      align-items: center;
-    }
-
-    .swiper-slide img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
   </style>
   <link rel="stylesheet" href="//use.fontawesome.com/releases/v5.9.0/css/all.css"
     integrity="sha384-i1LQnF23gykqWXg6jxC2ZbCbUMxyw5gLZY6UiUS98LYV5unm8GWmfkIS6jqJfb4E" crossorigin="anonymous">
@@ -124,6 +65,7 @@
     integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
   <!-- <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script> -->
   <link rel="stylesheet" href="//unpkg.com/swiper/swiper-bundle.min.css" />
+  <script src="https://unpkg.com/swiper@6.7.0/swiper-bundle.min.js"></script>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="//www.googletagmanager.com/gtag/js?id=UA-46259306-6"></script>
@@ -131,55 +73,17 @@
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'UA-46259306-6');
   </script>
   <script src="//cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
     crossorigin="anonymous"></script>
 </head>
-
 <body>
-  <!-- <nav class="navbar navbar-expand-lg navbar-light" style="z-index: 10;">
-    <a class="navbar-brand font-weight-bold" href="/">NDL<span class="text-primary">.</span></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse align-self-stretch justify-content-end" id="navbarColor03">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item px-2">
-          <a class="nav-link nav-internal-link font-weight-bold text-default" url="/home">Inicio</a>
-        </li>
-        <li class="nav-item px-2">
-            <a class="nav-link nav-internal-link font-weight-bold text-default" url="/shop">Biografía</a>
-          </li>
-        <li class="nav-item px-2">
-            <a class="nav-link nav-internal-link font-weight-bold text-default" url="/shop">Shop</a>
-        </li>        
-        <li class="nav-item px-2 dropdown">
-            <a class="nav-link dropdown-toggle font-weight-bold text-default" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Más
-            </a>
-            <div class="dropdown-menu border-0 shadow" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item nav-internal-link" url="/shop">Blog</a>
-                <a class="dropdown-item nav-internal-link" url="/shop">Proyectos</a>
-                <a class="dropdown-item nav-internal-link" url="/shop">Trabajos</a>
-                <a class="dropdown-item nav-internal-link" url="/shop">Podcast</a>
-            </div>
-           </li>
-        <li class="nav-item px-2">
-          <a class="nav-link nav-internal-link font-weight-bold text-default" url="/shop">Contacto</a>
-        </li>
-      </ul>
-    </div>
-    <ul class="navbar-nav text-default">
-      <li><a class="nav-link" href="https://instagram.com/nachodallago" target="_blank"><i class="fab fa-instagram text-default"></i></a></li>
-      <li><a class="nav-link" href="https://www.linkedin.com/in/nachodallago/" target="_blank"><i class="fab fa-linkedin text-default"></i></a></li>
-      <li><a class="nav-link" href="https://wa.me/message/OXURXG6SKOEDK1" target="_blank"><i class="fab fa-whatsapp text-default"></i></a></li>
-    </ul>
-  </nav> -->
-  <div class="container" style="z-index: 9;position: relative;">
+  <div class="loading-page">
+    <h2>Cargando</h2>
+  </div>
+  <div class="container navmenu" style="z-index: 9;position: relative;">
     <div class="row">
       <div class="col-3 col-md-2">
         <a class="btn" style="color:#8b0395;"><span class="fa fa-bars"></span></a>
@@ -187,8 +91,8 @@
       <div class="col-6 col-md-8 pt-2">
         <div class="fw-bold text-white text-center">NDL</div>
       </div>
-      <div class="col-3 col-md-2">
-        <a class="btn" style="color:#8b0395;"><span class="fab fa-instagram"></span></a>
+      <div class="col-3 col-md-2 text-end">
+        <a class="btn" style="color:#ccc"><span class="fa fa-gamepad"></span></a>
       </div>
     </div>
   </div>

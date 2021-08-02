@@ -1,7 +1,3 @@
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'))
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl)
-})
 function texto_hola() {
     var hora_actual = new Date().getHours(), text_welcome = "";
 
@@ -23,9 +19,22 @@ function texto_hola() {
     //console.log(text_welcome + 'f')
     document.querySelector('.text-welcome').innerHTML += ', ' + text_welcome;
 }
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+});
 texto_hola();
 var swiper = new Swiper(".swiper-sections", {
     slidesPerView: 10,
+    spaceBetween: 30,
+    loop: false,
+    autoplay: {
+        delay: 2500,
+        disableOnInteraction: false,
+    }
+});
+var swiperProjects = new Swiper(".swiper-projects", {
+    slidesPerView: 3,
     spaceBetween: 30,
     loop: false,
     autoplay: {
