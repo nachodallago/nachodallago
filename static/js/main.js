@@ -27,6 +27,52 @@ const loadHtml = function (url_path) {
         // To not repeat the element
         scripts[i].parentNode.removeChild(scripts[i]);
       }
+      var lazyloadImages;
+      if ("IntersectionObserver" in window) {
+        lazyloadImages = document.querySelectorAll(".lazy");
+        var imageObserver = new IntersectionObserver(function (entries, observer) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var image = entry.target;
+              image.src = image.dataset.src;
+              image.classList.remove("lazy");
+              imageObserver.unobserve(image);
+            }
+          });
+        });
+
+        lazyloadImages.forEach(function (image) {
+          imageObserver.observe(image);
+        });
+      } else {
+        var lazyloadThrottleTimeout;
+        lazyloadImages = document.querySelectorAll(".lazy");
+
+        function lazyload() {
+          if (lazyloadThrottleTimeout) {
+            clearTimeout(lazyloadThrottleTimeout);
+          }
+
+          lazyloadThrottleTimeout = setTimeout(function () {
+            var scrollTop = window.pageYOffset;
+            lazyloadImages.forEach(function (img) {
+              if (img.offsetTop < (window.innerHeight + scrollTop)) {
+                img.src = img.dataset.src;
+                img.classList.remove('lazy');
+              }
+            });
+            if (lazyloadImages.length == 0) {
+              document.removeEventListener("scroll", lazyload);
+              window.removeEventListener("resize", lazyload);
+              window.removeEventListener("orientationChange", lazyload);
+            }
+          }, 20);
+        }
+
+        document.addEventListener("scroll", lazyload);
+        window.addEventListener("resize", lazyload);
+        window.addEventListener("orientationChange", lazyload);
+      }
     });
 };
 
@@ -43,26 +89,31 @@ if (window.location.pathname == '/') {
  * @param {string} parentElementId - The ID of the DOM element to load into
  * @param {string} htmlFilePath - The path of the HTML file to load
  */
+var modal_nav = document.getElementById('modal-nav'),
+  modal_close = document.querySelector('.modal-nav-close'),
+  btn_openmenu = document.querySelector('.btn-openmenu');
 
-document.addEventListener('DOMContentLoaded', function () {
+btn_openmenu.onclick = function () {
+  modal_nav.style.transition = '.5s';
+  modal_nav.style.opacity = '1';
+  modal_nav.style.visibility = 'visible';
+  modal_nav.style.display = "block";
+}
+
+modal_close.onclick = function () {
+  modal_nav.style.transition = '.5s';
+  modal_nav.style.opacity = '0';
+  modal_nav.style.visibility = 'hidden';
+}
+
+document.addEventListener("DOMContentLoaded", function () {
   var loader = document.querySelector('.loading-page');
   setTimeout(function () {
     loader.style.transition = '.5s';
     loader.style.opacity = '0';
     loader.style.visibility = 'hidden';
-  },1000)
-})
-window.onpopstate = function (e) {
-  if (e.state) {
-    document.getElementById("content").innerHTML = e.state.html;
-    document.title = e.state.pageTitle;
-  }
-  var loader = document.querySelector('.loading-page');
-    loader.style.transition = '.5s';
-    loader.style.opacity = '1';
-    loader.style.visibility = 'visible';
-};
+  }, 500);
 
-var lazyLoadInstance = new LazyLoad({
-  elements_selector: ".lazy"
-});
+
+})
+

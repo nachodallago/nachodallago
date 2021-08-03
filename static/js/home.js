@@ -19,11 +19,30 @@ function texto_hola() {
     //console.log(text_welcome + 'f')
     document.querySelector('.text-welcome').innerHTML += ', ' + text_welcome;
 }
+function video_background(gaming=false){
+    var videoID = [
+        'WdCDh6cQ2NI',
+        '02uGbq-C_wo',
+        'ydk4dRwyaBA',
+        '83KdoGgBLFc',
+        '4jxeYfqevl4',
+        'vTWaOIiIru4',
+        'KjToqo-ACnc'
+    ]
+    if(gaming==false){
+        videoID = videoID[Math.floor(Math.random() * videoID.length)]
+    } else {
+        videoID = 'TKmllByzCtU'
+    }
+    const div = document.querySelector('.video-foreground');
+    div.innerHTML = '<iframe src="https://www.youtube.com/embed/'+videoID+'?playlist='+videoID+'&controls=0&showinfo=0&rel=0&autoplay=1&loop=1&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+}
 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'))
 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
 });
-texto_hola();
+texto_hola(); 
+video_background();
 var swiper = new Swiper(".swiper-sections", {
     slidesPerView: 10,
     spaceBetween: 30,

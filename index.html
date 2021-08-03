@@ -86,18 +86,25 @@
   <div class="container navmenu" style="z-index: 9;position: relative;">
     <div class="row">
       <div class="col-3 col-md-2">
-        <a class="btn" style="color:#8b0395;"><span class="fa fa-bars"></span></a>
+        <a class="btn btn-openmenu" style="color:#b1b1b1;"><span class="fa fa-bars"></span></a>
       </div>
       <div class="col-6 col-md-8 pt-2">
         <div class="fw-bold text-white text-center">NDL</div>
       </div>
       <div class="col-3 col-md-2 text-end">
-        <a class="btn" style="color:#ccc"><span class="fa fa-gamepad"></span></a>
+        <a class="btn" style="color:#b1b1b1" data-toggle="tooltip" title="Modo Gaming"><span class="fa fa-gamepad"></span></a>
       </div>
     </div>
   </div>
   <div id="container_load">
   </div>
-  <script src="/static/js/lazyload.js"></script>
+  <div id="modal-nav" style="display: none;">
+    <div>
+      <span class="modal-nav-close"><i class="fa fa-times float-end"></i></span>
+      <a href="#">Home</a>
+      <a href="#">Projects</a>
+    </div>
+  </div>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.4.0/dist/lazyload.min.js"></script> -->
   <script src="/static/js/main.js"></script>
 </body>
