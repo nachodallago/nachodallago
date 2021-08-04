@@ -90,6 +90,7 @@ if (window.location.pathname == '/') {
  * @param {string} htmlFilePath - The path of the HTML file to load
  */
 var modal_nav = document.getElementById('modal-nav'),
+  container_load = document.getElementById('container_load'),
   modal_close = document.querySelector('.modal-nav-close'),
   btn_openmenu = document.querySelector('.btn-openmenu');
 
@@ -97,13 +98,15 @@ btn_openmenu.onclick = function () {
   modal_nav.style.transition = '.5s';
   modal_nav.style.opacity = '1';
   modal_nav.style.visibility = 'visible';
-  modal_nav.style.display = "block";
+
+  container_load.style.display = 'none';
 }
 
 modal_close.onclick = function () {
   modal_nav.style.transition = '.5s';
   modal_nav.style.opacity = '0';
   modal_nav.style.visibility = 'hidden';
+  container_load.style.display = 'block';
 }
 
 document.addEventListener("DOMContentLoaded", function () {

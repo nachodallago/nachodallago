@@ -93,7 +93,6 @@ h6 {
     left: 0;
     width: 100%;
     height: 100%;
-    padding: 5rem 10rem;
 }
 #modal-nav a {
 	display: block;
@@ -156,7 +155,7 @@ h6 {
 }
 
 .skills-logo {
-	filter: contrast(0);
+	filter: grayscale(1);
 }
 .background-home {
 	height: 114vh;
@@ -503,12 +502,15 @@ body.bg-obscure-mode {
 	object-fit: cover;
 }
 
-.logo-skill:hover{
+.skills-logo:hover{
 	filter: none !important;
 	transition: .2s all ease-in-out;
 }
 /* Media */
 @media screen and (max-width: 992px) {
+	#modal-nav {
+		padding: 6rem 1rem;
+	}
 	.background-home {
 		margin-top: -8rem;
         position: relative;
@@ -524,6 +526,9 @@ body.bg-obscure-mode {
 	}
 }
 @media screen and (min-width: 992px) {
+	#modal-nav{
+		padding: 5rem 10rem;
+	}
 	.navmenu, .navmenu a, .navmenu div{
 		font-size: 28px;
 	}
