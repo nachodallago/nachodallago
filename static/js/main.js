@@ -1,22 +1,23 @@
 var modal_nav = document.getElementById('modal-nav'),
   container_load = document.getElementById('container_load'),
   modal_close = document.querySelector('.modal-nav-close'),
+  btn_linkmenu = document.querySelectorAll('.btn-link-menu'),
   btn_openmenu = document.querySelector('.btn-openmenu');
-  btn_openmenu.onclick = function () {
-    modal_nav.style.transition = '.5s';
-    modal_nav.style.opacity = '1';
-    modal_nav.style.visibility = 'visible';
-  
-    container_load.style.display = 'none';
-  }
-  
-  modal_close.onclick = function () {
-    modal_nav.style.transition = '.5s';
-    modal_nav.style.opacity = '0';
-    modal_nav.style.visibility = 'hidden';
-    container_load.style.display = 'block';
-  }
-  
+
+btn_openmenu.onclick = function () {
+  modal_nav.style.transition = '.5s';
+  modal_nav.style.opacity = '1';
+  modal_nav.style.visibility = 'visible';
+  container_load.style.display = 'none';
+}
+
+modal_close.onclick = function () {
+  modal_nav.style.transition = '.5s';
+  modal_nav.style.opacity = '0';
+  modal_nav.style.visibility = 'hidden';
+  container_load.style.display = 'block';
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   var loader = document.querySelector('.loading-page');
   setTimeout(function () {
@@ -27,6 +28,8 @@ document.addEventListener("DOMContentLoaded", function () {
 })
 
 const loadHtml = function (url_path) {
+  document.getElementById('container_load').innerHTML = '';
+
   var page_status;
   const init = {
     method: "GET",
@@ -47,7 +50,7 @@ const loadHtml = function (url_path) {
       return data.text();
     })
     .then(function (html) {
-      if(page_status==true){
+      if (page_status == true) {
 
         document.getElementById('container_load').innerHTML = html;
         var scripts = document.getElementById("container_load").querySelectorAll("script");
@@ -60,7 +63,7 @@ const loadHtml = function (url_path) {
                 eval(r);
               })
             });
-  
+
           }
           // To not repeat the element
           scripts[i].parentNode.removeChild(scripts[i]);
@@ -79,19 +82,19 @@ const loadHtml = function (url_path) {
               }
             });
           });
-  
+
           lazyloadImages.forEach(function (image) {
             imageObserver.observe(image);
           });
         } else {
           var lazyloadThrottleTimeout;
           lazyloadImages = document.querySelectorAll(".lazy");
-  
+
           function lazyload() {
             if (lazyloadThrottleTimeout) {
               clearTimeout(lazyloadThrottleTimeout);
             }
-  
+
             lazyloadThrottleTimeout = setTimeout(function () {
               var scrollTop = window.pageYOffset;
               lazyloadImages.forEach(function (img) {
@@ -107,14 +110,14 @@ const loadHtml = function (url_path) {
               }
             }, 20);
           }
-  
+
           document.addEventListener("scroll", lazyload);
           window.addEventListener("resize", lazyload);
           window.addEventListener("orientationChange", lazyload);
         }
 
-      } else if(page_status==404){
-        html='';
+      } else if (page_status == 404) {
+        html = '';
         var notfound = document.getElementById('page-404').innerHTML
         container_load.innerHTML = notfound
       }
@@ -124,7 +127,7 @@ const loadHtml = function (url_path) {
 };
 
 if (window.location.pathname == '/') {
-  loadHtml('comming-soon')
+  loadHtml('home')
   //   fetch('/pages/home.site.html')
   //   .then(response => response.text())
   //   .then(value => {
@@ -134,11 +137,9 @@ if (window.location.pathname == '/') {
   loadHtml(window.location.pathname)
 }
 
-/* 
- * @param {string} parentElementId - The ID of the DOM element to load into
- * @param {string} htmlFilePath - The path of the HTML file to load
- */
-
-
-
-
+// for (var i = 0; i < btn_linkmenu.length; i++) {
+//   btn_linkmenu[i].addEventListener('click', function(){
+//     loadHtml(this.getAttribute('src-href'));
+//     return false;
+//   }, false);
+// }
