@@ -52,6 +52,9 @@ body {
 	font-family: "Manrope", sans-serif !important;
 	background-color: #f2f3f5 !important;
 }
+.banner-top{
+	margin-top: -56px;
+}
 .loading-page{
     padding: 46vh 1rem;
     width: 100%;
@@ -160,6 +163,25 @@ h6 {
 .background-home {
 	height: 114vh;
 	padding-top: 2rem;
+}
+
+.proyecto-titulo{
+	position: absolute;
+    top: 0;
+    background: linear-gradient(0deg, #5a5757, transparent);
+	height: 100%;
+    width: 100%;
+    padding-top: 5.6pc;
+	text-shadow: 0 0 8px black;
+	text-align: center;
+	vertical-align: bottom;
+    margin: 0;
+	color: #fff;
+	border-radius: 0 0px 10px 10px;
+}
+.proyecto-titulo:hover{
+	transition: 3s all ease-in-out;
+	background: linear-gradient(0deg, #171616, transparent);
 }
 
 .bg-gradient-venice-blue {
