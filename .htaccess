@@ -7,5 +7,4 @@ RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 RewriteCond %{REQUEST_FILENAME} -d
 
 RewriteRule ^(.*?[^/])$ %{REQUEST_URI}/ [L]
-
 RewriteRule ^([^/.]+)/?$ index.html?pag=$1&%{QUERY_STRING} [NC,L,QSA]

@@ -1,0 +1,191 @@
+<link href="https://fonts.googleapis.com/css2?family=Odibee+Sans&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    .btn-gaming{
+        border: 2px solid #fff;
+        /* box-shadow: inset 0 0 5px; */
+        color:#fff;
+        transition: .4s all ease-in-out;
+    }
+    .btn-gaming:hover{
+        border: 4px solid rgb(133, 0, 173);
+        font-size: 18px;
+        color:#000;
+        background: #fff;
+    }
+    .section-nav-gaming.animated {
+        transition-delay: 2s;
+        transform: translateX(0)!important;
+        transition: 2s all ease-in-out!important;
+    }
+    .tab-content-gaming.animated{
+        transition-delay: 1s;
+        transform: translateX(0)!important;
+        transition: 1s all ease-in-out!important;
+    }
+    body, .btn-link-menu, .section-nav-gaming{
+        font-family: 'Press Start 2P', Helvetica, sans-serif!important;
+    }
+    .tab-content-gaming, .name-steam{
+        font-family: 'Odibee Sans', Helvetica, sans-serif!important;
+    }
+    .tab-content-gaming{
+        background: #000000b8;
+        border-radius: 6px;
+        padding: 1rem;
+    }
+    .nav-pills .nav-link{
+        background: #ffffff52!important;
+        box-shadow: inset 0 0 3px #000;
+        color: #000;
+    }
+    :root {
+	--delay: .5s;
+	--timing: 1s;
+    }
+    .box-outer {
+    overflow: hidden;
+    margin: 0rem auto;
+    width: 12rem;
+    height: 12rem;
+    }
+    .main_box {
+    width: 12rem;
+    height: 12rem;
+    position: relative;
+    background: #f34c4c;
+    border: 0.5rem solid #000;
+    }
+    .bar {
+    position: absolute;
+    width: 5rem;
+    height: 0.5rem;
+    background: #fff;
+    transition: all var(--timing) linear;
+    -webkit-animation-duration: var(--timing);
+    animation-duration: var(--timing);
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    }
+    .bar.delay {
+    animation-delay: var(--delay);
+    -webkit-animation-delay: var(--delay);
+    }
+    .top {
+    top: -0.5rem;
+    left: -0.5rem;
+    }
+    .right {
+    top: 1.8rem;
+    right: -2.8rem;
+    transform: rotate(90deg);
+    }
+    .bottom {
+    bottom: -0.5rem;
+    left: -0.5rem;
+    }
+    .left {
+    top: 1.8rem;
+    left: -2.8rem;
+    transform: rotate(90deg);
+    }
+    @-webkit-keyframes h-move {
+    0% {
+        left: -0.5rem;
+    }
+    100% {
+        left: 12rem;
+    }
+    }
+    @keyframes h-move {
+    0% {
+        left: 0rem;
+    }
+    100% {
+        left: 12rem;
+    }
+    }
+    .top,
+    .bottom {
+    -webkit-animation-name: h-move;
+    animation-name: h-move;
+    }
+    @-webkit-keyframes v-move {
+    0% {
+        top: -0.5rem;
+    }
+    100% {
+        top: 22.8rem;
+    }
+    }
+    @keyframes v-move {
+    0% {
+        top: -0.5rem;
+    }
+    100% {
+        top: 22.8rem;
+    }
+    }
+    .right,
+    .left {
+    -webkit-animation-name: v-move;
+    animation-name: v-move;
+    }
+
+</style>
+<div class="video-background">
+    <div class="video-foreground">
+    </div>
+</div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills mb-3 section-nav-gaming" id="pills-tab" role="tablist" style="justify-content: center;transform: translateX(-57pc);transition: 1s all ease-in-out;">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Resumen</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Juegos</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Logros</button>
+                </li>
+              </ul>
+              <div class="tab-content tab-content-gaming" id="pills-tabContent" style="transform: translateX(-57pc);transition: 1s all ease-in-out;transition-delay: 2s!important;">
+                <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                    <div class="container">
+                        <div class="row justify-content-md-center">
+                            <div class="col-md-5 text-center">
+                                <div class="box-outer">
+                                    <div class="main_box">
+                                      <div class="bar top"></div>
+                                      <img class="img-steam-avatar">
+                                      <div class="bar right delay"></div>
+                                      <div class="bar bottom delay"></div>
+                                      <div class="bar left"></div>
+                                    </div>
+                                  </div>
+                                <h4 class="name-steam py-3 text-white"></h4>
+                            </div>
+                        </div>
+                        <div class="row justify-content-md-center">
+                            <div class="col-md-1 text-center mb-2">
+                                <a href="https://steamcommunity.com/id/nachodallago" target="_blank" class="btn btn-gaming w-100"><i class="fab fa-steam"></i> Steam</a>
+                            </div>
+                            <div class="col-md-1 text-center mb-2">
+                                <a class="btn btn-gaming w-100"><i class="fab fa-discord"></i> Discord</a>
+                            </div>
+                            <div class="col-md-1 text-center mb-2">
+                                <a class="btn btn-gaming w-100"><i class="fab fa-twitch"></i> Twitch</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">...</div>
+                <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
+              </div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/home-gaming.js"></script>
