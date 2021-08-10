@@ -27,4 +27,3 @@ function getSteamInfo(){
 getSteamInfo()
 var gaming_section_nav = document.querySelector('.section-nav-gaming'),
  gaming_section_content = document.querySelector('.tab-content-gaming');
-gaming_section_nav.classList.add('animated'), gaming_section_content.classList.add('animated');
