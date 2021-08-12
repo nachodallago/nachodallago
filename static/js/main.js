@@ -127,7 +127,7 @@ const loadHtml = function (url_path) {
 };
 
 if (window.location.pathname == '/') {
-  loadHtml('home')
+  loadHtml('comming-soon')
   //   fetch('/pages/home.site.html')
   //   .then(response => response.text())
   //   .then(value => {
