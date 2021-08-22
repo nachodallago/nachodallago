@@ -1,140 +1,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Odibee+Sans&family=Press+Start+2P&display=swap" rel="stylesheet">
 <!-- <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" /> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<style>
-    .btn-gaming{
-        border: 2px solid #fff;
-        /* box-shadow: inset 0 0 5px; */
-        color:#fff;
-        transition: .4s all ease-in-out;
-    }
-    .btn-gaming:hover{
-        border: 4px solid rgb(133, 0, 173);
-        color:#000;
-        background: #fff;
-    }
-    /* .section-nav-gaming.animated {
-        transition-delay: 2s;
-        transform: translateX(0)!important;
-        transition: 2s all ease-in-out!important;
-    }
-    .tab-content-gaming.animated{
-        transition-delay: 1s;
-        transform: translateX(0)!important;
-        transition: 1s all ease-in-out!important;
-    } */
-    body, .btn-link-menu, .section-nav-gaming{
-        font-family: 'Press Start 2P', Helvetica, sans-serif!important;
-    }
-    .tab-content-gaming, .name-steam{
-        font-family: 'Odibee Sans', Helvetica, sans-serif!important;
-    }
-    .tab-content-gaming{
-        background: #000000b8;
-        border-radius: 6px;
-        padding: 1rem;
-    }
-    .nav-pills .nav-link{
-        background: #ffffff52!important;
-        box-shadow: inset 0 0 3px #000;
-        color: #000;
-    }
-    :root {
-	--delay: .5s;
-	--timing: 1s;
-    }
-    .box-outer {
-    overflow: hidden;
-    margin: 0rem auto;
-    width: 12rem;
-    height: 12rem;
-    }
-    .main_box {
-    width: 12rem;
-    height: 12rem;
-    position: relative;
-    background: #f34c4c;
-    border: 0.5rem solid #000;
-    }
-    .bar {
-    position: absolute;
-    width: 5rem;
-    height: 0.5rem;
-    background: #fff;
-    transition: all var(--timing) linear;
-    -webkit-animation-duration: var(--timing);
-    animation-duration: var(--timing);
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-    -webkit-animation-iteration-count: infinite;
-    animation-iteration-count: infinite;
-    }
-    .bar.delay {
-    animation-delay: var(--delay);
-    -webkit-animation-delay: var(--delay);
-    }
-    .top {
-    top: -0.5rem;
-    left: -0.5rem;
-    }
-    .right {
-    top: 1.8rem;
-    right: -2.8rem;
-    transform: rotate(90deg);
-    }
-    .bottom {
-    bottom: -0.5rem;
-    left: -0.5rem;
-    }
-    .left {
-    top: 1.8rem;
-    left: -2.8rem;
-    transform: rotate(90deg);
-    }
-    @-webkit-keyframes h-move {
-    0% {
-        left: -0.5rem;
-    }
-    100% {
-        left: 12rem;
-    }
-    }
-    @keyframes h-move {
-    0% {
-        left: 0rem;
-    }
-    100% {
-        left: 12rem;
-    }
-    }
-    .top,
-    .bottom {
-    -webkit-animation-name: h-move;
-    animation-name: h-move;
-    }
-    @-webkit-keyframes v-move {
-    0% {
-        top: -0.5rem;
-    }
-    100% {
-        top: 22.8rem;
-    }
-    }
-    @keyframes v-move {
-    0% {
-        top: -0.5rem;
-    }
-    100% {
-        top: 22.8rem;
-    }
-    }
-    .right,
-    .left {
-    -webkit-animation-name: v-move;
-    animation-name: v-move;
-    }
-
-</style>
+<link rel="stylesheet" href="/static/css/gaming.min.css"/>
 <div class="video-background">
     <div class="video-foreground">
     </div>
@@ -189,7 +56,38 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">...</div>
+                <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                    <div class="row">
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/gta_vice_city.jpg" style="width: 50px;"> GTA - Vice City
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/gta_san_andreas.jpg" style="width: 50px;"> GTA - San Andreas
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/gta_v.jpg" style="width: 50px;"> GTA V
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/age_of_empires_2_conquerors.jpg" style="width: 50px;"> Age of Empires II
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/rise_of_nations_2.png" style="width: 50px;"> Rise of Nations 2
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/minecraft.svg" style="width: 50px;"> Minecraft
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/counter_strike_1_6.gif" style="width: 50px;"> Counter Strike 1.6
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/counter_strike_global_offensive.png" style="width: 50px;"> Counter Strike: Global Offensive
+                        </div>
+                        <div class="col-1 text-center text-white">
+                            <img src="/static/img/game/among_us.jpg" style="width: 50px;"> Among Us
+                        </div>
+                    </div>
+
+                </div>
                 <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
               </div>
         </div>

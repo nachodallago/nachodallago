@@ -1,16 +1,30 @@
 <?php
 class Projects
 {
-    public static function readAll()
+    public static function readAll(int $limit=10,int $start=0)
     {
         require 'db.php';
         try {
-            $pgUpdate = $connection->prepare('SELECT * FROM projects');
-            $pgUpdate->bindParam(':pg', $pg);
+            $pgReadAll = $conn->prepare("SELECT title,url_image as image, url FROM works ORDER BY id DESC LIMIT $start, $limit");
+            $pgReadAll->execute();
+            return $pgReadAll->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             return array('status' => false, 'error' => $e->getMessage());
         }
     }
+    public static function readSingle(string $url)
+    {
+        require 'db.php';
+        try {
+            $pgSingle = $conn->prepare("SELECT title,url_image as image, body as content, features,status FROM works WHERE url=:url");
+            $pgSingle->bindParam(':url',$url);
+            $pgSingle->execute();
+            return $pgSingle->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return array('status' => false, 'error' => $e->getMessage());
+        }
+    }
+    
 }
 
 class Gaming

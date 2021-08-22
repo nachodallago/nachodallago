@@ -3,7 +3,7 @@ var modal_nav = document.getElementById('modal-nav'),
   modal_close = document.querySelector('.modal-nav-close'),
   btn_linkmenu = document.querySelectorAll('.btn-link-menu'),
   btn_openmenu = document.querySelector('.btn-openmenu');
-
+var global_URL = window.location.pathname
 btn_openmenu.onclick = function () {
   modal_nav.style.transition = '.5s';
   modal_nav.style.opacity = '1';
@@ -126,7 +126,8 @@ const loadHtml = function (url_path) {
 
 };
 
-if (window.location.pathname == '/') {
+
+if (global_URL == '/') {
   loadHtml('home')
   //   fetch('/pages/home.site.html')
   //   .then(response => response.text())
@@ -134,7 +135,12 @@ if (window.location.pathname == '/') {
   //     document.querySelector('.container--load').innerHTML = value
   //   });
 } else {
-  loadHtml(window.location.pathname)
+  if(global_URL.includes('/projects/')){
+    
+    loadHtml('projects')
+  } else {
+    loadHtml(global_URL)
+  }
 }
 
 // for (var i = 0; i < btn_linkmenu.length; i++) {
