@@ -1,4 +1,5 @@
 var modal_nav = document.getElementById('modal-nav'),
+  year_copyright = document.getElementById('setYearCopyright'),
   container_load = document.getElementById('container_load'),
   modal_close = document.querySelector('.modal-nav-close'),
   btn_linkmenu = document.querySelectorAll('.btn-link-menu'),
@@ -20,12 +21,17 @@ modal_close.onclick = function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   var loader = document.querySelector('.loading-page');
+  if(document.referrer.includes=='instagram'){
+    loader.querySelector('h2').innerText = 'Nos estamos moviendo de Instagram a mi web'
+  }
   setTimeout(function () {
     loader.style.transition = '.5s';
     loader.style.opacity = '0';
     loader.style.visibility = 'hidden';
   }, 500);
 })
+
+year_copyright.innerText = new Date().getFullYear();
 
 const loadHtml = function (url_path) {
   document.getElementById('container_load').innerHTML = '';
@@ -129,23 +135,8 @@ const loadHtml = function (url_path) {
 
 if (global_URL == '/') {
   loadHtml('home')
-  //   fetch('/pages/home.site.html')
-  //   .then(response => response.text())
-  //   .then(value => {
-  //     document.querySelector('.container--load').innerHTML = value
-  //   });
 } else {
-  if(global_URL.includes('/projects/')){
-    
-    loadHtml('projects')
-  } else {
-    loadHtml(global_URL)
-  }
+  var paths = global_URL.split('/');
+  var result_path = paths.filter(e =>  e);
+  loadHtml(result_path[0]);
 }
-
-// for (var i = 0; i < btn_linkmenu.length; i++) {
-//   btn_linkmenu[i].addEventListener('click', function(){
-//     loadHtml(this.getAttribute('src-href'));
-//     return false;
-//   }, false);
-// }
