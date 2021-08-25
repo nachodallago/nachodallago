@@ -16,8 +16,12 @@ if (isset($_REQUEST['type'])) {
             $url = $_REQUEST['url'];
             $return = Projects::readSingle($url);
             break;
-        default:
-            # code...
+        case 'shop':
+            $return = Shop::readAll();
+            break;
+        case 'singleshop':
+            $url = $_REQUEST['url'];
+            $return = Shop::readSingle($url);
             break;
     }
 }

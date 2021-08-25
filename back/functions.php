@@ -27,6 +27,34 @@ class Projects
     
 }
 
+class Shop
+{
+    public static function readAll(int $limit=10,int $start=0)
+    {
+        require 'db.php';
+        try {
+            $pgReadAll = $conn->prepare("SELECT title,url_image as image, price,url FROM shop WHERE status = 'active' ORDER BY id DESC LIMIT $start, $limit");
+            $pgReadAll->execute();
+            return $pgReadAll->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return array('status' => false, 'error' => $e->getMessage());
+        }
+    }
+    public static function readSingle(string $url)
+    {
+        require 'db.php';
+        try {
+            $pgSingle = $conn->prepare("SELECT title,url_image as image, price, btn_mercadopago as btn, description as content FROM shop WHERE status = 'active' AND url=:url");
+            $pgSingle->bindParam(':url',$url);
+            $pgSingle->execute();
+            return $pgSingle->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return array('status' => false, 'error' => $e->getMessage());
+        }
+    }
+    
+}
+
 class Gaming
 {
     public static function steamInfo()
