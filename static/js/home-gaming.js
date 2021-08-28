@@ -10,15 +10,18 @@ video_background();
 function getSteamInfo(){
     var avatar = document.querySelector('.img-steam-avatar'),
     name_steam = document.querySelector('.name-steam'),
+    status_steam = document.querySelector('.status-steam'),
     statusTxt='';
     fetch('/back/index.php?type=steam')
     .then(response => response.json())
     .then(data => {
         console.log(data)
-        if(data.status=='online'){statusTxt=' <div class="gaming-online d-inline-block"></div>'}
+        if(data.status=='online'){statusTxt=' <div class="gaming-online d-inline-block"></div> En línea'}
         if(data.status=='in-game'){statusTxt=' <div class="gaming-online d-inline-block"></div><br><small> <img src="'+data.in_game.icon+'"> Jugando a '+data.in_game.game+'</small>'}
+        if(data.status=='offline'){statusTxt='<span class="text-secondary">Actualmente desconectado</span>'}
         avatar.setAttribute('src',data.avatar);
-        name_steam.innerHTML=data.name + statusTxt;
+        status_steam.innerHTML = statusTxt;
+        name_steam.innerHTML=data.name;
     })
     .catch(err => {
         console.error('Fetch error:', err);
