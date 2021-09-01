@@ -223,6 +223,10 @@ h6 {
 	}
 }
 /* END GAMING */
+.emoji-tooltip{
+	width:20px;
+	vertical-align: sub;
+}
 .bg-gradient-venice-blue {
 	color: white;
 	background: #085078; /* fallback for old browsers */
