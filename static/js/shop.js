@@ -18,7 +18,7 @@ function getProjectInfo() {
                 a_project.setAttribute('href','/shop/'+pitems.url)
                 title_project.innerHTML =pitems.title
                 img_project.setAttribute('src',pitems.image)
-                price_project.innerHTML = pitems.price
+                price_project.innerHTML = '$'+pitems.price
                 item_project = document.querySelector('.shop-home-item').innerHTML
                 var div_pr = document.createElement("div");
                 div_pr.classList.add('col-md-4')

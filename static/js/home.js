@@ -61,7 +61,7 @@ function getProjectInfo() {
                 slider_project.append(div_pr)
             })
             /* Activate slider */
-            new Swiper(".swiper-projects", {
+            var swp_proj = new Swiper(".swiper-projects", {
                 slidesPerView: 3,
                 spaceBetween: 30,
                 loop: false,
@@ -79,12 +79,31 @@ function getProjectInfo() {
 getProjectInfo();
 texto_hola();
 video_background();
-var swiper = new Swiper(".swiper-sections", {
-    slidesPerView: 10,
-    spaceBetween: 30,
-    loop: false,
-    autoplay: {
-        delay: 2500,
-        disableOnInteraction: false,
-    }
-});
+setTimeout(function(){
+    var swiper = new Swiper(".swiper-sections", {
+        spaceBetween: 30,
+        loop: false,
+        autoplay: {
+            delay: 2500,
+            disableOnInteraction: false,
+        },
+        // Responsive breakpoints
+        breakpoints: {
+            // when window width is >= 320px
+            320: {
+            slidesPerView: 3,
+            spaceBetween: 20
+            },
+            // when window width is >= 480px
+            480: {
+            slidesPerView: 5,
+            spaceBetween: 30
+            },
+            // when window width is >= 640px
+            640: {
+            slidesPerView: 10,
+            spaceBetween: 40
+            }
+        }
+    });
+},900)
