@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 
 /localadmin
+/back/db.php

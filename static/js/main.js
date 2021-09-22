@@ -1,9 +1,10 @@
 var modal_nav = document.getElementById('modal-nav'),
+  year_copyright = document.getElementById('setYearCopyright'),
   container_load = document.getElementById('container_load'),
   modal_close = document.querySelector('.modal-nav-close'),
   btn_linkmenu = document.querySelectorAll('.btn-link-menu'),
   btn_openmenu = document.querySelector('.btn-openmenu');
-
+var global_URL = window.location.pathname
 btn_openmenu.onclick = function () {
   modal_nav.style.transition = '.5s';
   modal_nav.style.opacity = '1';
@@ -20,12 +21,17 @@ modal_close.onclick = function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   var loader = document.querySelector('.loading-page');
+  if(document.referrer.includes=='instagram'){
+    loader.querySelector('h2').innerText = 'Nos estamos moviendo de Instagram a mi web'
+  }
   setTimeout(function () {
     loader.style.transition = '.5s';
     loader.style.opacity = '0';
     loader.style.visibility = 'hidden';
   }, 500);
 })
+
+year_copyright.innerText = new Date().getFullYear();
 
 const loadHtml = function (url_path) {
   document.getElementById('container_load').innerHTML = '';
@@ -126,20 +132,11 @@ const loadHtml = function (url_path) {
 
 };
 
-if (window.location.pathname == '/') {
-  loadHtml('comming-soon')
-  //   fetch('/pages/home.site.html')
-  //   .then(response => response.text())
-  //   .then(value => {
-  //     document.querySelector('.container--load').innerHTML = value
-  //   });
-} else {
-  loadHtml(window.location.pathname)
-}
 
-// for (var i = 0; i < btn_linkmenu.length; i++) {
-//   btn_linkmenu[i].addEventListener('click', function(){
-//     loadHtml(this.getAttribute('src-href'));
-//     return false;
-//   }, false);
-// }
+if (global_URL == '/') {
+  loadHtml('home')
+} else {
+  var paths = global_URL.split('/');
+  var result_path = paths.filter(e =>  e);
+  loadHtml(result_path[0]);
+}
