@@ -52,7 +52,7 @@ function getProjectInfo() {
             data.forEach(function (pitems) {
                 a_project.setAttribute('href','/projects/'+pitems.url)
                 title_project.innerHTML =pitems.title
-                img_project.setAttribute('src',pitems.url_image)
+                img_project.setAttribute('src',pitems.image)
 
                 item_project = document.querySelector('.project-item').innerHTML
                 var div_pr = document.createElement("div");
