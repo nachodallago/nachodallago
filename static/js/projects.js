@@ -50,7 +50,7 @@ function getSingleProject(url) {
             /* Insert Data inside Template HTML */
             data.forEach(function (pitems) {
                 section_single.querySelector('.projects-single-title').innerHTML= pitems.title
-                section_single.querySelector('.projects-single-img').setAttribute('src',pitems.img)
+                section_single.querySelector('.projects-single-img').setAttribute('src',pitems.image)
                 section_single.querySelector('.projects-single-features').innerHTML= status(pitems.status) +' <br><i class="fa fa-sliders-h text-secondary"></i> ' + pitems.features.replaceAll('<br>\r\n',' • ')
                 section_single.querySelector('.projects-single-content').innerHTML= pitems.content
             })
