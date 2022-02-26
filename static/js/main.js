@@ -134,7 +134,7 @@ const loadHtml = function (url_path) {
 
 
 if (global_URL == '/') {
-  loadHtml('comming-soon')
+  loadHtml('home')
 } else {
   var paths = global_URL.split('/');
   var result_path = paths.filter(e =>  e);
