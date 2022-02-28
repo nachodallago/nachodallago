@@ -51,7 +51,7 @@ function getSingleProject(url) {
             /* Insert Data inside Template HTML */
             data.forEach(function (pitems) {
                 section_single.querySelector('.shop-single-title').innerHTML= pitems.title
-                section_single.querySelector('.shop-single-img').setAttribute('src',pitems.img)
+                section_single.querySelector('.shop-single-img').setAttribute('src',pitems.image)
                 section_single.querySelector('.shop-single-content').innerHTML= pitems.content
                 section_single.querySelector('.shop-single-price').innerHTML= '$'+pitems.price
             })
