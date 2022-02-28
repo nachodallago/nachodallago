@@ -54,6 +54,7 @@ function getSingleProject(url) {
                 section_single.querySelector('.shop-single-img').setAttribute('src',pitems.image)
                 section_single.querySelector('.shop-single-content').innerHTML= pitems.content
                 section_single.querySelector('.shop-single-price').innerHTML= '$'+pitems.price
+                section_single.querySelector('.shop-single-btn').setAttribute('href',pitems.btn)
             })
             
         })
