@@ -3,7 +3,7 @@ section_single = document.getElementById('projects-single'),
 section_home = document.getElementById('projects-home'),
 url_single = get_url_single.filter(e =>  e);
 function getProjectInfo() {
-    fetch('/back/index.php?type=projects')
+    fetch('/back/index.php?type=projectsAll')
         .then(response => response.json())
         .then(data => {
             /* Define elements from HTML */
