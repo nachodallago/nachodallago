@@ -1,8 +1,18 @@
 <link href="/static/css/animated.min.css" rel="stylesheet" />
+<style>
+    @media screen and (max-width:900px) {
+        .video-foreground{
+            display: none;
+        }
+        .hand-home{
+            display: block;
+            margin: auto;
+        }
+    }
+</style>
 <div class="home-formal">
     <div class="video-background">
         <div class="video-foreground">
-            <!-- MODO GAMING <iframe src="https://www.youtube.com/embed/TKmllByzCtU?controls=0&showinfo=0&rel=0&autoplay=1&loop=1&mute=1" frameborder="0" allowfullscreen></iframe> -->
         </div>
     </div>
     <div class="container-fluid background-home">
@@ -37,99 +47,27 @@
                     <h4 class="fw-bold">Acerca de</h4>
                     <p class="text-muted">Soy Nacho Dal Lago, desarrollador fullstack backend y frontend en Argentina. Desde 2012 comencé a adentrarme al mundo de la programación de manera autodidacta, ¡y desde allí nunca más pare!</p>
                 </div>
-                <div class="col-12 my-5 d-none">
-                    <div class="row">
-                        <!-- Slider main container -->
-                        <div class="swiper-container swiper-sections">
-                            <!-- Additional required wrapper -->
-                            <div class="swiper-wrapper">
-                                <!-- Slides -->
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="html5" title="HTML5" data-src="/static/img/skills/html5.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="css3" title="CSS3" data-src="/static/img/skills/css3.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="javascript" title="JavaScript" data-src="/static/img/skills/javascript.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="cloudflare" title="CloudFlare" data-src="/static/img/skills/cloudflare.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="jquery" title="jQuery" data-src="/static/img/skills/jquery.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="ionic" title="Ionic" data-src="/static/img/skills/ionic.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="angular" title="Angular" data-src="/static/img/skills/angular.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="adobe photoshop" title="Photoshop" data-src="/static/img/skills/photoshop.png">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="spark ar" title="Spark AR" data-src="/static/img/skills/sparkar.png">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="react native" title="React Native" data-src="/static/img/skills/react-native.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="mercado libre developers" title="Mercado Libre API" data-src="/static/img/skills/meli.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="aws" title="Amazon Web Services" data-src="/static/img/skills/aws.png">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="git" title="Git" data-src="/static/img/skills/git.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="wordpress" title="WordPress" data-src="/static/img/skills/wordpress.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="php" title="PHP" data-src="/static/img/skills/php.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="pwa" title="Progressive Web Apps" data-src="/static/img/skills/pwa.png">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="postman" title="Postman" data-src="/static/img/skills/postman.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="mysql" title="MySQL" data-src="/static/img/skills/mysql.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="boostrap" title="Boostrap" data-src="/static/img/skills/bootstrap.svg">
-                                </div>
-                                <div class="swiper-slide skills-logo">
-                                    <img data-toggle="tooltip" class="logo-skill lazy" alt="aspnet" title="ASP.NET" data-src="/static/img/skills/aspnet.svg">
-                                </div>
-                
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-    <div class="bg-white poppins pt-5">
+    <div class="bg-white poppins">
         <div class="container">
             <div class="row">
                 <div class="col-12 mb-5 text-center">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                             <div class="card card-body shadow border-radius border-0">
                                 <h2 class="text-gradient-primary fw-bold h1">7</h2>
                                 <p class="small">Años programando</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                             <div class="card card-body shadow border-radius border-0">
                                 <h2 class="text-gradient-primary fw-bold h1">+10</h2>
                                 <p class="small">Proyectos trabajados</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                             <div class="card card-body shadow border-radius border-0">
                                 <h2 class="text-gradient-primary fw-bold h1">+400</h2>
                                 <p class="small">Tazas de café</p>
