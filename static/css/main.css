@@ -50,10 +50,10 @@
 
 body {
 	font-family: "Manrope", sans-serif !important;
-	background-color: #f2f3f5 !important;
+	background-color: #191919 !important;
 }
 .banner-top {
-	margin-top: -56px;
+	margin-top: 0px;
 }
 .loading-page {
 	padding: 46vh 1rem;
@@ -516,7 +516,7 @@ body.bg-obscure-mode {
 	box-sizing: border-box;
 }
 .video-background {
-	background: #000;
+	background: linear-gradient(178deg, #242424, #1b1b1b);
 	position: fixed;
 	top: 0;
 	right: 0;
@@ -585,19 +585,34 @@ body.bg-obscure-mode {
 
 .project-title {
 	position: absolute;
-	padding-bottom: 8px;
+	padding: 30px 14px;
 	bottom: -7px;
 	border-radius: 0 0 1rem 1rem;
 	margin: auto;
 	color: white;
 	width: 100%;
-	background: linear-gradient(360deg, black, transparent);
+	background: linear-gradient(360deg, #00000070, transparent)
+}
+.projects-home-item-link{
+	background-color: #191919!important;
 }
 iframe {
 	border-radius: 1rem;
 }
+
+.navmenu{
+	top: 0;
+    z-index: 9;
+    position: fixed;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px);
+    background: rgba(255, 255, 255, 0.2) !important;
+}
 /* Media */
 @media screen and (max-width: 992px) {
+	.navmenu{
+		left: 0;
+	}
 	#modal-nav {
 		padding: 6rem 1rem;
 	}
@@ -622,6 +637,9 @@ iframe {
 	#modal-nav {
 		padding: 5rem 10rem;
 	}
+	.navmenu{
+		left: 15vw;
+	}
 	.navmenu,
 	.navmenu a,
 	.navmenu div {
@@ -637,7 +655,7 @@ iframe {
 		margin-top: -4rem;
 	}
 	.background-home .row {
-		margin-top: 10%;
+		margin-top: 20vh;
 	}
 	.section-home-cards {
 		margin-top: -40px !important;

@@ -36,22 +36,22 @@ function getSingleProject(url) {
         .then(data => {
             /* Define elements from HTML */
             function status(st) {
-                var project_status='<i class="fa fa-circle text-secondary"></i> Indefinido'
+                var project_status='<i class="fa fa-circle"></i> Indefinido',color='secondary'
                 switch (st) {
                     case '1':
-                        project_status='<i class="fa fa-circle text-primary"></i> Trabajando ahora'
+                        project_status='Trabajando ahora',color='primary'
                         break;
                     case '2':
-                        project_status='<i class="fa fa-check-circle text-success"></i> Finalizado'
+                        project_status='<i class="fa fa-check-circle"></i> Finalizado', color='success'
                         break;
                 }
-                return '<span class="badge bg-white text-dark shadow" style="vertical-align: text-top;">'+project_status+'</span>'
+                return '<span class="badge bg-'+color+'  shadow" style="vertical-align: text-top;">'+project_status+'</span>'
             }
             /* Insert Data inside Template HTML */
             data.forEach(function (pitems) {
                 section_single.querySelector('.projects-single-title').innerHTML= pitems.title
                 section_single.querySelector('.projects-single-img').setAttribute('src',pitems.image)
-                section_single.querySelector('.projects-single-features').innerHTML= status(pitems.status) +' <br><i class="fa fa-sliders-h text-secondary"></i> ' + pitems.features.replaceAll('<br>\r\n',' • ')
+                section_single.querySelector('.projects-single-features').innerHTML= status(pitems.status) +' <br><i class="fa fa-exclamation-circle text-secondary"></i> ' + pitems.features.replaceAll('<br>\r\n',' • ')
                 section_single.querySelector('.projects-single-content').innerHTML= pitems.content
             })
             

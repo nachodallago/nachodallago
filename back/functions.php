@@ -59,7 +59,7 @@ class Gaming
 {
     public static function steamInfo()
     {
-        $xml = simplexml_load_file("https://steamcommunity.com/id/nachodallago?xml=" . time());
+        $xml = simplexml_load_file("https://steamcommunity.com/id/chonadev?xml=" . time());
 
         $steam_online = (string)$xml->onlineState;
         $steam_avatar = (string)$xml->avatarFull;

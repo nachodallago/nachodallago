@@ -11,6 +11,8 @@ var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="
 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
 });
+var btn_gaming = document.querySelector('.btn-link-menu-gaming')
+btn_gaming.innerHTML='<i class="fa fa-laptop"></i>',btn_gaming.setAttribute('data-bs-original-title','Modo Normal'),btn_gaming.setAttribute('href','/')
 video_background();
 function getSteamInfo(){
     var avatar = document.querySelector('.img-steam-avatar'),
