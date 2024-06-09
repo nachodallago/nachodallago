@@ -1,140 +1,197 @@
 <link href="/static/css/animated.min.css" rel="stylesheet" />
-<style>
-    @media screen and (max-width:900px) {
-       
-        .hand-home{
-            display: block;
-            margin: auto;
-        }
-    }
-</style>
 <div class="home-formal">
-    <div class="video-background">
-        <div class="video-foreground">
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-6 col-md-3 py-5">
+        <img class="border-radius w-100" src="/static/img/profile2.jpg" />
+      </div>
+      <div class="col-md-6 py-5">
+        <div
+          class="card card-home-top shadow animate__animated animate__fadeInUp"
+        >
+          <div class="card-body">
+            <h1 class="fw-bold">¡Hola<span class="text-welcome"></span>!</h1>
+            <p class="fw-light" style="color: #afafaf">
+              Bienvenido a mi portfolio personal. Soy Nacho Dal Lago,
+              desarrollador Fullstack (Backend y Frontend) en Argentina.<br />
+              Desde 2012 comencé a adentrarme al mundo de la programación de
+              manera autodidacta, ¡y desde allí nunca más pare!
+            </p>
+          </div>
         </div>
-    </div>
-    <div class="container background-home">
-        <div class="row justify-between-center">
-            <div class="col-md-6 py-5">
-                <img class="hand-home border-radius" src="/static/img/profile2.jpg">
-                <div class="card card-home-top shadow animate__animated animate__fadeInUp">
-                    <div class="card-body">
-                        <h1 class="fw-bold">¡Hola<span class="text-welcome"></span>!</h1>
-                        <p class="h4 poppins fw-light">Bienvenido a mi portfolio personal.<br>
-                            Soy Nacho Dal Lago, desarrollador Fullstack (Backend y Frontend) en Argentina.<br> Desde 2012 comencé a adentrarme al mundo de la programación de manera autodidacta, ¡y desde allí nunca más pare!</p>
-                    </div>
-                </div>
-                <div class="home-angle">
-                    <a href="#down">
-                        <img src="/static/img/angle.svg" style="width: 30px;filter:invert(1)">
-                    </a>
-                </div>
+        <div class="col-12 my-5 text-center">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <div
+                class="card card-body shadow border-radius py-5 bg-dark border-0"
+              >
+                <h2 class="text-gradient-primary fw-bold h1">10</h2>
+                <p class="small text-white">Años programando</p>
+              </div>
             </div>
+            <div class="col-md-4 mb-3">
+              <div
+                class="card card-body shadow border-radius py-5 bg-dark border-0"
+              >
+                <h2 class="text-gradient-primary fw-bold h1">+10</h2>
+                <p class="small text-white">Proyectos trabajados</p>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div
+                class="card card-body shadow border-radius py-5 bg-dark border-0"
+              >
+                <h2 class="text-gradient-primary fw-bold h1">+400</h2>
+                <p class="small text-white">Tazas de café</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-    <div class="bg-white poppins pt-5">
-        <div class="container">
+  </div>
+    <div class="container" style="overflow: hidden;">
+      <div class="row">
+        <div class="col-12 mt-5">
+          <h4 class="text-center fw-bold">
+            Mis Proyectos Recientes<br />
+            <small class="fw-light text-secondary" style="font-size: 14px">Aquí hay algunos proyectos en los que he trabajado recientemente.
+              <a href="/projects" class="badge bg-light text-primary text-decoration-none">Ver todos</a></small>
+          </h4>
+        </div>
+        <div class="col-12 mt-3 mb-5">
+          <div class="row">
+            <!-- Slider main container -->
+            <div class="swiper-container swiper-projects py-4">
+              <!-- Additional required wrapper -->
+              <div class="swiper-wrapper list-projects">
+                <!-- Slides -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="card card-body border-0 shadow-lg mb-5 border-radius bg-dark">
+            <div class="row justify-content-center">
+              <div class="col-md-6 py-5">
+                <h4 class="text-center fw-bold text-gradient-primary">
+                  He colaborado con algunos organismos:
+                </h4>
+              </div>
+            </div>
             <div class="row">
-                <div class="col-12 mb-5 text-center">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="card card-body shadow border-radius border-0">
-                                <h2 class="text-gradient-primary fw-bold h1">7</h2>
-                                <p class="small">Años programando</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card card-body shadow border-radius border-0">
-                                <h2 class="text-gradient-primary fw-bold h1">+10</h2>
-                                <p class="small">Proyectos trabajados</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card card-body shadow border-radius border-0">
-                                <h2 class="text-gradient-primary fw-bold h1">+400</h2>
-                                <p class="small">Tazas de café</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="local guide google"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/local-guides.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="facebook translate"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/facebook.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="wikipedia"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/wikipedia.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="giphy"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/giphy.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="peu rio cuarto"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/peu.png"
+                    class="logo-trust lazy" style="filter: invert();"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="sieger"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/constructora-jlg.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="seedmatriz"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/seedmatriz.svg"
+                    class="logo-trust lazy pt-5"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="marisa cassan"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/marisacassan.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="guiasdelsur"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/guiasdelsur.svg"
+                    class="logo-trust lazy pt-5"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2 text-center">
+                <a href="#"
+                  ><img
+                    alt="alican"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/alican.webp"
+                    class="logo-trust lazy" style="width: 70px;"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="federacion viajes"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/federacion-viajes.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
+              <div class="col-6 col-md-2">
+                <a href="#"
+                  ><img
+                    alt="micvitae"
+                    data-src="//ndlweb.s3.amazonaws.com/static/img/companies/revista-breves.png"
+                    class="logo-trust lazy"
+                /></a>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-    <div class="bg-white">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 mt-5">
-                    <h4 class="text-center fw-bold">Mis Proyectos Recientes<br>
-                        <small class="fw-light text-secondary" style="font-size: 14px;">Aquí hay algunos proyectos en los que he trabajado recientemente. <a href="/projects" class="badge bg-light text-primary text-decoration-none">Ver todos</a></small>
-                    </h4>
-                </div>
-                <div class="col-12 mt-3 mb-5">
-                    <div class="row">
-                         <!-- Slider main container -->
-                         <div class="swiper-container swiper-projects py-4">
-                            <!-- Additional required wrapper -->
-                            <div class="swiper-wrapper list-projects">
-                                <!-- Slides -->
-                                
-                            </div>
-                         </div>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <div class="card card-body border-0 shadow-lg mb-5 border-radius">
-                        <div class="row justify-content-center">
-                            <div class="col-md-6 py-5">
-                                <h4 class="text-center fw-bold text-gradient-primary">He colaborado con algunos organismos:
-                                </h4>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="local guide google"  data-src="/static/img/companies/local-guides.png" class="logo-trust lazy pt-5"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="facebook translate"  data-src="/static/img/companies/translate-facebook.png" class="logo-trust lazy"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="wikipedia"  data-src="/static/img/companies/wikipedia.png" class="logo-trust lazy"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="giphy"  data-src="/static/img/companies/giphy.png" class="logo-trust lazy"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="peu rio cuarto"  data-src="/static/img/companies/peu.jpg" class="logo-trust lazy"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="sieger"  data-src="//ndlweb.s3.amazonaws.com/assets/img/empresas/sieger.svg" class="logo-trust lazy"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="seedmatriz"  data-src="/static/img/companies/seedmatriz.svg" class="logo-trust lazy pt-5"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="marisa cassan"  data-src="//ndlweb.s3.amazonaws.com/assets/img/empresas/7.png" class="logo-trust lazy" style="filter: invert();"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="guiasdelsur"  data-src="/static/img/companies/guiasdelsur.svg" class="logo-trust lazy pt-5"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="alican"  data-src="//ndlweb.s3.amazonaws.com/assets/img/empresas/alican.svg" class="logo-trust lazy"></a>
-                            </div>
-                            <div class="col-6 col-md-2">
-                                <a href="#"><img alt="micvitae"  data-src="/static/img/companies/micvitae.png" class="logo-trust lazy"></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-</div>
-<div id="projects-template" style="display: none;">
+<div id="projects-template" style="display: none">
     <div class="swiper-slide project-item">
-        <a href="#" class="card border-radius border-0 shadow-sm text-decoration-none project-link">
-            <h2 class="project-title h6 rounded"></h2>
-            <img src="//via.placeholder.com/350x200" class="rounded project-image">
+        <a href="#" class="card p-2 shadow-sm text-decoration-none project-link bg-dark border-radius">
+            <div class="row">
+                <div class="col-4">
+                    <img src="//via.placeholder.com/350x200" class="rounded w-100 project-image" />
+                </div>
+                <div class="col-8">
+                    <h2 class="project-title h6  rounded"></h2>
+                </div>
+            </div>
         </a>
     </div>
 </div>

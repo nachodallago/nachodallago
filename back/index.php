@@ -12,12 +12,22 @@ if (isset($_REQUEST['type'])) {
         case 'projects':
             $return = Projects::readAll(3);
             break;
-            case 'projectsAll':
-                $return = Projects::readAll();
-                break;
+        case 'projectsAll':
+            $return = Projects::readAll();
+            break;
         case 'singleproject':
             $url = $_REQUEST['url'];
             $return = Projects::readSingle($url);
+            break;
+        case 'blog':
+            $return = Blog::readAll(3);
+            break;
+        case 'blogAll':
+            $return = Blog::readAll();
+            break;
+        case 'singleblog':
+            $url = $_REQUEST['url'];
+            $return = Blog::readSingle($url);
             break;
         case 'shop':
             $return = Shop::readAll();

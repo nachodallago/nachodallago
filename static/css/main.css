@@ -88,29 +88,27 @@ h6 {
 #modal-nav {
 	position: fixed;
 	z-index: 9;
-	background: #fff;
+	background: #000;
 	position: fixed;
 	z-index: 9;
-	background: #fff;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
 }
 #modal-nav .btn-link-menu {
-	display: block;
-	text-decoration: none;
-	text-align: center;
-	font-family: Manrope, sans-serif;
-	color: #000;
-	width: 100%;
-	font-size: 20px;
-	font-weight: bold;
-	text-transform: uppercase;
-	padding: 0.4rem;
-	background: linear-gradient(to left, #fff 50%, #000 50%) right;
-	background-size: 200%;
-	transition: 0.3s ease-out;
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    font-family: Manrope, sans-serif;
+    color: #a5a5a5;
+    width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0.4rem;
+    background: linear-gradient(to left, #000 50%, #000 50%) right;
+    background-size: 200%;
 }
 #modal-nav a:hover {
 	background-position: left;
@@ -150,6 +148,7 @@ h6 {
 	-webkit-animation: home-angle 2s infinite;
 	animation: home-angle 2s infinite;
 }
+
 .cursor {
 	cursor: default;
 }
@@ -172,6 +171,10 @@ h6 {
 	padding-top: 2rem;
 }
 
+.project-title{
+	color: #dfdcdc;
+	font-weight: 600;
+}
 .proyecto-titulo {
 	position: absolute;
 	top: 0;
@@ -282,6 +285,9 @@ h6 {
 		#f45c43,
 		#eb3349
 	); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.card{
+	background-color: #262626;
 }
 .card-home-top {
 	border-radius: 1rem !important;
@@ -553,7 +559,7 @@ body.bg-obscure-mode {
 }
 
 .swiper-slide {
-	text-align: center;
+	/* text-align: center; */
 	font-size: 18px;
 
 	/* Center slide text vertically */
@@ -583,16 +589,6 @@ body.bg-obscure-mode {
 	transition: 0.2s all ease-in-out;
 }
 
-.project-title {
-	position: absolute;
-	padding: 30px 14px;
-	bottom: -7px;
-	border-radius: 0 0 1rem 1rem;
-	margin: auto;
-	color: white;
-	width: 100%;
-	background: linear-gradient(360deg, #00000070, transparent)
-}
 .projects-home-item-link{
 	background-color: #191919!important;
 }
@@ -604,15 +600,13 @@ iframe {
 	top: 0;
     z-index: 9;
     position: fixed;
-    backdrop-filter: blur(5px) !important;
+	backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px);
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgb(38 38 38 / 20%) !important;
+	width: 100%;
 }
 /* Media */
 @media screen and (max-width: 992px) {
-	.navmenu{
-		left: 0;
-	}
 	#modal-nav {
 		padding: 6rem 1rem;
 	}
@@ -636,9 +630,6 @@ iframe {
 @media screen and (min-width: 992px) {
 	#modal-nav {
 		padding: 5rem 10rem;
-	}
-	.navmenu{
-		left: 15vw;
 	}
 	.navmenu,
 	.navmenu a,

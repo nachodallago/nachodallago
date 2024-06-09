@@ -1,4 +1,32 @@
 <?php
+class Blog
+{
+    public static function readAll(int $limit=10,int $start=0)
+    {
+        require 'db.php';
+        try {
+            $pgReadAll = $conn->prepare("SELECT title,url_image as image, url_blog FROM blog ORDER BY id DESC LIMIT $start, $limit");
+            $pgReadAll->execute();
+            return $pgReadAll->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return array('status' => false, 'error' => $e->getMessage());
+        }
+    }
+    public static function readSingle(string $url)
+    {
+        require 'db.php';
+        try {
+            $pgSingle = $conn->prepare("SELECT title,url_image as image, text as content FROM blog WHERE url_blog=:url");
+            $pgSingle->bindParam(':url',$url);
+            $pgSingle->execute();
+            return $pgSingle->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return array('status' => false, 'error' => $e->getMessage());
+        }
+    }
+    
+}
+
 class Projects
 {
     public static function readAll(int $limit=10,int $start=0)

@@ -1,10 +1,10 @@
 function texto_hola() {
     var hora_actual = new Date().getHours(), text_welcome = "";
 
-    if (hora_actual < 07 || hora_actual > 18) {
+    if (hora_actual < 7 || hora_actual > 18) {
         text_welcome = "buenas noches <img src='/static/img/emojis/crescent-moon.png' style='width:40px;'>";
     } else {
-        if (hora_actual >= 07 && hora_actual <= 13) {
+        if (hora_actual >= 7 && hora_actual <= 13) {
             text_welcome = "buenos días <img src='/static/img/emojis/sun-with-face.png' style='width:40px;'>";
         } else {
             if (hora_actual >= 13 && hora_actual < 17) {
@@ -38,7 +38,7 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
 });
 function getProjectInfo() {
-    fetch('/back/index.php?type=projects')
+    fetch('/back/index.php?type=blog')
         .then(response => response.json())
         .then(data => {
             /* Define elements from HTML */
@@ -50,7 +50,7 @@ function getProjectInfo() {
 
             /* Insert Data inside Template HTML */
             data.forEach(function (pitems) {
-                a_project.setAttribute('href','/projects/'+pitems.url)
+                a_project.setAttribute('href','/blog/'+pitems.url_blog)
                 title_project.innerHTML =pitems.title
                 img_project.setAttribute('src',pitems.image)
 
@@ -62,9 +62,9 @@ function getProjectInfo() {
             })
             /* Activate slider */
             var swp_proj = new Swiper(".swiper-projects", {
-                slidesPerView: 3,
+                slidesPerView: 1,
                 spaceBetween: 30,
-                loop: false,
+                loop: true,
                 autoplay: {
                     delay: 2500,
                     disableOnInteraction: false,
@@ -76,13 +76,8 @@ function getProjectInfo() {
                     slidesPerView: 1,
                     spaceBetween: 20
                     },
-                    // when window width is >= 480px
-                    480: {
-                    slidesPerView: 2,
-                    spaceBetween: 30
-                    },
                     // when window width is >= 640px
-                    640: {
+                    920: {
                     slidesPerView: 3,
                     spaceBetween: 40
                     }
@@ -96,32 +91,5 @@ function getProjectInfo() {
 }
 getProjectInfo();
 texto_hola();
-video_background();
-setTimeout(function(){
-    var swiper = new Swiper(".swiper-sections", {
-        spaceBetween: 30,
-        loop: false,
-        autoplay: {
-            delay: 2500,
-            disableOnInteraction: false,
-        },
-        // Responsive breakpoints
-        breakpoints: {
-            // when window width is >= 320px
-            320: {
-            slidesPerView: 3,
-            spaceBetween: 20
-            },
-            // when window width is >= 480px
-            480: {
-            slidesPerView: 5,
-            spaceBetween: 30
-            },
-            // when window width is >= 640px
-            640: {
-            slidesPerView: 10,
-            spaceBetween: 40
-            }
-        }
-    });
-},900)
+//video_background();
+
