@@ -44,3 +44,7 @@ docker run --rm -p 8080:80 nachodallago   # http://localhost:8080
 ```
 
 Las URLs del sitio anterior (`/projects`, `/blog`, `/shop`, `/gaming`, `/contact`, …) redirigen con 301 a la nueva home.
+
+## Legacy
+
+El sitio anterior (PHP + jQuery + Bootstrap) está archivado en [`Legacy/`](./Legacy). No se incluye en el build ni en la imagen Docker.
