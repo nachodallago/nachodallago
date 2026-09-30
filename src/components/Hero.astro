@@ -1,0 +1,104 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import nacho from '../assets/nacho.jpg';
+import { links, site } from '../data/site';
+
+const steps = [
+  { tag: 'trigger', title: 'Llega un mensaje por WhatsApp', meta: 'webhook', color: 'text-cyan' },
+  { tag: 'agente IA', title: 'Entiende la intención y extrae los datos', meta: 'llm · 1.2s', color: 'text-violet' },
+  { tag: 'mcp', title: 'Consulta CRM y stock en tu servidor', meta: 'mcp://prod-server', color: 'text-acid' },
+  { tag: 'acción', title: 'Responde, agenda y avisa al equipo', meta: 'n8n · ok', color: 'text-cyan' },
+];
+---
+
+<section class="relative mx-auto grid max-w-6xl gap-12 px-5 pt-10 pb-16 sm:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-10 lg:pt-24 lg:pb-28">
+  <div>
+    <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[.03] py-1 pr-4 pl-1">
+      <Image
+        src={nacho}
+        alt={site.name}
+        width={64}
+        height={64}
+        loading="eager"
+        fetchpriority="high"
+        class="size-8 rounded-full object-cover"
+      />
+      <span class="flex items-center gap-2 text-xs text-zinc-300 sm:text-sm">
+        <span class="relative flex size-2">
+          <span class="absolute inline-flex size-full animate-pulse-dot rounded-full bg-acid"></span>
+        </span>
+        Tomando proyectos nuevos
+      </span>
+    </div>
+
+    <p class="eyebrow mt-8">Ingeniero en Inteligencia Artificial</p>
+    <h1 class="mt-3 text-[2.6rem] leading-[1.02] font-semibold sm:text-6xl lg:text-7xl">
+      Pongo a la <span class="text-gradient">IA</span> a trabajar por vos.
+    </h1>
+    <p class="mt-6 max-w-xl text-lg text-zinc-400 sm:text-xl">
+      Soy Nacho Dal Lago, programador Gen Z convertido en Ingeniero en IA. Automatizo procesos con
+      <strong class="font-medium text-white">agentes de IA</strong>, <strong class="font-medium text-white">n8n</strong>
+      y <strong class="font-medium text-white">servidores conectados vía MCP</strong> para que tu equipo entregue más, en
+      menos tiempo y con muchos menos errores.
+    </p>
+
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <a href={links.whatsapp} target="_blank" rel="noopener" class="btn btn-primary">
+        Automaticemos tu operación <Icon name="arrow" size={18} />
+      </a>
+      <a href="#servicios" class="btn btn-ghost">Ver qué hago</a>
+    </div>
+
+    <ul class="mt-8 flex flex-wrap gap-2" aria-label="Especialidades">
+      <li class="chip">n8n</li>
+      <li class="chip">MCP</li>
+      <li class="chip">Agentes IA</li>
+      <li class="chip">LLMs</li>
+      <li class="chip">Full-stack</li>
+    </ul>
+  </div>
+
+  <!-- Workflow "en vivo": ilustra una automatización real de punta a punta -->
+  <div class="relative" aria-label="Ejemplo de workflow automatizado con IA" role="img">
+    <div aria-hidden="true" class="absolute -inset-y-6 inset-x-0 -z-10 rounded-[2rem] sm:-inset-6 bg-gradient-to-br from-violet/20 via-transparent to-cyan/10 blur-2xl"></div>
+    <div class="card overflow-hidden !bg-ink-900/80 font-mono shadow-2xl shadow-black/50 backdrop-blur">
+      <div class="flex items-center justify-between border-b border-white/5 px-4 py-3 text-xs">
+        <div class="flex items-center gap-1.5" aria-hidden="true">
+          <span class="size-2.5 rounded-full bg-white/15"></span>
+          <span class="size-2.5 rounded-full bg-white/15"></span>
+          <span class="size-2.5 rounded-full bg-white/15"></span>
+        </div>
+        <span class="text-zinc-500">workflow · lead-inbound</span>
+        <span class="flex items-center gap-1.5 text-acid">
+          <span class="size-1.5 animate-pulse-dot rounded-full bg-acid"></span>live
+        </span>
+      </div>
+
+      <ol class="relative space-y-4 p-4 sm:p-5">
+        <span aria-hidden="true" class="absolute top-9 bottom-9 left-[2.05rem] w-px overflow-hidden bg-white/10 sm:left-[2.3rem]">
+          <span class="flow-packet absolute inset-x-0 h-8 bg-gradient-to-b from-transparent via-acid to-transparent"></span>
+        </span>
+        {
+          steps.map((s, i) => (
+            <li class="flow-step relative flex items-start gap-3 rounded-xl border border-white/5 bg-white/[.02] p-3" style={`animation-delay:${i * 0.7}s`}>
+              <span class={`relative z-10 grid size-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-ink-800 text-[11px] font-bold ${s.color}`}>
+                0{i + 1}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class={`text-[10px] tracking-widest uppercase ${s.color}`}>{s.tag}</p>
+                <p class="mt-0.5 font-sans text-sm text-white">{s.title}</p>
+              </div>
+              <span class="hidden shrink-0 self-center text-[11px] text-zinc-500 sm:block">{s.meta}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="flex items-center justify-between border-t border-white/5 px-4 py-3 text-[11px] text-zinc-500">
+        <span class="flex items-center gap-1.5 text-acid"><Icon name="check" size={14} /> ejecución completada</span>
+        <span>0 pasos manuales</span>
+      </div>
+    </div>
+  </div>
+</section>

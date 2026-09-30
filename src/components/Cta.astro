@@ -1,0 +1,28 @@
+---
+import Icon from './Icon.astro';
+import { links } from '../data/site';
+---
+
+<section id="contacto" aria-labelledby="cta-title" class="mx-auto max-w-6xl px-5 pb-20 sm:pb-28">
+  <div class="reveal relative overflow-hidden rounded-[2rem] border border-acid/25 bg-ink-900 px-6 py-14 text-center sm:px-12 sm:py-20">
+    <div aria-hidden="true" class="bg-grid absolute inset-0 opacity-60"></div>
+    <div aria-hidden="true" class="absolute -top-32 left-1/2 size-[28rem] -translate-x-1/2 rounded-full bg-acid/15 blur-3xl"></div>
+    <div class="relative">
+      <p class="eyebrow">// hablemos</p>
+      <h2 id="cta-title" class="mx-auto mt-4 max-w-2xl text-3xl font-semibold sm:text-5xl">
+        ¿Qué tarea te está robando horas <span class="text-gradient">hoy</span>?
+      </h2>
+      <p class="mx-auto mt-5 max-w-xl text-zinc-400 sm:text-lg">
+        Contámela en dos minutos y te digo cómo automatizarla con IA. Sin compromiso.
+      </p>
+      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <a href={links.whatsapp} target="_blank" rel="noopener" class="btn btn-primary">
+          <Icon name="whatsapp" /> Escribime por WhatsApp
+        </a>
+        <a href={links.linkedin} target="_blank" rel="noopener" class="btn btn-ghost">
+          <Icon name="linkedin" /> Conectemos en LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

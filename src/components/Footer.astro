@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro';
+import { links, site } from '../data/site';
+
+const socials = [
+  { href: links.linkedin, label: 'LinkedIn', icon: 'linkedin' },
+  { href: links.github, label: 'GitHub', icon: 'github' },
+  { href: links.instagram, label: 'Instagram', icon: 'instagram' },
+  { href: links.whatsapp, label: 'WhatsApp', icon: 'whatsapp' },
+] as const;
+---
+
+<footer class="border-t border-white/5 pb-[env(safe-area-inset-bottom)]">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-zinc-300">© {new Date().getFullYear()} {site.name} · {site.role}</p>
+      <p class="mt-1">
+        Hecho con Astro + Tailwind, casi cero JavaScript ·
+        <a href={links.repo} target="_blank" rel="noopener" class="underline decoration-white/20 underline-offset-4 hover:text-white">mirá el código</a>
+      </p>
+    </div>
+    <ul class="flex gap-2">
+      {
+        socials.map((s) => (
+          <li>
+            <a
+              href={s.href}
+              target="_blank"
+              rel="noopener me"
+              aria-label={s.label}
+              class="grid size-11 place-items-center rounded-full border border-white/10 text-zinc-400 transition-colors hover:border-acid/40 hover:text-acid"
+            >
+              <Icon name={s.icon} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>

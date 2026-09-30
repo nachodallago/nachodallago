@@ -1,0 +1,208 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+
+  --color-ink-950: #050507;
+  --color-ink-900: #0a0a0f;
+  --color-ink-800: #12121a;
+  --color-ink-700: #1c1c27;
+  --color-ink-600: #2a2a38;
+
+  --color-acid: #c4ff4d;
+  --color-violet: #a78bfa;
+  --color-cyan: #5ee7ff;
+
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .45; transform: scale(.85); }
+  }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --glow-1: color-mix(in oklab, var(--color-violet) 22%, transparent);
+    --glow-2: color-mix(in oklab, var(--color-cyan) 12%, transparent);
+  }
+
+  html {
+    overflow-x: clip;
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-zinc-300);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-acid);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acid);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  h1, h2, h3 {
+    color: var(--color-white);
+    text-wrap: balance;
+    letter-spacing: -0.035em;
+  }
+
+  p { text-wrap: pretty; }
+}
+
+@layer components {
+  /* Fondo: grilla técnica + halos de color, 100% CSS */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / .045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / .045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  .bg-glow {
+    background:
+      radial-gradient(40rem 28rem at 15% -5%, var(--glow-1), transparent 70%),
+      radial-gradient(36rem 26rem at 95% 10%, var(--glow-2), transparent 70%);
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, var(--color-acid) 0%, var(--color-cyan) 45%, var(--color-violet) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .card {
+    position: relative;
+    border-radius: 1.25rem;
+    border: 1px solid rgb(255 255 255 / .08);
+    background: linear-gradient(180deg, rgb(255 255 255 / .04), rgb(255 255 255 / .015));
+    transition: border-color .25s ease, transform .25s ease, background .25s ease;
+  }
+
+  @media (hover: hover) {
+    .card-hover:hover {
+      border-color: color-mix(in oklab, var(--color-acid) 45%, transparent);
+      transform: translateY(-2px);
+    }
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--color-acid);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 3rem;
+    padding: 0 1.4rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: .95rem;
+    transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(.97); }
+
+  .btn-primary {
+    background: var(--color-acid);
+    color: var(--color-ink-950);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-acid) 40%, transparent);
+  }
+  @media (hover: hover) {
+    .btn-primary:hover { box-shadow: 0 0 32px 2px color-mix(in oklab, var(--color-acid) 35%, transparent); }
+    .btn-ghost:hover { border-color: rgb(255 255 255 / .35); background: rgb(255 255 255 / .06); }
+  }
+
+  .btn-ghost {
+    border: 1px solid rgb(255 255 255 / .15);
+    color: var(--color-white);
+    background: rgb(255 255 255 / .02);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / .1);
+    background: rgb(255 255 255 / .03);
+    padding: .3rem .75rem;
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    color: var(--color-zinc-300);
+    white-space: nowrap;
+  }
+}
+
+/* Revelado al hacer scroll con Scroll-Driven Animations (sin JS).
+   Si el navegador no lo soporta, el contenido se ve normal. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Workflow "en vivo" del hero */
+@media (prefers-reduced-motion: no-preference) {
+  .flow-step { animation: flow-step 8s ease-in-out infinite both; }
+  .flow-packet { animation: flow-packet 2s linear infinite; }
+}
+
+@keyframes flow-step {
+  0%, 4% { opacity: .35; }
+  10%, 88% { opacity: 1; }
+  96%, 100% { opacity: .35; }
+}
+
+@keyframes flow-packet {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -1,0 +1,111 @@
+---
+import Icon from './Icon.astro';
+import { nav, links } from '../data/site';
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-white/5 bg-ink-950/70 pt-[env(safe-area-inset-top)] backdrop-blur-xl supports-[backdrop-filter]:bg-ink-950/55"
+>
+  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+    <a href="/" class="group flex items-center gap-2 font-semibold text-white" aria-label="Nacho Dal Lago — inicio">
+      <span
+        class="grid size-8 place-items-center rounded-lg bg-acid font-mono text-sm font-bold text-ink-950 transition-transform group-hover:rotate-6"
+        >N</span
+      >
+      <span class="tracking-tight">Nacho Dal Lago</span>
+      <span class="hidden rounded-md border border-acid/30 px-1.5 py-0.5 font-mono text-[10px] tracking-widest text-acid min-[380px]:inline">AI ENG</span>
+    </a>
+
+    <nav aria-label="Principal" class="hidden md:block">
+      <ul class="flex items-center gap-1 text-sm">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} class="rounded-full px-3 py-2 text-zinc-400 transition-colors hover:text-white">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href={links.whatsapp} target="_blank" rel="noopener" class="btn btn-primary hidden !min-h-10 !px-4 text-sm sm:inline-flex">
+        Hablemos
+      </a>
+      <button
+        type="button"
+        popovertarget="mobile-menu"
+        class="grid size-10 place-items-center rounded-full border border-white/10 text-white md:hidden"
+        aria-label="Abrir menú"
+      >
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Menú mobile con Popover API nativa: cero JavaScript -->
+<div
+  id="mobile-menu"
+  popover
+  class="mobile-menu m-0 h-dvh max-h-none w-full max-w-none border-0 bg-ink-950/95 p-0 text-white backdrop-blur-xl"
+>
+  <div class="flex h-16 items-center justify-between px-5 pt-[env(safe-area-inset-top)]">
+    <span class="font-mono text-sm text-zinc-500">menu</span>
+    <button
+      type="button"
+      popovertarget="mobile-menu"
+      popovertargetaction="hide"
+      class="grid size-10 place-items-center rounded-full border border-white/10"
+      aria-label="Cerrar menú"
+    >
+      <Icon name="x" />
+    </button>
+  </div>
+  <nav aria-label="Móvil" class="px-5 pt-6">
+    <ul class="space-y-1">
+      {
+        nav.map((item, i) => (
+          <li>
+            <a
+              href={item.href}
+              class="flex items-baseline gap-4 border-b border-white/5 py-4 text-3xl font-semibold tracking-tight"
+              onclick="document.getElementById('mobile-menu').hidePopover()"
+            >
+              <span class="font-mono text-xs text-acid">0{i + 1}</span>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <a href={links.whatsapp} target="_blank" rel="noopener" class="btn btn-primary mt-8 w-full">
+      <Icon name="whatsapp" /> Escribime por WhatsApp
+    </a>
+  </nav>
+</div>
+
+<style>
+  .mobile-menu {
+    inset: 0;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+  .mobile-menu:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+  @starting-style {
+    .mobile-menu:popover-open {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+</style>

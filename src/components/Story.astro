@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from './SectionHeading.astro';
+import nacho from '../assets/nacho.jpg';
+import { timeline, site } from '../data/site';
+---
+
+<section id="sobre-mi" aria-labelledby="story-title" class="border-y border-white/5 bg-ink-900/40">
+  <div class="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:py-28 lg:grid-cols-[0.8fr_1.2fr]">
+    <div>
+      <SectionHeading eyebrow="// sobre mí" title="De programador a Ingeniero en IA" id="story-title">
+        Soy de la generación que creció con internet y hoy crece con la IA. En el último año transformé mi forma de
+        trabajar de punta a punta, y ahora ayudo a empresas a hacer lo mismo.
+      </SectionHeading>
+      <div class="reveal mt-8 flex items-center gap-4">
+        <Image src={nacho} alt={`Foto de ${site.name}`} width={160} height={160} class="size-20 rounded-2xl object-cover grayscale-[.2]" />
+        <div>
+          <p class="font-semibold text-white">{site.name}</p>
+          <p class="text-sm text-zinc-400">{site.role} · {site.location}</p>
+        </div>
+      </div>
+    </div>
+
+    <ol class="relative space-y-8 border-l border-white/10 pl-8">
+      {
+        timeline.map((t, i) => (
+          <li class="reveal relative">
+            <span
+              class:list={[
+                'absolute top-1.5 -left-[2.3rem] size-3 rounded-full ring-4 ring-ink-900',
+                i === timeline.length - 1 ? 'bg-acid' : 'bg-zinc-600',
+              ]}
+            />
+            <p class="font-mono text-xs tracking-widest text-acid uppercase">{t.year}</p>
+            <h3 class="mt-1 text-xl font-semibold">{t.title}</h3>
+            <p class="mt-2 text-zinc-400">{t.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

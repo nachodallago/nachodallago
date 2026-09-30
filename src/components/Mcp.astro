@@ -1,0 +1,60 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+import { mcpServers } from '../data/site';
+
+const points = [
+  'La IA opera con datos reales, no con suposiciones.',
+  'Deploys, logs, bases de datos y workflows desde un solo lugar.',
+  'Permisos mínimos y auditables en cada conexión.',
+];
+---
+
+<section id="mcp" aria-labelledby="mcp-title" class="relative border-y border-white/5 bg-ink-900/40">
+  <div class="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:py-28 lg:grid-cols-2 lg:items-center">
+    <div>
+      <SectionHeading eyebrow="// model context protocol" title="Todos mis servidores, conectados a la IA" id="mcp-title">
+        Con MCP conecto servidores, bases de datos y herramientas directamente a la IA. Todo queda centralizado:
+        pregunto, diagnostico y despliego sin saltar entre diez pestañas.
+      </SectionHeading>
+      <ul class="reveal mt-8 space-y-3">
+        {
+          points.map((p) => (
+            <li class="flex gap-3 text-zinc-300">
+              <Icon name="check" size={20} class="mt-0.5 shrink-0 text-acid" />
+              {p}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="reveal card overflow-hidden !bg-ink-950 font-mono text-[13px] shadow-2xl shadow-black/40 sm:text-sm">
+      <div class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs text-zinc-500">
+        <span class="size-2.5 rounded-full bg-white/15"></span>
+        <span class="size-2.5 rounded-full bg-white/15"></span>
+        <span class="size-2.5 rounded-full bg-white/15"></span>
+        <span class="ml-2">~/infra — mcp</span>
+      </div>
+      <div class="space-y-2 overflow-x-auto p-4 sm:p-6">
+        <p><span class="text-acid">❯</span> <span class="text-white">mcp list</span></p>
+        {
+          mcpServers.map((s) => (
+            <p class="flex gap-3 whitespace-nowrap">
+              <span class="text-acid">✓</span>
+              <span class="w-28 shrink-0 text-white">{s.name}</span>
+              <span class="text-zinc-500">{s.caps}</span>
+            </p>
+          ))
+        }
+        <p class="pt-2 text-cyan">→ {mcpServers.length} servidores conectados · contexto unificado</p>
+        <p class="pt-3"><span class="text-acid">❯</span> <span class="text-white">"¿por qué subió la latencia en prod?"</span></p>
+        <p class="text-zinc-400"><span class="text-violet">ia</span> revisando logs, métricas y último deploy…</p>
+        <p class="text-zinc-400">
+          <span class="text-violet">ia</span> causa encontrada, fix listo para revisar
+          <span class="ml-0.5 inline-block h-4 w-2 translate-y-0.5 animate-pulse-dot bg-acid"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

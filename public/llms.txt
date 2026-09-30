@@ -1,0 +1,17 @@
+# Nacho Dal Lago — Ingeniero en Inteligencia Artificial
+
+> Programador Gen Z (programando desde 2012) convertido en Ingeniero en IA. Con base en Argentina. Automatiza procesos con agentes de IA, workflows en n8n y servidores conectados a la IA vía Model Context Protocol (MCP).
+
+## Servicios
+
+- Automatizaciones con IA: agentes que leen, clasifican, responden y deciden sobre emails, documentos, tickets y leads.
+- Workflows con n8n self-hosted: integración de CRM, WhatsApp, planillas, ERP y APIs, corriendo 24/7 con monitoreo.
+- Servidores conectados vía MCP: servidores, bases de datos y herramientas centralizadas y operables desde la IA.
+- Desarrollo full-stack aumentado con IA: entre 4 y 6 tareas entregadas por día en simultáneo, con una reducción muy significativa del porcentaje de error.
+
+## Contacto
+
+- Web: https://nachodallago.com
+- WhatsApp: https://wa.me/message/OXURXG6SKOEDK1
+- LinkedIn: https://www.linkedin.com/in/nachodallago/
+- GitHub: https://github.com/nachodallago

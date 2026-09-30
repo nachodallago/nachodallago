@@ -1,0 +1,28 @@
+---
+import { metrics, stack } from '../data/site';
+---
+
+<section aria-label="Números" class="border-y border-white/5 bg-ink-900/40">
+  <dl class="mx-auto grid max-w-6xl grid-cols-2 gap-px px-5 lg:grid-cols-4">
+    {
+      metrics.map((m) => (
+        <div class="reveal py-8 pr-4 lg:py-10">
+          <dt class="sr-only">{m.label}</dt>
+          <dd class="text-4xl font-semibold tracking-tight text-white sm:text-5xl">{m.value}</dd>
+          <dd class="mt-2 text-sm leading-snug text-zinc-400">{m.label}</dd>
+        </div>
+      ))
+    }
+  </dl>
+  <div class="relative overflow-hidden border-t border-white/5 py-4 [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
+    <ul class="flex w-max animate-marquee gap-8 font-mono text-sm text-zinc-500" aria-label="Stack tecnológico">
+      {
+        [...stack, ...stack].map((t, i) => (
+          <li aria-hidden={i >= stack.length ? 'true' : undefined} class="flex items-center gap-8">
+            {t} <span class="text-acid/50">/</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

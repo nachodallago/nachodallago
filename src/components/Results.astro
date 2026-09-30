@@ -1,0 +1,45 @@
+---
+import Icon from './Icon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { beforeAfter } from '../data/site';
+---
+
+<section id="resultados" aria-labelledby="resultados-title" class="mx-auto max-w-6xl px-5 py-20 sm:py-28">
+  <SectionHeading eyebrow="// resultados" title="Mi forma de trabajar cambió por completo" id="resultados-title">
+    Uso IA para todas las tareas que me demandan. El resultado: más entregas, en paralelo, y un porcentaje de
+    error que bajó de forma muy significativa. Eso mismo es lo que llevo a tu equipo.
+  </SectionHeading>
+
+  <div class="mt-12 grid gap-4 md:grid-cols-2">
+    <div class="card reveal p-6 sm:p-8">
+      <p class="font-mono text-xs tracking-widest text-zinc-500 uppercase">Antes · manual</p>
+      <ul class="mt-6 space-y-4">
+        {
+          beforeAfter.before.map((item) => (
+            <li class="flex gap-3 text-zinc-500">
+              <span class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-white/5 text-zinc-500">
+                <Icon name="x" size={14} />
+              </span>
+              <span class="line-through decoration-white/20">{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="card reveal !border-acid/30 !bg-gradient-to-b !from-acid/[.07] !to-transparent p-6 sm:p-8">
+      <p class="font-mono text-xs tracking-widest text-acid uppercase">Ahora · con IA</p>
+      <ul class="mt-6 space-y-4">
+        {
+          beforeAfter.after.map((item) => (
+            <li class="flex gap-3 text-white">
+              <span class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-acid text-ink-950">
+                <Icon name="check" size={14} />
+              </span>
+              <span>{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>

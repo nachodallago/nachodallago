@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { services } from '../data/site';
+---
+
+<section id="servicios" aria-labelledby="servicios-title" class="mx-auto max-w-6xl px-5 py-20 sm:py-28">
+  <SectionHeading eyebrow="// servicios" title="Lo que hago hoy con Inteligencia Artificial" id="servicios-title">
+    No vendo humo: implemento sistemas que funcionan en producción, conectados a tus herramientas reales.
+  </SectionHeading>
+
+  <div class="mt-12 grid gap-4 sm:grid-cols-2">
+    {
+      services.map((s, i) => (
+        <article class="card card-hover reveal flex flex-col p-6 sm:p-8">
+          <div class="flex items-center justify-between">
+            <span class="grid size-11 place-items-center rounded-xl border border-acid/25 bg-acid/10 text-acid">
+              <Icon name={s.icon} size={22} />
+            </span>
+            <span class="font-mono text-xs text-zinc-600">0{i + 1}</span>
+          </div>
+          <h3 class="mt-6 text-xl font-semibold sm:text-2xl">{s.title}</h3>
+          <p class="mt-3 flex-1 text-zinc-400">{s.text}</p>
+          <ul class="mt-6 flex flex-wrap gap-2">
+            {s.tags.map((t) => (
+              <li class="chip">{t}</li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+</section>
