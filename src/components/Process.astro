@@ -6,10 +6,10 @@ import { process } from '../data/site';
 <section id="proceso" aria-labelledby="proceso-title" class="mx-auto max-w-6xl px-5 py-20 sm:py-28">
   <SectionHeading eyebrow="// proceso" title="De la tarea repetitiva al sistema que trabaja solo" id="proceso-title" />
 
-  <ol class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <ol class="stage mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {
       process.map((step, i) => (
-        <li class="card reveal p-6">
+        <li class="card reveal reveal-tilt p-6" style={`--i:${i}`}>
           <span class="font-mono text-sm text-acid">0{i + 1}</span>
           <h3 class="mt-4 text-lg font-semibold">{step.title}</h3>
           <p class="mt-2 text-sm text-zinc-400">{step.text}</p>

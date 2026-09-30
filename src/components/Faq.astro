@@ -10,7 +10,7 @@ import { faqs } from '../data/site';
   <div class="mt-12 space-y-3">
     {
       faqs.map((f, i) => (
-        <details name="faq" class="card reveal group p-0 open:!border-acid/30" open={i === 0}>
+        <details name="faq" class="card reveal reveal-blur group p-0 open:!border-acid/30" open={i === 0}>
           <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-medium text-white sm:p-6 [&::-webkit-details-marker]:hidden">
             {f.q}
             <Icon name="plus" size={18} class="shrink-0 text-acid transition-transform duration-300 group-open:rotate-45" />

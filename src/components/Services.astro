@@ -9,10 +9,10 @@ import { services } from '../data/site';
     No vendo humo: implemento sistemas que funcionan en producción, conectados a tus herramientas reales.
   </SectionHeading>
 
-  <div class="mt-12 grid gap-4 sm:grid-cols-2">
+  <div class="stage mt-12 grid gap-4 sm:grid-cols-2">
     {
       services.map((s, i) => (
-        <article class="card card-hover reveal flex flex-col p-6 sm:p-8">
+        <article class="card card-hover reveal reveal-tilt flex flex-col p-6 sm:p-8" style={`--i:${i % 2}`}>
           <div class="flex items-center justify-between">
             <span class="grid size-11 place-items-center rounded-xl border border-acid/25 bg-acid/10 text-acid">
               <Icon name={s.icon} size={22} />

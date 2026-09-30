@@ -17,10 +17,10 @@ const points = [
         Con MCP conecto servidores, bases de datos y herramientas directamente a la IA. Todo queda centralizado:
         pregunto, diagnostico y despliego sin saltar entre diez pestañas.
       </SectionHeading>
-      <ul class="reveal mt-8 space-y-3">
+      <ul class="mt-8 space-y-3">
         {
           points.map((p) => (
-            <li class="flex gap-3 text-zinc-300">
+            <li class="reveal reveal-left flex gap-3 text-zinc-300">
               <Icon name="check" size={20} class="mt-0.5 shrink-0 text-acid" />
               {p}
             </li>
@@ -29,7 +29,7 @@ const points = [
       </ul>
     </div>
 
-    <div class="reveal card overflow-hidden !bg-ink-950 font-mono text-[13px] shadow-2xl shadow-black/40 sm:text-sm">
+    <div class="reveal reveal-right card overflow-hidden !bg-ink-950 font-mono text-[13px] shadow-2xl shadow-black/40 sm:text-sm">
       <div class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs text-zinc-500">
         <span class="size-2.5 rounded-full bg-white/15"></span>
         <span class="size-2.5 rounded-full bg-white/15"></span>
@@ -37,20 +37,20 @@ const points = [
         <span class="ml-2">~/infra — mcp</span>
       </div>
       <div class="space-y-2 overflow-x-auto p-4 sm:p-6">
-        <p><span class="text-acid">❯</span> <span class="text-white">mcp list</span></p>
+        <p class="reveal-type"><span class="text-acid">❯</span> <span class="text-white">mcp list</span></p>
         {
           mcpServers.map((s) => (
-            <p class="flex gap-3 whitespace-nowrap">
+            <p class="reveal-type flex gap-3 whitespace-nowrap">
               <span class="text-acid">✓</span>
               <span class="w-28 shrink-0 text-white">{s.name}</span>
               <span class="text-zinc-500">{s.caps}</span>
             </p>
           ))
         }
-        <p class="pt-2 text-cyan">→ {mcpServers.length} servidores conectados · contexto unificado</p>
-        <p class="pt-3"><span class="text-acid">❯</span> <span class="text-white">"¿por qué subió la latencia en prod?"</span></p>
-        <p class="text-zinc-400"><span class="text-violet">ia</span> revisando logs, métricas y último deploy…</p>
-        <p class="text-zinc-400">
+        <p class="reveal-type pt-2 text-cyan">→ {mcpServers.length} servidores conectados · contexto unificado</p>
+        <p class="reveal-type pt-3"><span class="text-acid">❯</span> <span class="text-white">"¿por qué subió la latencia en prod?"</span></p>
+        <p class="reveal-type text-zinc-400"><span class="text-violet">ia</span> revisando logs, métricas y último deploy…</p>
+        <p class="reveal-type text-zinc-400">
           <span class="text-violet">ia</span> causa encontrada, fix listo para revisar
           <span class="ml-0.5 inline-block h-4 w-2 translate-y-0.5 animate-pulse-dot bg-acid"></span>
         </p>

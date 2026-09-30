@@ -12,7 +12,7 @@ import { timeline, site } from '../data/site';
         Soy de la generación que creció con internet y hoy crece con la IA. En el último año transformé mi forma de
         trabajar de punta a punta, y ahora ayudo a empresas a hacer lo mismo.
       </SectionHeading>
-      <div class="reveal mt-8 flex items-center gap-4">
+      <div class="reveal reveal-left mt-8 flex items-center gap-4">
         <Image src={nacho} alt={`Foto de ${site.name}`} width={160} height={160} class="size-20 rounded-2xl object-cover grayscale-[.2]" />
         <div>
           <p class="font-semibold text-white">{site.name}</p>
@@ -21,13 +21,13 @@ import { timeline, site } from '../data/site';
       </div>
     </div>
 
-    <ol class="relative space-y-8 border-l border-white/10 pl-8">
+    <ol class="timeline relative space-y-8 border-l border-white/10 pl-8">
       {
         timeline.map((t, i) => (
-          <li class="reveal relative">
+          <li class="reveal reveal-right relative">
             <span
               class:list={[
-                'absolute top-1.5 -left-[2.3rem] size-3 rounded-full ring-4 ring-ink-900',
+                'timeline-dot absolute top-1.5 -left-[2.3rem] size-3 rounded-full ring-4 ring-ink-900',
                 i === timeline.length - 1 ? 'bg-acid' : 'bg-zinc-600',
               ]}
             />
