@@ -37,6 +37,11 @@ db.exec(`
     created_at  INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS matches_date ON matches (date);
+  -- Cada jugador con su equipo de siempre (se elige solo al armar un partido)
+  CREATE TABLE IF NOT EXISTS players (
+    name TEXT PRIMARY KEY,
+    team TEXT NOT NULL DEFAULT ''
+  );
   -- Torneos: separan los partidos (un partido está en un torneo o en ninguno)
   CREATE TABLE IF NOT EXISTS tournaments (
     id         TEXT PRIMARY KEY,
@@ -85,6 +90,12 @@ const deleteLiveStmt = db.prepare('DELETE FROM live WHERE id = ?');
 const staleLiveStmt = db.prepare('DELETE FROM live WHERE updated_at < ?');
 const LIVE_TTL = 3 * 60 * 60_000; // un partido "en vivo" sin cambios por 3 h se descarta
 
+const playersStmt = db.prepare("SELECT name, team FROM players WHERE team <> ''");
+const putPlayerTeam = db.prepare(`
+  INSERT INTO players (name, team) VALUES (?, ?)
+  ON CONFLICT (name) DO UPDATE SET team = excluded.team
+`);
+const playerTeams = () => Object.fromEntries(playersStmt.all().map((r) => [r.name, r.team]));
 const tournamentsStmt = db.prepare('SELECT id, name, created_at FROM tournaments ORDER BY created_at DESC');
 const tournamentExists = db.prepare('SELECT 1 FROM tournaments WHERE id = ?');
 const insertTournament = db.prepare('INSERT INTO tournaments (id, name, created_at) VALUES (?, ?, ?)');
@@ -301,6 +312,7 @@ async function handle(req, res) {
     return send(res, 200, {
       matches: all(),
       tournaments: tournaments(),
+      playerTeams: playerTeams(),
       photos: photos(),
       live: live(),
       canWrite: Boolean(pinHash),
@@ -414,6 +426,19 @@ async function handle(req, res) {
     } else return send(res, 404, { error: 'No encontrado' });
     broadcast('changed');
     return send(res, 200, { tournaments: tournaments(), matches: all() });
+  }
+
+  // Equipo de siempre de un jugador
+  const playerTeam = path.match(/^\/api\/fc26\/players\/([^/]+)\/team$/);
+  if (playerTeam && req.method === 'PUT') {
+    const auth = checkPin(req);
+    if (!auth.ok) return send(res, auth.status, { error: auth.error });
+    const name = playerName(playerTeam[1]);
+    if (!name) return send(res, 400, { error: 'Jugador inválido' });
+    const body = await readJson(req);
+    putPlayerTeam.run(name, text(body?.team, 40));
+    broadcast('changed');
+    return send(res, 200, { playerTeams: playerTeams() });
   }
 
   // Mover un partido a otro torneo (o a ninguno)

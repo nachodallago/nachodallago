@@ -179,7 +179,7 @@ const tabs = [
 
     <!-- Bottom sheet: cargar partido -->
     <dialog id="sheet" class="fc-sheet" aria-labelledby="sheet-title">
-      <form id="match-form" autocomplete="off" novalidate>
+      <form id="match-form" autocomplete="off" novalidate data-phase="setup">
         <div class="fc-grabber" aria-hidden="true"></div>
         <div class="flex items-center justify-between">
           <h2 id="sheet-title" class="text-lg font-extrabold">Nuevo partido</h2>
@@ -189,88 +189,113 @@ const tabs = [
           </button>
         </div>
 
-        <!-- Marcador en vivo -->
-        <div class="fc-preview" aria-hidden="true">
-          <div><span class="fc-avatar fc-avatar-lg" data-preview="home">?</span><b data-preview-name="home">Local</b></div>
-          <p><span data-preview-goals="home">0</span><i>:</i><span data-preview-goals="away">0</span></p>
-          <div><span class="fc-avatar fc-avatar-lg" data-preview="away">?</span><b data-preview-name="away">Visitante</b></div>
-        </div>
+        <!-- 1) Antes de empezar: quién juega (cada uno trae su equipo) y deslizar para arrancar -->
+        <div class="fc-setup">
+          <div class="grid grid-cols-2 gap-3">
+            {
+              sides.map((s) => (
+                <fieldset class="flex min-w-0 flex-col gap-2.5">
+                  <legend class="fc-label mb-2">{s.label}</legend>
+                  <div class="fc-picks" role="radiogroup" aria-label={`Jugador ${s.label.toLowerCase()}`}>
+                    {players.map((p) => (
+                      <label style={`--c:${p.color}`}>
+                        <input type="radio" name={`${s.key}Player`} value={p.name} data-color={p.color} required class="sr-only" />
+                        <span>
+                          <i class="fc-avatar">{initials(p.name)}</i>
+                          {p.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <!-- El equipo viene elegido con el jugador; se puede cambiar -->
+                  <details class="fc-team-edit" data-team-edit={s.key}>
+                    <summary>
+                      <span class="min-w-0 truncate" data-team-line={s.key}>Equipo</span>
+                      <span class="fc-team-change" aria-label="cambiar equipo">✎</span>
+                    </summary>
+                    <input name={`${s.key}Team`} list="teams" maxlength="40" placeholder="Equipo" class="fc-input mt-2" aria-label={`Equipo ${s.label.toLowerCase()}`} autocapitalize="words" />
+                    <div class="fc-team-chips mt-2" data-team-chips={s.key} aria-label={`Equipos guardados ${s.label.toLowerCase()}`}></div>
+                  </details>
+                </fieldset>
+              ))
+            }
+          </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          {
-            sides.map((s) => (
-              <fieldset class="flex min-w-0 flex-col gap-3">
-                <legend class="fc-label mb-2">{s.label}</legend>
-                <div class="fc-picks" role="radiogroup" aria-label={`Jugador ${s.label.toLowerCase()}`}>
-                  {players.map((p) => (
-                    <label style={`--c:${p.color}`}>
-                      <input type="radio" name={`${s.key}Player`} value={p.name} data-color={p.color} required class="sr-only" />
-                      <span>
-                        <i class="fc-avatar">{initials(p.name)}</i>
-                        {p.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                <input name={`${s.key}Team`} list="teams" maxlength="40" placeholder="Equipo" class="fc-input" aria-label={`Equipo ${s.label.toLowerCase()}`} autocapitalize="words" />
-                <div class="fc-team-chips" data-team-chips={s.key} aria-label={`Equipos guardados ${s.label.toLowerCase()}`}></div>
-                <div class="fc-stepper">
-                  <button type="button" data-step={`${s.key}Goals`} data-delta="-1" aria-label={`Restar gol ${s.label.toLowerCase()}`}>−</button>
-                  <input name={`${s.key}Goals`} type="number" inputmode="numeric" min="0" max="99" value="0" aria-label={`Goles ${s.label.toLowerCase()}`} />
-                  <button type="button" data-step={`${s.key}Goals`} data-delta="1" aria-label={`Sumar gol ${s.label.toLowerCase()}`}>+</button>
-                </div>
-              </fieldset>
-            ))
-          }
-        </div>
-
-        <!-- Goles con su tiempo -->
-        <div id="goal-panel" class="fc-goal-panel" hidden>
           <!-- Confirmar el partido nuevo: hay que deslizar la pelota a la derecha -->
-          <div id="kickoff" class="fc-swipe" aria-disabled="true">
+          <div id="kickoff" class="fc-swipe mt-5" aria-disabled="true">
             <span class="fc-swipe-fill" aria-hidden="true"></span>
             <span class="fc-swipe-text">Deslizá para empezar el partido</span>
             <button type="button" class="fc-swipe-thumb" aria-label="Deslizá a la derecha para empezar el partido">⚽</button>
           </div>
           <p id="kickoff-hint" class="fc-muted mt-2 text-center text-xs"></p>
+        </div>
 
-          <!-- Reloj de juego: corre como el del FC (90' en la duración elegida) -->
-          <div class="fc-clock-row">
+        <!-- 2) En juego: reloj y marcador grandes, con botones de gol bien visibles -->
+        <div class="fc-board">
+          <div class="fc-board-clock">
             <span id="match-clock" class="fc-game-clock">00:00</span>
-            <button type="button" class="fc-clock-btn" data-nudge="-1" aria-label="Restar un minuto al reloj">−1'</button>
-            <button type="button" class="fc-clock-btn" data-nudge="1" aria-label="Sumar un minuto al reloj">+1'</button>
-            <button type="button" id="clock-toggle" class="fc-clock-btn fc-clock-main">▶ Empezar</button>
+            <button type="button" id="clock-toggle" class="fc-clock-btn">⏸ Pausa</button>
           </div>
-          <p id="clock-note" class="fc-muted mt-1 text-xs"></p>
-          <div class="fc-duration" role="radiogroup" aria-label="Duración del partido">
-            <span>Dura</span>
+          <div class="fc-board-score">
             {
-              [8, 10, 12, 16, 20].map((d) => (
-                <button type="button" data-duration={d} role="radio">{d}</button>
+              sides.map((s, i) => (
+                <Fragment>
+                  {i === 1 && <span class="fc-board-sep" aria-hidden="true">:</span>}
+                  <div class="fc-board-side" data-board={s.key}>
+                    <span class="fc-avatar fc-avatar-lg" data-preview={s.key}>?</span>
+                    <b class="fc-board-name" data-preview-name={s.key}>{s.label}</b>
+                    <small class="fc-board-team" data-preview-team={s.key}></small>
+                    <span class="fc-board-num" data-preview-goals={s.key} aria-live="polite">0</span>
+                    <button type="button" class="fc-goal-btn" data-step={`${s.key}Goals`} data-delta="1" aria-label={`Gol del ${s.label.toLowerCase()}`}>+ GOL</button>
+                    <button type="button" class="fc-undo-btn" data-step={`${s.key}Goals`} data-delta="-1" aria-label={`Quitar el último gol del ${s.label.toLowerCase()}`}>− quitar</button>
+                    <input name={`${s.key}Goals`} type="number" min="0" max="99" value="0" class="sr-only" tabindex="-1" aria-hidden="true" />
+                  </div>
+                </Fragment>
               ))
             }
-            <span>min</span>
           </div>
-          <div class="mt-3 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
-            <span class="fc-label">Goles</span>
-          </div>
-          <ol id="goal-log" class="fc-goal-log"></ol>
-          <p id="goal-empty" class="fc-muted mt-2 text-xs"></p>
         </div>
 
-        <div class="mt-4 grid grid-cols-2 gap-3">
-          <label class="block min-w-0">
-            <span class="fc-label">Fecha</span>
-            <input name="date" type="date" required value={today} class="fc-input mt-2" />
-          </label>
-          <label class="block min-w-0">
-            <span class="fc-label">Torneo</span>
-            <select name="tournament" class="fc-input fc-select mt-2"><option value="">Sin torneo</option></select>
-          </label>
+        <!-- Goles con su minuto -->
+        <div id="goal-panel" class="fc-goal-panel">
+          <ol id="goal-log" class="fc-goal-log"></ol>
+          <p id="goal-empty" class="fc-muted text-center text-xs"></p>
         </div>
+
+        <!-- Todo lo demás, guardado en un menú -->
+        <details class="fc-options">
+          <summary>⚙️ Opciones del partido</summary>
+          <div class="fc-options-body">
+            <div class="fc-clock-row">
+              <span class="fc-label mr-auto">Ajustar reloj</span>
+              <button type="button" class="fc-clock-btn" data-nudge="-1" aria-label="Restar un minuto al reloj">−1'</button>
+              <button type="button" class="fc-clock-btn" data-nudge="1" aria-label="Sumar un minuto al reloj">+1'</button>
+            </div>
+            <p id="clock-note" class="fc-muted text-xs"></p>
+            <div class="fc-duration" role="radiogroup" aria-label="Duración del partido">
+              <span>Dura</span>
+              {
+                [8, 10, 12, 16, 20].map((d) => (
+                  <button type="button" data-duration={d} role="radio">{d}</button>
+                ))
+              }
+              <span>min</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="block min-w-0">
+                <span class="fc-label">Fecha</span>
+                <input name="date" type="date" required value={today} class="fc-input mt-2" />
+              </label>
+              <label class="block min-w-0">
+                <span class="fc-label">Torneo</span>
+                <select name="tournament" class="fc-input fc-select mt-2"><option value="">Sin torneo</option></select>
+              </label>
+            </div>
+          </div>
+        </details>
 
         <p id="form-error" class="mt-3 text-sm font-semibold text-red-400 empty:hidden" role="alert"></p>
-        <button type="submit" class="fc-btn fc-btn-primary fc-btn-block mt-4">Guardar resultado</button>
+        <button type="submit" class="fc-btn fc-btn-primary fc-btn-block mt-4">Terminar y guardar</button>
         <datalist id="teams"></datalist>
       </form>
     </dialog>
@@ -1304,6 +1329,9 @@ const tabs = [
     .fc-avatar.has-photo { background-size: cover; background-position: center; color: transparent; }
     .fc-who .fc-avatar { cursor: pointer; }
     .fc-player-list { display: grid; gap: .5rem; margin-top: 1rem; }
+    .fc-player-item { flex-wrap: wrap; }
+    .fc-player-team { display: flex; align-items: center; gap: .6rem; width: 100%; font-size: .78rem; font-weight: 700; color: var(--fc-muted); white-space: nowrap; }
+    .fc-player-team .fc-input { min-height: 2.5rem; font-size: .95rem; }
     .fc-player-item {
       display: flex;
       align-items: center;
@@ -1425,6 +1453,89 @@ const tabs = [
     .fc-swipe.back .fc-swipe-thumb, .fc-swipe.back .fc-swipe-fill { transition: translate .35s var(--ease-out), rotate .35s var(--ease-out), width .35s var(--ease-out); }
     .fc-swipe.done { border-color: var(--fc-accent); }
     .fc-stepper:has(:disabled) { opacity: .4; }
+    /* Panel de partido en dos etapas: preparar (jugadores) y en juego (marcador grande) */
+    #match-form[data-phase='setup'] .fc-board,
+    #match-form[data-phase='setup'] #goal-panel,
+    #match-form[data-phase='setup'] [type='submit'] { display: none; }
+    #match-form[data-phase='play'] .fc-setup { display: none; }
+    .fc-team-edit summary {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      min-height: 2.6rem;
+      padding: 0 .75rem;
+      border-radius: .8rem;
+      border: 1px dashed var(--fc-line);
+      font-size: .85rem;
+      font-weight: 700;
+      list-style: none;
+      cursor: pointer;
+    }
+    .fc-team-edit summary::-webkit-details-marker { display: none; }
+    .fc-team-edit summary::before { content: '🛡'; font-size: .8rem; }
+    .fc-team-change { margin-left: auto; flex-shrink: 0; font-size: .9rem; color: var(--fc-muted); }
+    .fc-team-edit[open] .fc-team-change { visibility: hidden; }
+    .fc-board {
+      margin-top: .75rem;
+      padding: 1rem .75rem 1.1rem;
+      border-radius: 1.4rem;
+      border: 1px solid var(--fc-line);
+      background: radial-gradient(18rem 9rem at 50% 0%, rgb(255 255 255 / .07), transparent 70%), rgb(255 255 255 / .03);
+    }
+    .fc-board-clock { display: flex; align-items: center; justify-content: center; gap: .75rem; }
+    .fc-board-clock .fc-game-clock { margin: 0; font-size: 1.9rem; }
+    .fc-board-score { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: start; gap: .5rem; margin-top: .9rem; }
+    .fc-board-sep { align-self: center; margin-top: -2.5rem; font-size: 2.5rem; font-weight: 900; color: var(--fc-muted); }
+    .fc-board-side { display: grid; justify-items: center; gap: .3rem; min-width: 0; text-align: center; }
+    .fc-board-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fc-board-team { max-width: 100%; min-height: 1em; font-size: .72rem; color: var(--fc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fc-board-num { display: block; font-size: clamp(4.5rem, 24vw, 6.5rem); font-weight: 900; line-height: .95; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    /* El botón más importante: grande, del color del jugador */
+    .fc-goal-btn {
+      width: 100%;
+      min-height: 4.25rem;
+      margin-top: .35rem;
+      border-radius: 1.2rem;
+      background: var(--c, var(--fc-accent));
+      color: #07090a;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: .02em;
+      box-shadow: 0 8px 24px color-mix(in oklab, var(--c, var(--fc-accent)) 35%, transparent);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .1s ease;
+    }
+    .fc-goal-btn:active { transform: scale(.95); }
+    .fc-undo-btn {
+      min-height: 2.5rem;
+      padding: 0 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--fc-line);
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--fc-muted);
+      touch-action: manipulation;
+    }
+    .fc-undo-btn:disabled { opacity: .35; }
+    #goal-panel { margin-top: .75rem; padding: .7rem .85rem; }
+    #goal-panel .fc-goal-log { margin-top: 0; }
+    .fc-options { margin-top: .75rem; border-radius: 1rem; border: 1px solid var(--fc-line); background: rgb(255 255 255 / .03); }
+    .fc-options summary {
+      display: flex;
+      align-items: center;
+      min-height: 3rem;
+      padding: 0 .9rem;
+      font-size: .9rem;
+      font-weight: 700;
+      list-style: none;
+      cursor: pointer;
+    }
+    .fc-options summary::-webkit-details-marker { display: none; }
+    .fc-options summary::after { content: '▾'; margin-left: auto; color: var(--fc-muted); transition: rotate .2s ease; }
+    .fc-options[open] summary::after { rotate: 180deg; }
+    .fc-options-body { display: grid; gap: .75rem; padding: 0 .9rem 1rem; }
+    .fc-options-body .fc-duration { margin-top: 0; }
     /* Reloj de juego */
     .fc-clock-row { display: flex; align-items: center; gap: .4rem; }
     .fc-clock-row[hidden] { display: none; }
@@ -1740,6 +1851,24 @@ const tabs = [
     const ids = new Set(remote.map((m) => m.id));
     return [...remote, ...localOnly.filter((m) => !ids.has(m.id))];
   }
+  // --- Equipo de siempre de cada jugador (guardado en el servidor, compartido) ---
+  const PLAYER_TEAMS_KEY = 'fc26-player-teams';
+  let playerTeams: Record<string, string> = (() => {
+    try {
+      const data = JSON.parse(localStorage.getItem(PLAYER_TEAMS_KEY) ?? '{}');
+      return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+    } catch {
+      return {};
+    }
+  })();
+  function setPlayerTeams(next: unknown) {
+    if (!next || typeof next !== 'object' || Array.isArray(next)) return;
+    playerTeams = Object.fromEntries(Object.entries(next).filter(([, v]) => typeof v === 'string' && v)) as Record<string, string>;
+    try {
+      localStorage.setItem(PLAYER_TEAMS_KEY, JSON.stringify(playerTeams));
+    } catch {}
+  }
+
   // --- Torneos: cuál se está viendo ('all' = todos, 'none' = sin torneo, o el id) ---
   const TOURNAMENTS_KEY = 'fc26-tournaments';
   const VIEW_KEY = 'fc26-tournament';
@@ -1940,6 +2069,7 @@ const tabs = [
       setRemote(data.matches);
       setPhotos(data.photos);
       setTournaments(data.tournaments);
+      setPlayerTeams(data.playerTeams);
       setLive(data.live);
       connectStream();
     } catch {
@@ -1970,6 +2100,7 @@ const tabs = [
       if ('matches' in data) setRemote(data.matches);
       if ('photos' in data) setPhotos(data.photos);
       if ('tournaments' in data) setTournaments(data.tournaments);
+      if ('playerTeams' in data) setPlayerTeams(data.playerTeams);
       if ('live' in data) setLive(data.live);
       return data;
     }
@@ -2330,8 +2461,8 @@ const tabs = [
   function renderPlayers() {
     const ready = online && canWrite;
     $('#players-note').textContent = ready
-      ? 'Tocá "Subir foto" y elegí una de la galería o sacala con la cámara.'
-      : 'Para subir fotos hace falta conexión con el servidor.';
+      ? 'Foto de perfil y el equipo con el que juega cada uno (se elige solo al armar un partido).'
+      : 'Para cambiar fotos o equipos hace falta conexión con el servidor.';
     $('#players-list').replaceChildren(
       ...roster.map((name) => {
         const li = document.createElement('li');
@@ -2353,6 +2484,28 @@ const tabs = [
           photoInput.click();
         });
         li.append(av, label, upload);
+        // Equipo de siempre: se elige solo al armar un partido
+        const team = document.createElement('label');
+        team.className = 'fc-player-team';
+        const tl = document.createElement('span');
+        tl.textContent = '🛡 Equipo';
+        const ti = document.createElement('input');
+        ti.className = 'fc-input';
+        ti.maxLength = 40;
+        ti.placeholder = 'Ej: Real Madrid';
+        ti.value = playerTeams[name] ?? '';
+        ti.disabled = !ready;
+        ti.setAttribute('list', 'teams');
+        ti.setAttribute('autocapitalize', 'words');
+        ti.addEventListener('change', async () => {
+          try {
+            await write('PUT', `/players/${encodeURIComponent(name)}/team`, { team: ti.value.trim() });
+            notify(ti.value.trim() ? `🛡 ${name} juega con ${ti.value.trim()}` : `${name} sin equipo fijo`);
+          } catch (err) {
+            if (!(err instanceof Cancelled)) notify(errorText(err));
+          }
+        });
+        team.append(tl, ti);
         if (photos[name]) {
           const remove = document.createElement('button');
           remove.type = 'button';
@@ -2363,6 +2516,7 @@ const tabs = [
           remove.addEventListener('click', () => changePhoto(name, null));
           li.append(remove);
         }
+        li.append(team);
         return li;
       }),
     );
@@ -3468,6 +3622,18 @@ const tabs = [
   });
 
   // --- Formulario (bottom sheet) ---
+  // Equipo que trae cada jugador: el fijo, o si no tiene, el último con el que jugó
+  function defaultTeam(player: string) {
+    if (playerTeams[player]) return playerTeams[player];
+    const last = [...allMatches]
+      .sort(byDate)
+      .reverse()
+      .find((m) => (m.homePlayer === player && m.homeTeam) || (m.awayPlayer === player && m.awayTeam));
+    return last ? (last.homePlayer === player ? last.homeTeam : last.awayTeam) : '';
+  }
+  // Si el equipo lo puso la página (no la persona), se reemplaza al cambiar de jugador
+  const autoTeam: Record<string, boolean> = { home: true, away: true };
+
   function syncForm() {
     for (const [side, other] of [['home', 'away'], ['away', 'home']]) {
       const picked = form.querySelector<HTMLInputElement>(`[name=${side}Player]:checked`)?.value;
@@ -3484,6 +3650,12 @@ const tabs = [
         (form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value || '0';
 
       const current = (form.elements.namedItem(`${side}Team`) as HTMLInputElement).value;
+      form.querySelector(`[data-team-line=${side}]`)!.textContent = current || (picked ? 'Sin equipo' : 'Equipo');
+      form.querySelector(`[data-preview-team=${side}]`)!.textContent = current;
+      form.querySelector<HTMLElement>(`[data-board=${side}]`)!.style.setProperty('--c', picked ? (colors.get(picked) ?? '') : '');
+      // "− quitar" solo cuando hay goles de ese lado
+      form.querySelector<HTMLButtonElement>(`[data-board=${side}] .fc-undo-btn`)!.disabled =
+        !startedAt || !Number((form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value);
       form.querySelector(`[data-team-chips=${side}]`)!.replaceChildren(
         ...teamsFor(picked).map((t) => {
           const b = document.createElement('button');
@@ -3628,6 +3800,8 @@ const tabs = [
     const started = Boolean(startedAt);
     const ready = Boolean(pickedPlayer('home') && pickedPlayer('away'));
     // Antes de confirmar: solo la barra para deslizar; después: reloj, pausa y ajustes
+    form.dataset.phase = started ? 'play' : 'setup';
+    $('#sheet-title').textContent = started ? (pausedAt ? '⏸ En pausa' : '🔴 En juego') : 'Nuevo partido';
     const swipe = $('#kickoff');
     swipe.hidden = started;
     swipe.setAttribute('aria-disabled', String(!ready));
@@ -3637,16 +3811,14 @@ const tabs = [
     $('#kickoff-hint').textContent = ready ? 'Con el pitazo inicial, llevá la pelota hasta la derecha.' : 'Elegí los dos jugadores para poder empezar.';
     form.querySelectorAll<HTMLElement>('.fc-clock-row, #clock-note').forEach((el) => (el.hidden = !started));
     // Los goles se cargan recién con el partido confirmado
-    form.querySelectorAll<HTMLInputElement | HTMLButtonElement>('.fc-stepper button, .fc-stepper input').forEach(
+    form.querySelectorAll<HTMLInputElement | HTMLButtonElement>('.fc-goal-btn, [name=homeGoals], [name=awayGoals]').forEach(
       (el) => (el.disabled = !started),
     );
-    $('#goal-empty').textContent = started
-      ? 'Tocá + y cada gol queda con su minuto.'
-      : 'Los goles se cargan cuando empieza el partido.';
+    $('#goal-empty').textContent = started ? 'Tocá + GOL y cada gol queda con su minuto.' : '';
     const clock = $('#match-clock');
     clock.textContent = fmtGame(gameSeconds(clockState()));
     clock.classList.toggle('paused', Boolean(pausedAt));
-    $('#clock-toggle').textContent = !startedAt ? '▶ Empezar' : pausedAt ? '▶ Seguir' : '⏸ Pausa';
+    $('#clock-toggle').textContent = pausedAt ? '▶ Seguir' : '⏸ Pausa';
     $('#clock-note').textContent = !startedAt
       ? ''
       : pausedAt
@@ -3659,7 +3831,7 @@ const tabs = [
 
   function renderGoalLog() {
     const panel = $('#goal-panel');
-    panel.hidden = !goals.length && !startedAt && !pickedPlayer('home') && !pickedPlayer('away');
+    panel.hidden = !startedAt;
     renderClock();
     $('#goal-empty').hidden = goals.length > 0;
     $('#goal-log').replaceChildren(
@@ -3788,6 +3960,7 @@ const tabs = [
 
   function clearDraft() {
     form.reset();
+    autoTeam.home = autoTeam.away = true;
     resetGoals();
     (field('date') as HTMLInputElement).value = todayLocal();
     syncForm();
@@ -3827,12 +4000,22 @@ const tabs = [
   }
 
   form.addEventListener('change', (e) => {
-    // El partido arranca al elegir el primer jugador o cargar el primer gol
+    const t = e.target as HTMLInputElement;
+    // Al elegir jugador, su equipo viene puesto (salvo que lo hayan escrito a mano)
+    if (t.name === 'homePlayer' || t.name === 'awayPlayer') {
+      const side = t.name === 'homePlayer' ? 'home' : 'away';
+      const team = form.elements.namedItem(`${side}Team`) as HTMLInputElement;
+      if (autoTeam[side] || !team.value) {
+        team.value = defaultTeam(t.value);
+        autoTeam[side] = true;
+      }
+    }
     syncForm();
     saveDraft();
   });
   form.addEventListener('input', (e) => {
     const t = e.target as HTMLInputElement;
+    if (t.name === 'homeTeam' || t.name === 'awayTeam') autoTeam[t.name === 'homeTeam' ? 'home' : 'away'] = false;
     if (t.name === 'homeGoals' || t.name === 'awayGoals') {
       if (t.value === '') return;
       setGoals(t.name === 'homeGoals' ? 'home' : 'away', Number(t.value));
@@ -3883,6 +4066,8 @@ const tabs = [
     const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-team]');
     if (chip) {
       (form.elements.namedItem(`${chip.dataset.side}Team`) as HTMLInputElement).value = chip.dataset.team!;
+      autoTeam[chip.dataset.side!] = false;
+      chip.closest('details')?.removeAttribute('open');
       syncForm();
       saveDraft();
       return;
@@ -3971,9 +4156,16 @@ const tabs = [
     }
     sheet.close();
     rememberTeams([m.homeTeam, m.awayTeam]);
+    // La primera vez que alguien juega con un equipo, queda como su equipo de siempre
+    for (const [player, team] of [[m.homePlayer, m.homeTeam], [m.awayPlayer, m.awayTeam]]) {
+      if (team && !playerTeams[player] && online && canWrite && roster.includes(player)) {
+        write('PUT', `/players/${encodeURIComponent(player)}/team`, { team }).catch(() => {});
+      }
+    }
     refresh();
     form.reset();
     resetGoals();
+    autoTeam.home = autoTeam.away = true;
     (field('date') as HTMLInputElement).value = m.date;
     syncForm();
     try {
