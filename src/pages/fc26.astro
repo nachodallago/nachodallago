@@ -258,6 +258,25 @@ const tabs = [
       </form>
     </dialog>
 
+    <!-- Ficha de un jugador: sus números y todos sus partidos -->
+    <dialog id="player-detail" class="fc-sheet" aria-labelledby="pd-name">
+      <div class="fc-grabber" aria-hidden="true"></div>
+      <div class="flex items-start gap-3">
+        <div id="pd-head" class="flex min-w-0 flex-1 items-center gap-3"></div>
+        <button type="button" class="fc-icon-btn shrink-0" data-close-detail aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.close} />
+        </button>
+      </div>
+      <div id="pd-stats" class="fc-pd-stats"></div>
+      <div id="pd-rivals-wrap">
+        <h3 class="fc-label mt-5 mb-2">Contra cada rival</h3>
+        <ul id="pd-rivals" class="fc-pd-rivals"></ul>
+      </div>
+      <h3 class="fc-label mt-5 mb-2">Partidos</h3>
+      <ol id="pd-matches" class="fc-pd-matches"></ol>
+      <p id="pd-empty" class="fc-muted py-6 text-center text-sm">Todavía no jugó ningún partido.</p>
+    </dialog>
+
     <!-- Jugadores: fotos de perfil -->
     <dialog id="players-dialog" class="fc-sheet fc-sheet-sm" aria-labelledby="players-title">
       <div class="fc-grabber" aria-hidden="true"></div>
@@ -1216,6 +1235,78 @@ const tabs = [
 
     .fc-picks .fc-avatar.has-photo, .fc-preview .fc-avatar.has-photo { cursor: inherit; }
 
+    /* Ficha del jugador */
+
+    .fc-row { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s ease; }
+
+    .fc-row:active { background: rgb(255 255 255 / .05); }
+
+    .fc-row:focus-visible { outline: 2px solid var(--fc-accent); outline-offset: -2px; }
+
+    #pd-head .fc-form { display: flex; justify-content: flex-start; margin-top: .4rem; }
+
+    .fc-pd-name { font-size: 1.5rem; font-weight: 900; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-pd-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin-top: 1rem; }
+
+    .fc-pd-stats > div { display: grid; gap: .1rem; padding: .7rem .3rem; border-radius: 1rem; border: 1px solid var(--fc-line); background: rgb(255 255 255 / .04); text-align: center; }
+
+    .fc-pd-stats b { font-size: 1.25rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+    .fc-pd-stats small { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--fc-muted); }
+
+    .fc-pd-rivals { display: grid; gap: .35rem; }
+
+    .fc-pd-rivals li { display: flex; align-items: center; gap: .6rem; padding: .45rem .6rem; border-radius: .85rem; background: rgb(255 255 255 / .04); font-size: .85rem; }
+
+    .fc-pd-rivals li > b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-pd-rivals .fc-avatar { width: 1.9rem; height: 1.9rem; font-size: .6rem; box-shadow: none; }
+
+    .fc-pd-rivals small { color: var(--fc-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .fc-pd-matches { display: grid; gap: .45rem; }
+
+    .fc-pd-match {
+
+      display: grid;
+
+      grid-template-columns: auto minmax(0, 1fr) auto;
+
+      align-items: center;
+
+      gap: .7rem;
+
+      padding: .7rem;
+
+      border-radius: 1rem;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .03);
+
+    }
+
+    .fc-res { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: .55rem; font-size: .75rem; font-weight: 900; color: #07090a; }
+
+    .fc-res.w { background: var(--fc-win); }
+
+    .fc-res.d { background: var(--fc-draw); }
+
+    .fc-res.l { background: var(--fc-loss); }
+
+    .fc-pd-vs { display: flex; align-items: center; gap: .45rem; min-width: 0; font-weight: 700; }
+
+    .fc-pd-vs span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-pd-vs .fc-avatar { width: 1.6rem; height: 1.6rem; font-size: .55rem; box-shadow: none; }
+
+    .fc-pd-meta { margin-top: .15rem; font-size: .72rem; color: var(--fc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-pd-score { font-size: 1.35rem; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .fc-pd-match .fc-goals { grid-column: 2 / -1; margin: 0; padding-top: .45rem; border-top: 1px solid var(--fc-line); }
+
     /* Fotos de perfil */
 
     .fc-avatar.has-photo { background-size: cover; background-position: center; color: transparent; }
@@ -1876,6 +1967,7 @@ const tabs = [
     });
     renderSync();
     if (playersDialog.open) renderPlayers();
+    if (detailDialog.open) renderPlayerDetail();
   }
 
   // Los avatares de los botones de jugador del formulario también llevan la foto
@@ -1964,7 +2056,7 @@ const tabs = [
     locked = true;
     disconnectStream();
     app.classList.add('fc-locked');
-    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer]) if (d.open) d.close();
+    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer, detailDialog]) if (d.open) d.close();
     renderSync();
     if (await askPin('', true)) {
       locked = false;
@@ -2628,9 +2720,181 @@ const tabs = [
   playersDialog.addEventListener('click', (e) => {
     if (e.target === playersDialog) playersDialog.close();
   });
-  // Tocar un avatar de la tabla sin foto abre el panel para subirla (con foto, abre el visor)
+  // Tocar una fila abre la ficha del jugador (tocar una foto, en cambio, la agranda)
   standingsEl.addEventListener('click', (e) => {
-    if ((e.target as HTMLElement).closest('.fc-avatar:not(.has-photo)')) openPlayers();
+    const t = e.target as HTMLElement;
+    if (t.closest('.fc-avatar.has-photo')) return;
+    const row = t.closest<HTMLElement>('.fc-row');
+    if (row?.dataset.player) openPlayerDetail(row.dataset.player);
+  });
+  standingsEl.addEventListener('keydown', (e) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>('.fc-row');
+    if (row?.dataset.player && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      openPlayerDetail(row.dataset.player);
+    }
+  });
+
+  // --- Ficha del jugador ---
+  const detailDialog = $<HTMLDialogElement>('#player-detail');
+  let detailPlayer = '';
+
+  function openPlayerDetail(name: string) {
+    detailPlayer = name;
+    renderPlayerDetail();
+    detailDialog.showModal();
+    detailDialog.scrollTop = 0;
+  }
+
+  function renderPlayerDetail() {
+    const name = detailPlayer;
+    const same = (a: string) => a.trim().toLowerCase() === name.trim().toLowerCase();
+    const rows = computeTable();
+    const pos = rows.findIndex((r) => same(r.name));
+    const r = rows[pos];
+
+    // Encabezado: avatar (toca → foto en grande o subir una), nombre y posición
+    const av = document.createElement('span');
+    av.className = 'fc-avatar fc-avatar-xl';
+    avatar(av, name);
+    if (!photos[name] && roster.includes(name)) {
+      av.style.cursor = 'pointer';
+      av.title = 'Subir foto';
+      av.addEventListener('click', () => {
+        detailDialog.close();
+        photoFor = name;
+        photoInput.value = '';
+        photoInput.click();
+      });
+    }
+    const text = document.createElement('div');
+    text.className = 'min-w-0';
+    const h = document.createElement('h2');
+    h.id = 'pd-name';
+    h.className = 'fc-pd-name';
+    h.textContent = name;
+    const sub = document.createElement('p');
+    sub.className = 'fc-muted text-sm';
+    sub.textContent = r && r.pj ? `${pos + 1}° en la tabla · ${r.pts} pts` : 'Sin partidos todavía';
+    text.append(h, sub);
+    if (r?.form.length) text.append(formEl(r.form));
+    $('#pd-head').replaceChildren(av, text);
+
+    const stat = (value: string | number, label: string) => {
+      const d = document.createElement('div');
+      const b = document.createElement('b');
+      b.textContent = String(value);
+      const sm = document.createElement('small');
+      sm.textContent = label;
+      d.append(b, sm);
+      return d;
+    };
+    $('#pd-stats').replaceChildren(
+      stat(r?.pj ?? 0, 'Jugados'),
+      stat(r ? `${r.g}-${r.e}-${r.p}` : '0-0-0', 'G-E-P'),
+      stat(r ? `${r.gf}:${r.gc}` : '0:0', 'Goles'),
+      stat(r ? signed(r.dg) : 0, 'Dif.'),
+    );
+
+    // Sus partidos, del más nuevo al más viejo, vistos desde su lado
+    const mine = [...matches]
+      .filter((m) => same(m.homePlayer) || same(m.awayPlayer))
+      .sort(byDate)
+      .reverse()
+      .map((m) => {
+        const home = same(m.homePlayer);
+        const gf = home ? m.homeGoals : m.awayGoals;
+        const gc = home ? m.awayGoals : m.homeGoals;
+        return {
+          m,
+          home,
+          gf,
+          gc,
+          rival: home ? m.awayPlayer : m.homePlayer,
+          myTeam: home ? m.homeTeam : m.awayTeam,
+          rivalTeam: home ? m.awayTeam : m.homeTeam,
+          res: gf > gc ? 'w' : gf < gc ? 'l' : 'd',
+        };
+      });
+
+    // Contra cada rival
+    const rivals = new Map<string, { w: number; d: number; l: number; gf: number; gc: number }>();
+    for (const x of mine) {
+      const k = rivals.get(x.rival) ?? { w: 0, d: 0, l: 0, gf: 0, gc: 0 };
+      k[x.res as 'w' | 'd' | 'l']++;
+      k.gf += x.gf;
+      k.gc += x.gc;
+      rivals.set(x.rival, k);
+    }
+    $('#pd-rivals-wrap').hidden = rivals.size === 0;
+    $('#pd-rivals').replaceChildren(
+      ...[...rivals]
+        .sort(([, a], [, b]) => b.w * 3 + b.d - (a.w * 3 + a.d) || b.gf - b.gc - (a.gf - a.gc))
+        .map(([rival, k]) => {
+          const li = document.createElement('li');
+          const ra = document.createElement('span');
+          ra.className = 'fc-avatar';
+          avatar(ra, rival);
+          const n = document.createElement('b');
+          n.textContent = `vs ${rival}`;
+          const rec = document.createElement('small');
+          rec.textContent = `${k.w}G ${k.d}E ${k.l}P · ${k.gf}:${k.gc}`;
+          li.append(ra, n, rec);
+          return li;
+        }),
+    );
+
+    $('#pd-empty').hidden = mine.length > 0;
+    $('#pd-matches').replaceChildren(
+      ...mine.map((x) => {
+        const li = document.createElement('li');
+        li.className = 'fc-pd-match';
+        const res = document.createElement('span');
+        res.className = `fc-res ${x.res}`;
+        res.textContent = formLetter[x.res];
+        res.setAttribute('aria-label', x.res === 'w' ? 'Ganó' : x.res === 'l' ? 'Perdió' : 'Empató');
+
+        const mid = document.createElement('div');
+        mid.className = 'min-w-0';
+        const vs = document.createElement('div');
+        vs.className = 'fc-pd-vs';
+        const label = document.createElement('span');
+        label.className = 'fc-muted text-xs';
+        label.textContent = 'vs';
+        const ra = document.createElement('span');
+        ra.className = 'fc-avatar';
+        avatar(ra, x.rival);
+        const rn = document.createElement('span');
+        rn.textContent = x.rival;
+        vs.append(label, ra, rn);
+        const meta = document.createElement('p');
+        meta.className = 'fc-pd-meta';
+        const teams = x.myTeam || x.rivalTeam ? ` · ${x.myTeam || '—'} vs ${x.rivalTeam || '—'}` : '';
+        meta.textContent = `${dayLabel(x.m.date)}${teams}${x.home ? '' : ' · de visitante'}`;
+        mid.append(vs, meta);
+
+        const score = document.createElement('p');
+        score.className = 'fc-pd-score';
+        score.textContent = `${x.gf} - ${x.gc}`;
+        li.append(res, mid, score);
+
+        // Sus goles con el minuto
+        const myGoals = (x.m.goals ?? []).filter((g) => g.side === (x.home ? 'home' : 'away'));
+        if (myGoals.length) {
+          const start = x.m.startedAt ?? x.m.goals![0].at;
+          const ol = document.createElement('ol');
+          ol.className = 'fc-goals';
+          ol.append(...myGoals.map((g) => goalChip(g, start, name)));
+          li.append(ol);
+        }
+        return li;
+      }),
+    );
+  }
+
+  detailDialog.querySelector('[data-close-detail]')!.addEventListener('click', () => detailDialog.close());
+  detailDialog.addEventListener('click', (e) => {
+    if (e.target === detailDialog) detailDialog.close();
   });
 
   // Al volver a la pestaña se traen los partidos que cargaron los demás
@@ -2714,6 +2978,11 @@ const tabs = [
         const li = document.createElement('li');
         li.className = 'fc-row';
         li.style.viewTransitionName = vtName(r.name);
+        // Tocar la fila abre la ficha del jugador
+        li.dataset.player = r.name;
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', `Ver los partidos de ${r.name}`);
 
         const who = document.createElement('div');
         who.className = 'fc-who';
