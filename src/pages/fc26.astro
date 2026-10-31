@@ -304,6 +304,26 @@ const tabs = [
     </dialog>
 
     <p id="toast" class="fc-toast" role="status" aria-live="polite"></p>
+
+    <!-- Festejo de gol: pelota al arco + confeti -->
+    <div id="goal-fx" popover="manual" class="fc-fx" aria-hidden="true">
+      <canvas id="confetti"></canvas>
+      <div class="fc-fx-goal">
+        <svg class="fc-fx-net" viewBox="0 0 220 130" fill="none">
+          <defs>
+            <pattern id="fc-net" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <path d="M0 0v12M0 0h12" stroke="rgb(255 255 255 / .45)" stroke-width="1.4" />
+            </pattern>
+          </defs>
+          <path d="M18 122 30 22h160l12 100" fill="url(#fc-net)" />
+          <path d="M30 22 46 8h128l16 14" fill="url(#fc-net)" opacity=".6" />
+          <path d="M14 126V18h192v108" stroke="#fff" stroke-width="7" stroke-linejoin="round" />
+          <path d="M4 126h212" stroke="rgb(255 255 255 / .5)" stroke-width="3" />
+        </svg>
+        <span class="fc-fx-ball">⚽</span>
+        <b class="fc-fx-text">¡GOOOL!</b>
+      </div>
+    </div>
   </div>
 </Layout>
 
@@ -752,6 +772,188 @@ const tabs = [
     }
     .fc-picks input:focus-visible + span { outline: 2px solid var(--c); outline-offset: 2px; }
     .fc-picks input:disabled + span { opacity: .25; cursor: not-allowed; }
+
+    /* Festejo de gol */
+
+    .fc-pop { animation: fc-pop .7s var(--ease-out); }
+
+    @keyframes fc-pop {
+
+      25% { scale: 1.5; color: var(--fc-accent); text-shadow: 0 0 24px color-mix(in oklab, var(--fc-accent) 70%, transparent); }
+
+      60% { scale: .92; }
+
+    }
+
+    .fc-fx {
+
+      position: fixed;
+
+      inset: 0;
+
+      width: 100%;
+
+      height: 100%;
+
+      max-width: none;
+
+      max-height: none;
+
+      margin: 0;
+
+      padding: 0;
+
+      border: 0;
+
+      background: transparent;
+
+      overflow: hidden;
+
+      pointer-events: none;
+
+    }
+
+    .fc-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    .fc-fx-goal {
+
+      position: absolute;
+
+      left: 50%;
+
+      top: 38%;
+
+      width: min(70vw, 16rem);
+
+      translate: -50% -50%;
+
+      display: grid;
+
+      justify-items: center;
+
+      animation: fc-fx-in 2.2s ease both;
+
+    }
+
+    /* Halo oscuro detrás del arco para que se lea sobre cualquier fondo */
+
+    .fc-fx-goal::before {
+
+      content: '';
+
+      position: absolute;
+
+      inset: -45% -40%;
+
+      z-index: -1;
+
+      background: radial-gradient(closest-side, rgb(0 0 0 / .72), rgb(0 0 0 / .35) 60%, transparent);
+
+    }
+
+    .fc-fx-net { width: 100%; filter: drop-shadow(0 10px 30px rgb(0 0 0 / .6)); animation: fc-net 2.2s ease both; transform-origin: 50% 70%; }
+
+    .fc-fx-ball {
+
+      position: absolute;
+
+      left: 50%;
+
+      top: 55%;
+
+      font-size: 3rem;
+
+      line-height: 1;
+
+      translate: -50% -50%;
+
+      animation: fc-ball 2.2s cubic-bezier(.3, .1, .3, 1) both;
+
+    }
+
+    .fc-fx-text {
+
+      margin-top: .5rem;
+
+      font-size: clamp(2.5rem, 13vw, 4rem);
+
+      font-weight: 900;
+
+      font-style: italic;
+
+      letter-spacing: -.02em;
+
+      background: linear-gradient(100deg, #c4ff4d, #5ee7ff 50%, #b69cff);
+
+      -webkit-background-clip: text;
+
+      background-clip: text;
+
+      color: transparent;
+
+      filter: drop-shadow(0 6px 20px rgb(0 0 0 / .7));
+
+      animation: fc-gol-text 2.2s var(--ease-out) both;
+
+    }
+
+    /* La pelota entra en arco desde abajo a la izquierda, gira y se achica al llegar a la red */
+
+    @keyframes fc-ball {
+
+      0% { transform: translate(-46vw, 48vh) scale(1.9) rotate(0deg); opacity: 0; }
+
+      8% { opacity: 1; }
+
+      30% { transform: translate(-22vw, -6vh) scale(1.3) rotate(-300deg); }
+
+      48% { transform: translate(0, -2vh) scale(.75) rotate(-540deg); }
+
+      56% { transform: translate(0, 1vh) scale(.7) rotate(-560deg); }
+
+      85% { transform: translate(0, 1vh) scale(.7) rotate(-560deg); opacity: 1; }
+
+      100% { transform: translate(0, 1vh) scale(.7) rotate(-560deg); opacity: 0; }
+
+    }
+
+    /* La red se infla cuando entra la pelota */
+
+    @keyframes fc-net {
+
+      0%, 46% { transform: none; }
+
+      52% { transform: scale(1.08, 1.12) translateY(-2%); }
+
+      62% { transform: scale(.98, .97); }
+
+      70%, 100% { transform: none; }
+
+    }
+
+    @keyframes fc-gol-text {
+
+      0%, 48% { opacity: 0; scale: .3; }
+
+      58% { opacity: 1; scale: 1.25; }
+
+      66% { scale: 1; }
+
+      88% { opacity: 1; }
+
+      100% { opacity: 0; scale: 1.05; }
+
+    }
+
+    @keyframes fc-fx-in {
+
+      0% { opacity: 0; }
+
+      6%, 88% { opacity: 1; }
+
+      100% { opacity: 0; }
+
+    }
 
     /* Partido en vivo */
 
@@ -1677,8 +1879,90 @@ const tabs = [
     return chip;
   }
 
+  // --- Festejo de gol: mini zoom del número + pelota al arco + confeti ---
+  const fx = $('#goal-fx');
+  const confettiCanvas = $<HTMLCanvasElement>('#confetti');
+  const fxColors = ['#c4ff4d', '#5ee7ff', '#b69cff', '#ff9354', '#ffffff', '#facc15'];
+  let fxTimer = 0;
+  let fxFrame = 0;
+
+  function pop(el: Element | null | undefined) {
+    if (!el) return;
+    el.classList.remove('fc-pop');
+    void (el as HTMLElement).offsetWidth; // reinicia la animación si ya estaba
+    el.classList.add('fc-pop');
+  }
+
+  function confetti() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = innerWidth;
+    const h = innerHeight;
+    confettiCanvas.width = w * dpr;
+    confettiCanvas.height = h * dpr;
+    const ctx = confettiCanvas.getContext('2d')!;
+    ctx.scale(dpr, dpr);
+    // Dos cañones desde las esquinas de abajo, apuntando hacia el centro
+    const parts = Array.from({ length: 160 }, (_, i) => {
+      const left = i % 2 === 0;
+      const angle = (left ? -60 : -120) * (Math.PI / 180) + (Math.random() - 0.5) * 0.9;
+      const speed = 9 + Math.random() * 9;
+      return {
+        x: left ? 0 : w,
+        y: h,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed * 1.25,
+        size: 5 + Math.random() * 6,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.35,
+        color: fxColors[i % fxColors.length],
+        round: Math.random() < 0.3,
+      };
+    });
+    const start = performance.now();
+    cancelAnimationFrame(fxFrame);
+    const frame = (now: number) => {
+      const t = now - start;
+      ctx.clearRect(0, 0, w, h);
+      for (const p of parts) {
+        p.vy += 0.32; // gravedad
+        p.vx *= 0.99;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vr;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - t / 2600);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        if (p.round) {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.restore();
+      }
+      if (t < 2600) fxFrame = requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, w, h);
+    };
+    fxFrame = requestAnimationFrame(frame);
+  }
+
+  function celebrate(scoreEl?: Element | null) {
+    pop(scoreEl);
+    if (reduceMotion.matches) return;
+    // Se muestra arriba de todo (también de los paneles abiertos) y las animaciones arrancan de cero
+    if (fx.matches(':popover-open')) fx.hidePopover();
+    const goal = fx.querySelector<HTMLElement>('.fc-fx-goal')!;
+    goal.replaceWith(goal.cloneNode(true));
+    fx.showPopover();
+    confetti();
+    clearTimeout(fxTimer);
+    fxTimer = window.setTimeout(() => fx.hidePopover(), 2700);
+  }
+
   function renderLive() {
     const seen = new Set<string>();
+    const goalsToCelebrate: Element[] = [];
     $('#live-list').replaceChildren(
       ...liveList.map((l) => {
         seen.add(l.id);
@@ -1731,13 +2015,20 @@ const tabs = [
         );
         card.append(head, row, list);
 
-        // Gol nuevo: la tarjeta destella
-        const key = `${l.homeGoals}-${l.awayGoals}`;
-        if (liveScores.has(l.id) && liveScores.get(l.id) !== key) card.classList.add('fc-live-flash');
+        // Gol nuevo: la tarjeta destella y se festeja (el que lo carga ya festejó al tocar +)
+        const key = `${l.homeGoals ?? 0}-${l.awayGoals ?? 0}`;
+        const prev = liveScores.get(l.id);
+        if (prev !== undefined && prev !== key) {
+          card.classList.add('fc-live-flash');
+          const [ph, pa] = prev.split('-').map(Number);
+          const scored = (l.homeGoals ?? 0) > ph ? hg : (l.awayGoals ?? 0) > pa ? ag : null;
+          if (scored && l.id !== liveId) goalsToCelebrate.push(scored);
+        }
         liveScores.set(l.id, key);
         return card;
       }),
     );
+    for (const el of goalsToCelebrate) celebrate(el);
     for (const id of [...liveScores.keys()]) if (!seen.has(id)) liveScores.delete(id);
   }
 
@@ -2581,10 +2872,13 @@ const tabs = [
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-step]');
     if (!btn) return;
     const input = form.elements.namedItem(btn.dataset.step!) as HTMLInputElement;
-    setGoals(btn.dataset.step === 'homeGoals' ? 'home' : 'away', (Number(input.value) || 0) + Number(btn.dataset.delta));
-    navigator.vibrate?.(10);
+    const side = btn.dataset.step === 'homeGoals' ? 'home' : 'away';
+    const scored = Number(btn.dataset.delta) > 0 && (Number(input.value) || 0) < 99;
+    setGoals(side, (Number(input.value) || 0) + Number(btn.dataset.delta));
+    navigator.vibrate?.(scored ? [30, 40, 60] : 10);
     syncForm();
     saveDraft();
+    if (scored) celebrate(form.querySelector(`[data-preview-goals=${side}]`));
   });
 
   document.querySelectorAll('[data-open-sheet]').forEach((b) =>
