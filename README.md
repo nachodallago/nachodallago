@@ -44,7 +44,7 @@ La página `/fc26` guarda los partidos en **SQLite** a través de una API chica 
 
 En Dokploy:
 
-- **Environment**: `FC26_PIN=<pin>`. Ver es libre; cargar o borrar pide ese PIN. Sin PIN, la API queda en solo lectura.
+- **Environment**: `FC26_PIN=<pin>`. Se pide al entrar a `/fc26` (ver, cargar, borrar, fotos y partidos en vivo); después queda una sesión en una cookie por un año. Cambiar el PIN cierra todas las sesiones. Sin PIN configurado, la API es pública y de solo lectura.
 - **Advanced → Volumes**: montar un volumen en `/app/data` (ahí vive `fc26.sqlite`). Sin volumen, la base se pierde en cada deploy.
 
 En local: `npm run api` (con `FC26_PIN=1234` para poder escribir) y `npm run dev` en otra terminal.

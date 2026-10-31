@@ -2,7 +2,7 @@
 // nginx le pasa /api/fc26/* y sirve el resto del sitio estático.
 //
 // Variables de entorno:
-//   FC26_PIN   PIN para cargar/borrar partidos (sin PIN, la API es solo lectura)
+//   FC26_PIN   PIN para entrar: sin él no se ve ni se carga nada (si no está, la API es pública y solo lectura)
 //   FC26_DB    ruta del archivo SQLite (default ./data/fc26.sqlite)
 //   PORT       puerto (default 8787), siempre en 127.0.0.1
 
@@ -37,6 +37,12 @@ db.exec(`
     created_at  INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS matches_date ON matches (date);
+  -- Partidos que se están cargando ahora (se ven en vivo)
+  CREATE TABLE IF NOT EXISTS live (
+    id         TEXT PRIMARY KEY,
+    data       TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS photos (
     name       TEXT PRIMARY KEY,
     mime       TEXT NOT NULL,
@@ -59,6 +65,14 @@ const putPhotoStmt = db.prepare(`
   ON CONFLICT (name) DO UPDATE SET mime = excluded.mime, data = excluded.data, updated_at = excluded.updated_at
 `);
 const deletePhotoStmt = db.prepare('DELETE FROM photos WHERE name = ?');
+const liveStmt = db.prepare('SELECT id, data, updated_at FROM live ORDER BY updated_at DESC');
+const putLiveStmt = db.prepare(`
+  INSERT INTO live (id, data, updated_at) VALUES (?, ?, ?)
+  ON CONFLICT (id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
+`);
+const deleteLiveStmt = db.prepare('DELETE FROM live WHERE id = ?');
+const staleLiveStmt = db.prepare('DELETE FROM live WHERE updated_at < ?');
+const LIVE_TTL = 3 * 60 * 60_000; // un partido "en vivo" sin cambios por 3 h se descarta
 
 const toMatch = (r) => ({
   id: r.id,
@@ -101,25 +115,74 @@ function clean(m) {
   };
 }
 
+// Un partido en curso: como un partido, pero puede no tener todavía jugadores elegidos
+function cleanLive(m) {
+  if (!m || typeof m !== 'object') return null;
+  const goals = (Array.isArray(m.goals) ? m.goals : [])
+    .slice(0, 200)
+    .filter((g) => (g?.side === 'home' || g?.side === 'away') && time(g.at))
+    .map((g) => ({ side: g.side, at: time(g.at) }));
+  return {
+    homePlayer: text(m.homePlayer),
+    awayPlayer: text(m.awayPlayer),
+    homeTeam: text(m.homeTeam),
+    awayTeam: text(m.awayTeam),
+    homeGoals: score(m.homeGoals) ?? 0,
+    awayGoals: score(m.awayGoals) ?? 0,
+    startedAt: time(m.startedAt),
+    goals,
+  };
+}
+
+const live = () => {
+  staleLiveStmt.run(Date.now() - LIVE_TTL);
+  return liveStmt.all().map((r) => ({ id: r.id, ...JSON.parse(r.data), updatedAt: r.updated_at }));
+};
+
 // --- PIN: comparación en tiempo constante + freno a la fuerza bruta ---
 const hash = (s) => createHash('sha256').update(s).digest();
 const pinHash = PIN ? hash(PIN) : null;
 let failures = [];
 
-function checkPin(req) {
-  if (!pinHash) return { ok: false, status: 503, error: 'Falta configurar FC26_PIN en el servidor' };
+// Sesión en cookie (HttpOnly) para que también las fotos <img> vayan autenticadas.
+// El valor deriva del PIN: si se cambia FC26_PIN, todas las sesiones dejan de valer.
+const COOKIE = 'fc26_session';
+const sessionToken = PIN ? createHash('sha256').update(`fc26-session:${PIN}`).digest('hex') : '';
+
+function cookie(req, name) {
+  for (const part of String(req.headers.cookie ?? '').split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === name) return v.join('=');
+  }
+  return '';
+}
+
+// write: cargar/borrar. Las lecturas son libres solo si el servidor no tiene PIN.
+function checkPin(req, { write = true } = {}) {
+  if (!pinHash) {
+    return write ? { ok: false, status: 503, error: 'Falta configurar FC26_PIN en el servidor' } : { ok: true };
+  }
   const now = Date.now();
   failures = failures.filter((t) => now - t < 10 * 60_000);
   if (failures.length >= 20) return { ok: false, status: 429, error: 'Demasiados intentos, probá en unos minutos' };
   const given = String(req.headers['x-fc26-pin'] ?? '');
+  const session = cookie(req, COOKIE);
   if (given && timingSafeEqual(hash(given), pinHash)) return { ok: true };
-  failures.push(now);
-  return { ok: false, status: 401, error: 'PIN incorrecto' };
+  if (!given && session && timingSafeEqual(hash(session), hash(sessionToken))) return { ok: true };
+  // Solo cuentan los PIN tipeados: una cookie vieja (PIN cambiado) no puede bloquear a todos,
+  // y el token de 64 hex no se puede adivinar
+  if (given) failures.push(now);
+  return { ok: false, status: 401, error: given ? 'PIN incorrecto' : 'Ingresá el PIN' };
+}
+
+function sessionCookie(req, value, maxAge) {
+  const secure = String(req.headers['x-forwarded-proto'] ?? '').includes('https') ? '; Secure' : '';
+  return `${COOKIE}=${value}; Path=/api/fc26; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure}`;
 }
 
 // --- HTTP ---
-function send(res, status, body) {
-  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+function send(res, status, body, headers = {}) {
+  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers });
   res.end(JSON.stringify(body));
 }
 
@@ -174,13 +237,40 @@ async function handle(req, res) {
 
   if (path === '/api/fc26/health') return send(res, 200, { ok: true });
 
-  if (path === '/api/fc26/matches' && req.method === 'GET') {
-    return send(res, 200, { matches: all(), photos: photos(), canWrite: Boolean(pinHash) });
-  }
-
+  // Entrar con el PIN: deja la sesión en una cookie por un año
   if (path === '/api/fc26/pin' && req.method === 'POST') {
     const auth = checkPin(req);
-    return auth.ok ? send(res, 200, { ok: true }) : send(res, auth.status, { error: auth.error });
+    if (!auth.ok) return send(res, auth.status, { error: auth.error });
+    return send(res, 200, { ok: true }, { 'set-cookie': sessionCookie(req, sessionToken, 31536000) });
+  }
+  if (path === '/api/fc26/pin' && req.method === 'DELETE') {
+    return send(res, 200, { ok: true }, { 'set-cookie': sessionCookie(req, '', 0) });
+  }
+
+  // Todo lo demás (salvo /health) pide estar adentro
+  const read = checkPin(req, { write: false });
+  if (!read.ok) return send(res, read.status, { error: read.error, pinRequired: true });
+
+  if (path === '/api/fc26/matches' && req.method === 'GET') {
+    return send(res, 200, { matches: all(), photos: photos(), live: live(), canWrite: Boolean(pinHash) });
+  }
+
+  // Partidos en curso: se consultan seguido, por eso es una ruta liviana aparte
+  if (path === '/api/fc26/live' && req.method === 'GET') {
+    return send(res, 200, { live: live() });
+  }
+
+  const liveMatch = path.match(/^\/api\/fc26\/live\/([\w-]{1,64})$/);
+  if (liveMatch && (req.method === 'PUT' || req.method === 'DELETE')) {
+    const auth = checkPin(req);
+    if (!auth.ok) return send(res, auth.status, { error: auth.error });
+    if (req.method === 'DELETE') deleteLiveStmt.run(liveMatch[1]);
+    else {
+      const data = cleanLive(await readJson(req));
+      if (!data) return send(res, 400, { error: 'Partido inválido' });
+      putLiveStmt.run(liveMatch[1], JSON.stringify(data), Date.now());
+    }
+    return send(res, 200, { live: live() });
   }
 
   // Alta de uno o varios partidos (importar / subir los que estaban solo en el celu)
@@ -192,8 +282,11 @@ async function handle(req, res) {
     if (!list.length || list.some((m) => !m)) return send(res, 400, { error: 'Partido inválido' });
     let added = 0;
     const now = Date.now();
+    // Si venía de un partido en vivo, deja de estar en vivo al guardarse
+    const liveId = !Array.isArray(body) && typeof body?.liveId === 'string' ? body.liveId : '';
     db.exec('BEGIN');
     try {
+      if (liveId) deleteLiveStmt.run(liveId);
       list.forEach((m, i) => {
         const r = insertStmt.run(
           m.id, m.date, m.homePlayer, m.homeTeam, m.homeGoals,
@@ -206,7 +299,7 @@ async function handle(req, res) {
       db.exec('ROLLBACK');
       throw e;
     }
-    return send(res, 200, { added, matches: all() });
+    return send(res, 200, { added, matches: all(), live: live() });
   }
 
   const del = path.match(/^\/api\/fc26\/matches\/([\w-]{1,64})$/);
@@ -229,7 +322,7 @@ async function handle(req, res) {
       res.writeHead(200, {
         'content-type': row.mime,
         // La URL lleva ?v=<versión>: cuando cambia la foto, cambia la URL
-        'cache-control': url.searchParams.has('v') ? 'public, max-age=31536000, immutable' : 'no-cache',
+        'cache-control': url.searchParams.has('v') ? 'private, max-age=31536000, immutable' : 'no-cache',
         'content-security-policy': "default-src 'none'",
         'x-content-type-options': 'nosniff',
       });

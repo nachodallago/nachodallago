@@ -71,6 +71,7 @@ const tabs = [
     <main id="main" class="mx-auto max-w-3xl space-y-8 px-4 pt-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-16">
       <!-- Resumen -->
       <section id="resumen" aria-label="Resumen" class="fc-section space-y-3">
+        <div id="live-list" class="space-y-3" aria-live="polite"></div>
         <div id="sync-banner" class="fc-banner" hidden>
           <p id="sync-text" class="min-w-0 flex-1"></p>
           <button type="button" id="sync-upload" class="fc-btn fc-btn-primary !min-h-9 shrink-0 !px-3.5 text-sm" hidden>Subir</button>
@@ -91,7 +92,7 @@ const tabs = [
         </div>
         <div class="fc-card overflow-hidden">
           <div class="fc-standings-head" aria-hidden="true">
-            <span>#</span><span>Jugador</span><span class="fc-form-col">Últimos</span><span>PJ</span><span>DG</span><span>Pts</span>
+            <span>#</span><span>Jugador</span><span class="fc-form-col">Últimos</span><span>PJ</span><span title="Goles a favor">GF</span><span>DG</span><span>Pts</span>
           </div>
           <ol id="standings" class="fc-standings"></ol>
         </div>
@@ -151,7 +152,7 @@ const tabs = [
         <span class="grid w-5 place-items-center" aria-hidden="true">📷</span> Fotos de los jugadores
       </button>
       <button type="button" id="forget-pin" class="fc-menu-item" hidden>
-        <span class="grid w-5 place-items-center" aria-hidden="true">🔒</span> Olvidar el PIN en este celu
+        <span class="grid w-5 place-items-center" aria-hidden="true">🔒</span> Salir (pedir el PIN de nuevo)
       </button>
       <a href="/" class="fc-menu-item">
         <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.back} /> Volver a nachodallago.com
@@ -247,10 +248,10 @@ const tabs = [
         <div class="fc-grabber" aria-hidden="true"></div>
         <span class="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-white/10 text-xl" aria-hidden="true">🔒</span>
         <h2 id="pin-title" class="text-lg font-extrabold">Ingresá el PIN</h2>
-        <p class="fc-muted mt-1 text-sm">Lo necesitás para cargar o borrar partidos. Queda guardado en este celu.</p>
+        <p class="fc-muted mt-1 text-sm">Para entrar a la tabla. Queda guardado en este celu.</p>
         <input id="pin-input" type="password" autocomplete="off" maxlength="64" class="fc-input mt-4 text-center" aria-label="PIN" />
         <p id="pin-error" class="mt-2 text-sm font-semibold text-red-400 empty:hidden" role="alert"></p>
-        <div class="mt-4 grid grid-cols-2 gap-2">
+        <div class="fc-pin-actions mt-4 grid gap-2">
           <button type="button" data-cancel class="fc-btn fc-btn-ghost">Cancelar</button>
           <button type="submit" class="fc-btn fc-btn-primary">Entrar</button>
         </div>
@@ -441,9 +442,9 @@ const tabs = [
     /* Tabla */
     .fc-standings-head, .fc-row {
       display: grid;
-      grid-template-columns: 1.5rem minmax(0, 1fr) 2rem 2.25rem 2.25rem;
+      grid-template-columns: 1.25rem minmax(0, 1fr) 1.75rem 1.9rem 2.1rem 2rem;
       align-items: center;
-      gap: .5rem;
+      gap: .4rem;
       padding: 0 .9rem;
     }
     .fc-standings-head {
@@ -723,6 +724,80 @@ const tabs = [
     .fc-picks input:focus-visible + span { outline: 2px solid var(--c); outline-offset: 2px; }
     .fc-picks input:disabled + span { opacity: .25; cursor: not-allowed; }
 
+    /* Partido en vivo */
+
+    .fc-live {
+
+      padding: .9rem;
+
+      border-color: color-mix(in oklab, #ef4444 45%, transparent);
+
+      background:
+
+        radial-gradient(18rem 10rem at 50% 0%, rgb(239 68 68 / .14), transparent 70%),
+
+        var(--fc-card);
+
+    }
+
+    .fc-live-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+
+    .fc-live-badge {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: .4rem;
+
+      padding: .2rem .6rem;
+
+      border-radius: 999px;
+
+      background: #ef4444;
+
+      color: #fff;
+
+      font-size: .7rem;
+
+      font-weight: 800;
+
+      letter-spacing: .1em;
+
+      text-transform: uppercase;
+
+    }
+
+    .fc-live-badge i { width: .45rem; height: .45rem; border-radius: 999px; background: #fff; animation: fc-pulse 1.2s ease-in-out infinite; }
+
+    .fc-live-score { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: .5rem; margin-top: .8rem; }
+
+    .fc-live-side { display: grid; justify-items: center; gap: .3rem; min-width: 0; text-align: center; }
+
+    .fc-live-side b, .fc-live-side small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-live-side small { font-size: .7rem; color: var(--fc-muted); }
+
+    .fc-live-score > p { display: flex; align-items: center; gap: .3rem; font-size: 2.6rem; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+
+    .fc-live-score > p i { font-style: normal; font-size: 1.8rem; color: var(--fc-muted); }
+
+    .fc-live .fc-goals { margin-top: .8rem; margin-right: 0; }
+
+    .fc-live-flash { animation: fc-flash 1.2s ease; }
+
+    @keyframes fc-flash { 30% { box-shadow: 0 0 0 3px #ef4444, 0 0 40px rgb(239 68 68 / .6); } }
+
+
+    /* Sin PIN no se ve nada */
+
+    .fc-locked main, .fc-locked .fc-header, .fc-locked .fc-dock { filter: blur(14px); pointer-events: none; user-select: none; }
+
+    .fc-pin-gate [data-cancel] { display: none; }
+
+    .fc-pin-actions { grid-template-columns: 1fr 1fr; }
+    .fc-pin-gate .fc-pin-actions { grid-template-columns: 1fr; }
+
     /* Fotos de perfil */
 
     .fc-avatar.has-photo { background-size: cover; background-position: center; color: transparent; }
@@ -981,7 +1056,7 @@ const tabs = [
     }
 
     @media (min-width: 40rem) {
-      .fc-standings-head, .fc-row { grid-template-columns: 1.5rem minmax(0, 1fr) 7rem 2.25rem 2.5rem 2.5rem; }
+      .fc-standings-head, .fc-row { grid-template-columns: 1.5rem minmax(0, 1fr) 7rem 2.25rem 2.5rem 2.5rem 2.5rem; gap: .5rem; }
       .fc-form-col, .fc-row > .fc-form { display: flex; }
       .fc-form-col { justify-content: center; }
       .fc-who .fc-form { display: none; }
@@ -1176,6 +1251,7 @@ const tabs = [
       matches = merged();
       render();
       paintPicks();
+      renderLive();
     });
     renderSync();
     if (playersDialog.open) renderPlayers();
@@ -1193,48 +1269,41 @@ const tabs = [
     });
   }
 
-  async function sync() {
-    try {
-      const res = await fetch(`${API}/matches`, { cache: 'no-store' });
-      if (!res.ok) throw new Error(String(res.status));
-      const data = await res.json();
-      online = true;
-      canWrite = Boolean(data.canWrite);
-      setRemote(data.matches);
-      setPhotos(data.photos);
-    } catch {
-      online = false;
-    }
-    refresh();
-  }
-
-  // --- PIN ---
+  // --- PIN: se pide al entrar; el servidor deja la sesión en una cookie ---
   const pinDialog = $<HTMLDialogElement>('#pin-dialog');
   const pinForm = $<HTMLFormElement>('#pin-form');
   const pinInput = $<HTMLInputElement>('#pin-input');
   const pinError = $('#pin-error');
-  let pinResolve: ((pin: string | null) => void) | null = null;
+  const app = $('.fc');
+  let pinResolve: ((ok: boolean) => void) | null = null;
+  let locked = false;
 
-  const storedPin = () => {
+  // PIN guardado por versiones anteriores: se usa una vez para abrir la sesión y se borra
+  function takeLegacyPin() {
     try {
-      return localStorage.getItem(PIN_KEY);
+      const pin = localStorage.getItem(PIN_KEY);
+      localStorage.removeItem(PIN_KEY);
+      return pin;
     } catch {
       return null;
     }
-  };
-  function forgetPin() {
-    try {
-      localStorage.removeItem(PIN_KEY);
-    } catch {}
-    renderSync();
   }
 
-  function askPin(message = ''): Promise<string | null> {
+  // gate: al entrar no se puede cancelar
+  function askPin(message = '', gate = false): Promise<boolean> {
+    pinDialog.classList.toggle('fc-pin-gate', gate);
+    $('#pin-title').textContent = gate ? 'Ingresá el PIN para entrar' : 'Ingresá el PIN';
     pinError.textContent = message;
     pinInput.value = '';
-    pinDialog.showModal();
+    if (!pinDialog.open) pinDialog.showModal();
     pinInput.focus();
     return new Promise((ok) => (pinResolve = ok));
+  }
+
+  async function login(pin: string) {
+    const res = await fetch(`${API}/pin`, { method: 'POST', headers: { 'x-fc26-pin': pin } });
+    const data = await res.json().catch(() => ({}));
+    return res.ok ? null : data.error || 'No se pudo validar el PIN';
   }
 
   pinForm.addEventListener('submit', async (e) => {
@@ -1244,20 +1313,15 @@ const tabs = [
     const btn = pinForm.querySelector<HTMLButtonElement>('[type=submit]')!;
     btn.disabled = true;
     try {
-      const res = await fetch(`${API}/pin`, { method: 'POST', headers: { 'x-fc26-pin': pin } });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        pinError.textContent = data.error || 'No se pudo validar el PIN';
+      const error = await login(pin);
+      if (error) {
+        pinError.textContent = error;
         return;
       }
-      try {
-        localStorage.setItem(PIN_KEY, pin);
-      } catch {}
       const done = pinResolve;
       pinResolve = null;
       pinDialog.close();
-      done?.(pin);
-      renderSync();
+      done?.(true);
     } catch {
       pinError.textContent = 'Sin conexión con el servidor';
     } finally {
@@ -1265,34 +1329,88 @@ const tabs = [
     }
   });
   pinForm.querySelector('[data-cancel]')!.addEventListener('click', () => pinDialog.close());
+  // En la pantalla de entrada, Escape no cierra
+  pinDialog.addEventListener('cancel', (e) => {
+    if (pinDialog.classList.contains('fc-pin-gate')) e.preventDefault();
+  });
   pinDialog.addEventListener('close', () => {
-    pinResolve?.(null);
+    pinResolve?.(false);
     pinResolve = null;
   });
 
+  async function lock() {
+    if (locked) return;
+    locked = true;
+    app.classList.add('fc-locked');
+    for (const d of [sheet, confirmDialog, playersDialog]) if (d.open) d.close();
+    renderSync();
+    if (await askPin('', true)) {
+      locked = false;
+      app.classList.remove('fc-locked');
+      sync();
+    }
+  }
+
+  async function logout() {
+    $('#fc-menu').hidePopover();
+    await fetch(`${API}/pin`, { method: 'DELETE' }).catch(() => {});
+    // Lo que se bajó del servidor no queda a la vista en este celu
+    for (const k of [CACHE_KEY, PHOTOS_KEY]) {
+      try {
+        localStorage.removeItem(k);
+      } catch {}
+    }
+    remote = [];
+    photos = {};
+    liveList = [];
+    refresh();
+    lock();
+  }
+
+  async function sync() {
+    try {
+      let res = await fetch(`${API}/matches`, { cache: 'no-store' });
+      const legacy = res.status === 401 ? takeLegacyPin() : null;
+      if (legacy && !(await login(legacy))) res = await fetch(`${API}/matches`, { cache: 'no-store' });
+      online = true;
+      if (res.status === 401) {
+        lock();
+        return;
+      }
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      canWrite = Boolean(data.canWrite);
+      setRemote(data.matches);
+      setPhotos(data.photos);
+      setLive(data.live);
+    } catch {
+      online = false;
+    }
+    refresh();
+  }
+
   class Cancelled extends Error {}
 
-  // Escritura en la API con el PIN (lo pide si no está o si cambió)
+  // Escritura en la API con la sesión; si venció, pide el PIN y reintenta
   async function write(method: 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown) {
     let message = '';
     for (let attempt = 0; attempt < 3; attempt++) {
-      const pin = storedPin() ?? (await askPin(message));
-      if (!pin) throw new Cancelled();
       const isFile = body instanceof Blob;
       const res = await fetch(`${API}${path}`, {
         method,
-        headers: { 'content-type': isFile ? body.type : 'application/json', 'x-fc26-pin': pin },
+        headers: { 'content-type': isFile ? body.type : 'application/json' },
         body: body === undefined ? undefined : isFile ? body : JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
-        forgetPin();
-        message = data.error || 'PIN incorrecto';
+        if (!(await askPin(message))) throw new Cancelled();
+        message = '';
         continue;
       }
       if (!res.ok) throw new Error(data.error || 'Error del servidor');
       if ('matches' in data) setRemote(data.matches);
       if ('photos' in data) setPhotos(data.photos);
+      if ('live' in data) setLive(data.live);
       return data;
     }
     throw new Error('PIN incorrecto');
@@ -1305,13 +1423,14 @@ const tabs = [
     const banner = $('#sync-banner');
     const upload = $('#sync-upload');
     let msg = '';
-    if (!online) msg = remote.length || localOnly.length ? 'Sin conexión con el servidor: mostrando lo último guardado en este celu.' : '';
+    if (locked) msg = '';
+    else if (!online) msg = remote.length || localOnly.length ? 'Sin conexión con el servidor: mostrando lo último guardado en este celu.' : '';
     else if (!canWrite) msg = 'El servidor todavía no tiene PIN configurado: lo que cargues queda en este celu.';
     else if (localOnly.length) msg = `Hay ${localOnly.length} partido(s) guardados solo en este celu.`;
     banner.hidden = !msg;
     $('#sync-text').textContent = msg;
     upload.hidden = !(online && canWrite && localOnly.length);
-    $('#forget-pin').hidden = !storedPin();
+    $('#forget-pin').hidden = !(online && canWrite && !locked);
     $('#menu-note').textContent = online && canWrite
       ? 'Los resultados se guardan en el servidor: todos ven la misma tabla.'
       : 'Sin conexión con el servidor: lo que cargues queda en este celu y después lo podés subir.';
@@ -1332,11 +1451,117 @@ const tabs = [
     }
   });
 
-  $('#forget-pin').addEventListener('click', () => {
-    forgetPin();
-    $('#fc-menu').hidePopover();
-    notify('PIN olvidado en este celu');
-  });
+  $('#forget-pin').addEventListener('click', logout);
+
+  // --- En vivo: partidos que alguien está cargando ahora ---
+  type Live = {
+    id: string;
+    homePlayer?: string;
+    awayPlayer?: string;
+    homeTeam?: string;
+    awayTeam?: string;
+    homeGoals?: number;
+    awayGoals?: number;
+    startedAt?: number | null;
+    goals?: Goal[];
+  };
+  let liveList: Live[] = [];
+  const liveScores = new Map<string, string>();
+
+  function setLive(list: unknown) {
+    liveList = (Array.isArray(list) ? list : []).filter((l) => l && typeof l.id === 'string');
+  }
+
+  function goalChip(g: Goal, start: number, player: string) {
+    const chip = document.createElement('li');
+    chip.style.setProperty('--c', colors.get(player) ?? '#71717a');
+    const min = document.createElement('b');
+    min.textContent = `${minuteOf(g.at, start)}'`;
+    const time = document.createElement('small');
+    time.textContent = clockFmt.format(g.at);
+    chip.append(min, ` ${player} `, time);
+    return chip;
+  }
+
+  function renderLive() {
+    const seen = new Set<string>();
+    $('#live-list').replaceChildren(
+      ...liveList.map((l) => {
+        seen.add(l.id);
+        const card = document.createElement('article');
+        card.className = 'fc-card fc-live';
+        const head = document.createElement('div');
+        head.className = 'fc-live-head';
+        const badge = document.createElement('span');
+        badge.className = 'fc-live-badge';
+        badge.append(document.createElement('i'), 'En vivo');
+        const clock = document.createElement('span');
+        clock.className = 'fc-clock';
+        clock.textContent = l.startedAt ? `⏱ ${minuteOf(Date.now(), l.startedAt)}'` : '';
+        head.append(badge, clock);
+
+        const side = (player = '', team = '') => {
+          const d = document.createElement('div');
+          d.className = 'fc-live-side';
+          const av = document.createElement('span');
+          av.className = 'fc-avatar fc-avatar-lg';
+          if (player) avatar(av, player);
+          else av.textContent = '?';
+          const name = document.createElement('b');
+          name.textContent = player || 'Por elegir';
+          const t = document.createElement('small');
+          t.textContent = team || '—';
+          d.append(av, name, t);
+          return d;
+        };
+        const score = document.createElement('p');
+        const hg = document.createElement('span');
+        hg.textContent = String(l.homeGoals ?? 0);
+        const sep = document.createElement('i');
+        sep.textContent = ':';
+        const ag = document.createElement('span');
+        ag.textContent = String(l.awayGoals ?? 0);
+        score.append(hg, sep, ag);
+        const row = document.createElement('div');
+        row.className = 'fc-live-score';
+        row.append(side(l.homePlayer, l.homeTeam), score, side(l.awayPlayer, l.awayTeam));
+
+        const list = document.createElement('ol');
+        list.className = 'fc-goals';
+        const start = l.startedAt || l.goals?.[0]?.at || Date.now();
+        list.append(
+          ...(l.goals ?? []).map((g) =>
+            goalChip(g, start, (g.side === 'home' ? l.homePlayer : l.awayPlayer) || (g.side === 'home' ? 'Local' : 'Visitante')),
+          ),
+        );
+        card.append(head, row, list);
+
+        // Gol nuevo: la tarjeta destella
+        const key = `${l.homeGoals}-${l.awayGoals}`;
+        if (liveScores.has(l.id) && liveScores.get(l.id) !== key) card.classList.add('fc-live-flash');
+        liveScores.set(l.id, key);
+        return card;
+      }),
+    );
+    for (const id of [...liveScores.keys()]) if (!seen.has(id)) liveScores.delete(id);
+  }
+
+  // Se consulta cada 4 s mientras la página está a la vista
+  async function pollLive() {
+    if (document.visibilityState !== 'visible' || locked || !online) return;
+    try {
+      const res = await fetch(`${API}/live`, { cache: 'no-store' });
+      if (res.status === 401) return lock();
+      if (!res.ok) return;
+      const before = liveList.map((l) => l.id);
+      setLive((await res.json()).live);
+      renderLive();
+      // Un partido dejó de estar en vivo: seguramente se guardó, se trae la tabla nueva
+      if (before.some((id) => !liveList.some((l) => l.id === id))) sync();
+    } catch {}
+  }
+  setInterval(pollLive, 4000);
+  setInterval(() => liveList.length && renderLive(), 15000);
 
   // --- Fotos de los jugadores ---
   const playersDialog = $<HTMLDialogElement>('#players-dialog');
@@ -1558,7 +1783,7 @@ const tabs = [
         if (r.form.length) info.append(formEl(r.form));
         who.append(av, info);
 
-        li.append(cell(i + 1, i === 0 && r.pj > 0 ? 'fc-rank lead' : 'fc-rank'), who, formEl(r.form), cell(r.pj), cell(signed(r.dg)), cell(r.pts, 'fc-pts'));
+        li.append(cell(i + 1, i === 0 && r.pj > 0 ? 'fc-rank lead' : 'fc-rank'), who, formEl(r.form), cell(r.pj), cell(r.gf, 'fc-gf'), cell(signed(r.dg)), cell(r.pts, 'fc-pts'));
         return li;
       }),
     );
@@ -1835,7 +2060,16 @@ const tabs = [
   }, 15000);
   // --- Borrador ---
   const draftFields = ['homePlayer', 'awayPlayer', 'homeTeam', 'awayTeam', 'homeGoals', 'awayGoals', 'date'] as const;
-  type Draft = Partial<Record<(typeof draftFields)[number], string>> & { open?: boolean; goals?: Goal[]; startedAt?: number };
+  type Draft = Partial<Record<(typeof draftFields)[number], string>> & {
+    open?: boolean;
+    goals?: Goal[];
+    startedAt?: number;
+    liveId?: string;
+  };
+  // Identifica el partido que se está cargando para mostrarlo en vivo
+  let liveId: string | undefined;
+  let livePushed: string | undefined;
+  let liveTimer = 0;
 
   const todayLocal = () => {
     const d = new Date();
@@ -1845,7 +2079,7 @@ const tabs = [
 
   function readDraft(): Draft {
     const fd = new FormData(form);
-    const draft: Draft = { open: sheet.open, goals, startedAt };
+    const draft: Draft = { open: sheet.open, goals, startedAt, liveId };
     for (const k of draftFields) draft[k] = String(fd.get(k) ?? '');
     return draft;
   }
@@ -1854,8 +2088,10 @@ const tabs = [
     Boolean(d.homePlayer || d.awayPlayer || d.homeTeam || d.awayTeam || Number(d.homeGoals) || Number(d.awayGoals) || d.goals?.length);
 
   function saveDraft() {
+    if (!liveId && hasData(readDraft())) liveId = `lv-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
     const draft = readDraft();
     const dirty = hasData(draft);
+    pushLive();
     document.querySelectorAll('.fc-fab').forEach((f) => f.classList.toggle('has-draft', dirty && !sheet.open));
     $('#clear-draft').hidden = !dirty;
     try {
@@ -1869,6 +2105,45 @@ const tabs = [
   function resetGoals() {
     goals = [];
     startedAt = undefined;
+    liveId = undefined;
+  }
+
+  // Manda el partido en curso al servidor (con un pequeño retardo para agrupar toques)
+  function pushLive() {
+    clearTimeout(liveTimer);
+    liveTimer = window.setTimeout(async () => {
+      if (!online || !canWrite || locked) return;
+      const draft = readDraft();
+      try {
+        if (livePushed && livePushed !== draft.liveId) {
+          await fetch(`${API}/live/${livePushed}`, { method: 'DELETE' });
+          livePushed = undefined;
+        }
+        if (draft.liveId && hasData(draft)) {
+          const res = await fetch(`${API}/live/${draft.liveId}`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              homePlayer: draft.homePlayer,
+              awayPlayer: draft.awayPlayer,
+              homeTeam: draft.homeTeam,
+              awayTeam: draft.awayTeam,
+              homeGoals: Number(draft.homeGoals) || 0,
+              awayGoals: Number(draft.awayGoals) || 0,
+              startedAt: draft.startedAt,
+              goals: draft.goals,
+            }),
+          });
+          if (res.ok) {
+            livePushed = draft.liveId;
+            setLive((await res.json()).live);
+            renderLive();
+          }
+        }
+      } catch {
+        // Sin conexión: se reintenta con el próximo cambio
+      }
+    }, 400);
   }
 
   function clearDraft() {
@@ -1900,6 +2175,7 @@ const tabs = [
       goals = draft.goals.filter((g) => (g?.side === 'home' || g?.side === 'away') && Number.isFinite(g.at));
     }
     if (Number.isFinite(draft.startedAt)) startedAt = draft.startedAt;
+    if (typeof draft.liveId === 'string') liveId = livePushed = draft.liveId;
     // Los números del marcador y la lista de goles siempre coinciden
     setGoals('home', Number((field('homeGoals') as HTMLInputElement).value));
     setGoals('away', Number((field('awayGoals') as HTMLInputElement).value));
@@ -1954,7 +2230,7 @@ const tabs = [
   // Tocar fuera del sheet lo cierra
   for (const d of [sheet, confirmDialog, pinDialog]) {
     d.addEventListener('click', (e) => {
-      if (e.target === d) d.close();
+      if (e.target === d && !d.classList.contains('fc-pin-gate')) d.close();
     });
   }
 
@@ -1988,7 +2264,10 @@ const tabs = [
     submit.disabled = true;
     try {
       if (online && canWrite) {
-        await write('POST', '/matches', m);
+        // Con liveId, el servidor lo saca de "en vivo" al guardarlo
+        clearTimeout(liveTimer);
+        await write('POST', '/matches', { ...m, liveId });
+        livePushed = undefined;
       } else {
         // Sin servidor: queda en este celu y después se sube
         localOnly.push(m);
