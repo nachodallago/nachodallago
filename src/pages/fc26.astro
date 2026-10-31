@@ -209,9 +209,25 @@ const tabs = [
 
         <!-- Goles con su tiempo -->
         <div id="goal-panel" class="fc-goal-panel" hidden>
-          <div class="flex items-center justify-between gap-2">
+          <!-- Reloj de juego: corre como el del FC (90' en la duración elegida) -->
+          <div class="fc-clock-row">
+            <span id="match-clock" class="fc-game-clock">00:00</span>
+            <button type="button" class="fc-clock-btn" data-nudge="-1" aria-label="Restar un minuto al reloj">−1'</button>
+            <button type="button" class="fc-clock-btn" data-nudge="1" aria-label="Sumar un minuto al reloj">+1'</button>
+            <button type="button" id="clock-toggle" class="fc-clock-btn fc-clock-main">▶ Empezar</button>
+          </div>
+          <p id="clock-note" class="fc-muted mt-1 text-xs"></p>
+          <div class="fc-duration" role="radiogroup" aria-label="Duración del partido">
+            <span>Dura</span>
+            {
+              [8, 10, 12, 16, 20].map((d) => (
+                <button type="button" data-duration={d} role="radio">{d}</button>
+              ))
+            }
+            <span>min</span>
+          </div>
+          <div class="mt-3 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
             <span class="fc-label">Goles</span>
-            <span id="match-clock" class="fc-clock"></span>
           </div>
           <ol id="goal-log" class="fc-goal-log"></ol>
           <p id="goal-empty" class="fc-muted mt-2 text-xs">Tocá + y cada gol queda con su minuto.</p>
@@ -1313,6 +1329,78 @@ const tabs = [
 
     }
 
+    /* Reloj de juego */
+
+    .fc-clock-row { display: flex; align-items: center; gap: .4rem; }
+
+    .fc-game-clock {
+
+      margin-right: auto;
+
+      font-family: var(--font-mono);
+
+      font-size: 2rem;
+
+      font-weight: 800;
+
+      font-variant-numeric: tabular-nums;
+
+      letter-spacing: -.02em;
+
+      color: var(--fc-accent);
+
+    }
+
+    .fc-game-clock.paused { color: var(--fc-muted); animation: fc-pulse 1.4s ease-in-out infinite; }
+
+    .fc-clock-btn {
+
+      min-width: 2.75rem;
+
+      height: 2.5rem;
+
+      padding: 0 .6rem;
+
+      border-radius: 999px;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .06);
+
+      font-size: .8rem;
+
+      font-weight: 800;
+
+      font-variant-numeric: tabular-nums;
+
+      touch-action: manipulation;
+
+    }
+
+    .fc-clock-main { background: var(--fc-accent); border-color: var(--fc-accent); color: #07090a; padding: 0 .9rem; }
+
+    .fc-duration { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; margin-top: .6rem; font-size: .75rem; color: var(--fc-muted); }
+
+    .fc-duration button {
+
+      min-width: 2.25rem;
+
+      height: 2rem;
+
+      border-radius: 999px;
+
+      border: 1px solid var(--fc-line);
+
+      font-weight: 700;
+
+      color: var(--fc-muted);
+
+      touch-action: manipulation;
+
+    }
+
+    .fc-duration button[aria-checked='true'] { border-color: var(--fc-accent); color: #fff; background: color-mix(in oklab, var(--fc-accent) 14%, transparent); }
+
     .fc-clock { font-size: .8rem; font-weight: 700; color: var(--fc-accent); font-variant-numeric: tabular-nums; }
 
     .fc-goal-log { display: grid; gap: .4rem; margin-top: .6rem; }
@@ -1507,7 +1595,8 @@ const tabs = [
     goals?: Goal[];
     startedAt?: number;
   };
-  type Goal = { side: 'home' | 'away'; at: number };
+  // min: minuto del juego en que entró (los goles viejos no lo tienen: se usa el tiempo real)
+  type Goal = { side: 'home' | 'away'; at: number; min?: number };
 
   const KEY = 'fc26-matches';
   // Partido a medio cargar: sobrevive a recargar la página
@@ -1859,6 +1948,9 @@ const tabs = [
     homeGoals?: number;
     awayGoals?: number;
     startedAt?: number | null;
+    duration?: number;
+    pausedMs?: number;
+    pausedAt?: number | null;
     goals?: Goal[];
   };
   let liveList: Live[] = [];
@@ -1868,11 +1960,14 @@ const tabs = [
     liveList = (Array.isArray(list) ? list : []).filter((l) => l && typeof l.id === 'string');
   }
 
+  const liveClockText = (c: Clock) =>
+    !c.startedAt ? 'Por empezar' : `${c.pausedAt ? '⏸' : '⏱'} ${fmtGame(gameSeconds(c))}`;
+
   function goalChip(g: Goal, start: number, player: string) {
     const chip = document.createElement('li');
     chip.style.setProperty('--c', colors.get(player) ?? '#71717a');
     const min = document.createElement('b');
-    min.textContent = `${minuteOf(g.at, start)}'`;
+    min.textContent = goalLabel(g, start);
     const time = document.createElement('small');
     time.textContent = clockFmt.format(g.at);
     chip.append(min, ` ${player} `, time);
@@ -1975,8 +2070,8 @@ const tabs = [
         badge.append(document.createElement('i'), 'En vivo');
         const clock = document.createElement('span');
         clock.className = 'fc-clock';
-        if (l.startedAt) clock.dataset.started = String(l.startedAt);
-        clock.textContent = l.startedAt ? `⏱ ${elapsed(l.startedAt)}` : '';
+        clock.dataset.clock = JSON.stringify({ startedAt: l.startedAt, duration: l.duration, pausedMs: l.pausedMs, pausedAt: l.pausedAt });
+        clock.textContent = liveClockText(l);
         head.append(badge, clock);
 
         const side = (player = '', team = '') => {
@@ -2504,14 +2599,14 @@ const tabs = [
       (homeWon ? hg : ag).classList.add('win');
     }
     if (Array.isArray(m.goals) && m.goals.length) {
-      const start = Number.isFinite(m.startedAt) ? m.startedAt : m.goals[0].at;
+      const start = m.startedAt ?? m.goals[0].at;
       li.querySelector('.fc-goals')!.append(
         ...m.goals.map((g) => {
           const chip = document.createElement('li');
           const player = g.side === 'home' ? m.homePlayer : m.awayPlayer;
           chip.style.setProperty('--c', colors.get(player) ?? '#71717a');
           const min = document.createElement('b');
-          min.textContent = `${minuteOf(g.at, start)}'`;
+          min.textContent = goalLabel(g, start);
           const time = document.createElement('small');
           time.textContent = clockFmt.format(g.at);
           chip.append(min, ` ${player} `, time);
@@ -2655,9 +2750,43 @@ const tabs = [
   // --- Goles con tiempo ---
   let goals: Goal[] = [];
   let startedAt: number | undefined;
+  let pausedMs = 0;
+  let pausedAt: number | undefined;
+  // Duración real de un partido (min); se recuerda en el celu
+  let duration = (() => {
+    try {
+      const v = Number(localStorage.getItem('fc26-duration'));
+      return v >= 1 && v <= 120 ? v : 20;
+    } catch {
+      return 20;
+    }
+  })();
+  const clockState = (): Clock => ({ startedAt, duration, pausedMs, pausedAt });
+
+  function startClock() {
+    if (!startedAt) {
+      startedAt = Date.now();
+      pausedMs = 0;
+      pausedAt = undefined;
+    }
+  }
 
   const clockFmt = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   const minuteOf = (at: number, start = at) => Math.max(1, Math.floor((at - start) / 60000) + 1);
+  // --- Reloj de juego: 90' que pasan en la duración real elegida (como el FC) ---
+  type Clock = { startedAt?: number | null; duration?: number; pausedMs?: number; pausedAt?: number | null };
+  const GAME_SECONDS = 90 * 60;
+  const gameSeconds = (c: Clock, now = Date.now()) => {
+    if (!c.startedAt) return 0;
+    const real = Math.max(0, (c.pausedAt ?? now) - c.startedAt - (c.pausedMs ?? 0));
+    return ((real / 1000) * GAME_SECONDS) / ((c.duration || 20) * 60);
+  };
+  const fmtGame = (sec: number) =>
+    `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+  // 37:12 en el reloj = gol al 38'
+  const goalMinute = (sec: number) => Math.min(200, Math.floor(sec / 60) + 1);
+  const goalLabel = (g: Goal, start: number) => `${g.min ?? minuteOf(g.at, start)}'`;
+
   // Reloj corrido del partido: 12:34
   const elapsed = (start: number, now = Date.now()) => {
     const sec = Math.max(0, Math.floor((now - start) / 1000));
@@ -2670,9 +2799,10 @@ const tabs = [
     n = Math.min(99, Math.max(0, Math.trunc(n) || 0));
     let count = goals.filter((g) => g.side === side).length;
     while (count < n) {
+      // Un gol con el reloj parado lo arranca
+      startClock();
       const now = Date.now();
-      startedAt ??= now;
-      goals.push({ side, at: now });
+      goals.push({ side, at: now, min: goalMinute(gameSeconds(clockState(), now)) });
       count++;
     }
     while (count > n) {
@@ -2683,12 +2813,25 @@ const tabs = [
     (form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value = String(n);
   }
 
+  function renderClock() {
+    const clock = $('#match-clock');
+    clock.textContent = fmtGame(gameSeconds(clockState()));
+    clock.classList.toggle('paused', Boolean(pausedAt));
+    $('#clock-toggle').textContent = !startedAt ? '▶ Empezar' : pausedAt ? '▶ Seguir' : '⏸ Pausa';
+    $('#clock-note').textContent = !startedAt
+      ? `Tocá Empezar con el pitazo inicial (o arranca solo con el primer gol). 90' en ${duration} min.`
+      : pausedAt
+        ? 'En pausa (entretiempo o juego frenado).'
+        : `Empezó ${clockFmt.format(startedAt)} · 90' en ${duration} min. Si no coincide con la tele, ajustalo con −1' / +1'.`;
+    form.querySelectorAll<HTMLButtonElement>('[data-duration]').forEach((b) =>
+      b.setAttribute('aria-checked', String(Number(b.dataset.duration) === duration)),
+    );
+  }
+
   function renderGoalLog() {
     const panel = $('#goal-panel');
-    panel.hidden = !goals.length && !startedAt;
-    $('#match-clock').textContent = startedAt
-      ? `⏱ ${elapsed(startedAt)} · empezó ${clockFmt.format(startedAt)}`
-      : '';
+    panel.hidden = !goals.length && !startedAt && !pickedPlayer('home') && !pickedPlayer('away');
+    renderClock();
     $('#goal-empty').hidden = goals.length > 0;
     $('#goal-log').replaceChildren(
       ...goals.map((g) => {
@@ -2697,7 +2840,7 @@ const tabs = [
         const player = pickedPlayer(g.side) ?? (g.side === 'home' ? 'Local' : 'Visitante');
         li.style.setProperty('--c', colors.get(player) ?? '#71717a');
         const min = document.createElement('b');
-        min.textContent = `${minuteOf(g.at, startedAt)}'`;
+        min.textContent = goalLabel(g, startedAt ?? g.at);
         const dot = document.createElement('i');
         const name = document.createElement('span');
         name.textContent = player;
@@ -2711,11 +2854,11 @@ const tabs = [
 
   // Los relojes corren segundo a segundo (solo se toca el texto; 4 veces por segundo para no atrasar)
   setInterval(() => {
-    if (sheet.open && startedAt) {
-      $('#match-clock').textContent = `⏱ ${elapsed(startedAt)} · empezó ${clockFmt.format(startedAt)}`;
-    }
-    document.querySelectorAll<HTMLElement>('.fc-live [data-started]').forEach((el) => {
-      el.textContent = `⏱ ${elapsed(Number(el.dataset.started))}`;
+    if (sheet.open && startedAt && !pausedAt) $('#match-clock').textContent = fmtGame(gameSeconds(clockState()));
+    document.querySelectorAll<HTMLElement>('.fc-live [data-clock]').forEach((el) => {
+      try {
+        el.textContent = liveClockText(JSON.parse(el.dataset.clock!));
+      } catch {}
     });
   }, 250);
   // --- Borrador ---
@@ -2724,6 +2867,9 @@ const tabs = [
     open?: boolean;
     goals?: Goal[];
     startedAt?: number;
+    pausedMs?: number;
+    pausedAt?: number;
+    duration?: number;
     liveId?: string;
   };
   // Identifica el partido que se está cargando para mostrarlo en vivo
@@ -2739,13 +2885,13 @@ const tabs = [
 
   function readDraft(): Draft {
     const fd = new FormData(form);
-    const draft: Draft = { open: sheet.open, goals, startedAt, liveId };
+    const draft: Draft = { open: sheet.open, goals, startedAt, pausedMs, pausedAt, duration, liveId };
     for (const k of draftFields) draft[k] = String(fd.get(k) ?? '');
     return draft;
   }
 
   const hasData = (d: Draft) =>
-    Boolean(d.homePlayer || d.awayPlayer || d.homeTeam || d.awayTeam || Number(d.homeGoals) || Number(d.awayGoals) || d.goals?.length);
+    Boolean(d.homePlayer || d.awayPlayer || d.homeTeam || d.awayTeam || Number(d.homeGoals) || Number(d.awayGoals) || d.goals?.length || d.startedAt);
 
   function saveDraft() {
     if (!liveId && hasData(readDraft())) liveId = `lv-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -2765,6 +2911,8 @@ const tabs = [
   function resetGoals() {
     goals = [];
     startedAt = undefined;
+    pausedMs = 0;
+    pausedAt = undefined;
     liveId = undefined;
   }
 
@@ -2791,6 +2939,9 @@ const tabs = [
               homeGoals: Number(draft.homeGoals) || 0,
               awayGoals: Number(draft.awayGoals) || 0,
               startedAt: draft.startedAt,
+              duration: draft.duration,
+              pausedMs: draft.pausedMs,
+              pausedAt: draft.pausedAt,
               goals: draft.goals,
             }),
           });
@@ -2835,6 +2986,9 @@ const tabs = [
       goals = draft.goals.filter((g) => (g?.side === 'home' || g?.side === 'away') && Number.isFinite(g.at));
     }
     if (Number.isFinite(draft.startedAt)) startedAt = draft.startedAt;
+    if (Number.isFinite(draft.pausedMs)) pausedMs = draft.pausedMs!;
+    if (Number.isFinite(draft.pausedAt)) pausedAt = draft.pausedAt;
+    if (Number.isFinite(draft.duration)) duration = draft.duration!;
     if (typeof draft.liveId === 'string') liveId = livePushed = draft.liveId;
     // Los números del marcador y la lista de goles siempre coinciden
     setGoals('home', Number((field('homeGoals') as HTMLInputElement).value));
@@ -2845,7 +2999,6 @@ const tabs = [
 
   form.addEventListener('change', (e) => {
     // El partido arranca al elegir el primer jugador o cargar el primer gol
-    if ((e.target as HTMLInputElement).name?.endsWith('Player')) startedAt ??= Date.now();
     syncForm();
     saveDraft();
   });
@@ -2862,6 +3015,42 @@ const tabs = [
   $('#clear-draft').addEventListener('click', clearDraft);
 
   form.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const now = Date.now();
+    if (t.closest('#clock-toggle')) {
+      if (!startedAt) startClock();
+      else if (pausedAt) {
+        pausedMs += now - pausedAt;
+        pausedAt = undefined;
+      } else pausedAt = now;
+      syncForm();
+      saveDraft();
+      return;
+    }
+    // −1' / +1': corre el arranque para que el reloj coincida con el de la tele
+    const nudge = t.closest<HTMLElement>('[data-nudge]');
+    if (nudge) {
+      startClock();
+      const msPerGameMinute = (duration * 60_000) / 90;
+      const next = startedAt! - Number(nudge.dataset.nudge) * msPerGameMinute;
+      startedAt = Math.min(now, next);
+      syncForm();
+      saveDraft();
+      return;
+    }
+    // Cambiar la duración no mueve el minuto actual
+    const dur = t.closest<HTMLElement>('[data-duration]');
+    if (dur) {
+      const sec = gameSeconds(clockState(), now);
+      duration = Number(dur.dataset.duration);
+      try {
+        localStorage.setItem('fc26-duration', String(duration));
+      } catch {}
+      if (startedAt) startedAt = (pausedAt ?? now) - pausedMs - (sec / GAME_SECONDS) * duration * 60_000;
+      syncForm();
+      saveDraft();
+      return;
+    }
     const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-team]');
     if (chip) {
       (form.elements.namedItem(`${chip.dataset.side}Team`) as HTMLInputElement).value = chip.dataset.team!;

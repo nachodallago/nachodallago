@@ -91,6 +91,8 @@ const toMatch = (r) => ({
 const text = (v, max = 40) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const score = (v) => (Number.isInteger(v) && v >= 0 && v <= 99 ? v : null);
 const time = (v) => (Number.isFinite(v) && v > 0 && v < 8.64e15 ? Math.trunc(v) : null);
+// Minuto del juego en que entró el gol (90' + descuento + alargue)
+const gameMinute = (v) => (Number.isInteger(v) && v >= 1 && v <= 200 ? v : null);
 
 function clean(m) {
   if (!m || typeof m !== 'object') return null;
@@ -105,7 +107,7 @@ function clean(m) {
   const goals = (Array.isArray(m.goals) ? m.goals : [])
     .slice(0, 200)
     .filter((g) => (g?.side === 'home' || g?.side === 'away') && time(g.at))
-    .map((g) => ({ side: g.side, at: time(g.at) }));
+    .map((g) => ({ side: g.side, at: time(g.at), ...(gameMinute(g.min) && { min: gameMinute(g.min) }) }));
   return {
     id, date, homePlayer, awayPlayer, homeGoals, awayGoals,
     homeTeam: text(m.homeTeam),
@@ -121,7 +123,7 @@ function cleanLive(m) {
   const goals = (Array.isArray(m.goals) ? m.goals : [])
     .slice(0, 200)
     .filter((g) => (g?.side === 'home' || g?.side === 'away') && time(g.at))
-    .map((g) => ({ side: g.side, at: time(g.at) }));
+    .map((g) => ({ side: g.side, at: time(g.at), ...(gameMinute(g.min) && { min: gameMinute(g.min) }) }));
   return {
     homePlayer: text(m.homePlayer),
     awayPlayer: text(m.awayPlayer),
@@ -130,6 +132,10 @@ function cleanLive(m) {
     homeGoals: score(m.homeGoals) ?? 0,
     awayGoals: score(m.awayGoals) ?? 0,
     startedAt: time(m.startedAt),
+    // Reloj de juego: duración real del partido (min), tiempo pausado acumulado y pausa en curso
+    duration: Number.isFinite(m.duration) && m.duration >= 1 && m.duration <= 120 ? m.duration : 20,
+    pausedMs: Number.isFinite(m.pausedMs) && m.pausedMs >= 0 ? Math.trunc(m.pausedMs) : 0,
+    pausedAt: time(m.pausedAt),
     goals,
   };
 }
