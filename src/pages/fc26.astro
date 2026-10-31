@@ -215,6 +215,14 @@ const tabs = [
 
         <!-- Goles con su tiempo -->
         <div id="goal-panel" class="fc-goal-panel" hidden>
+          <!-- Confirmar el partido nuevo: hay que deslizar la pelota a la derecha -->
+          <div id="kickoff" class="fc-swipe" aria-disabled="true">
+            <span class="fc-swipe-fill" aria-hidden="true"></span>
+            <span class="fc-swipe-text">Deslizá para empezar el partido</span>
+            <button type="button" class="fc-swipe-thumb" aria-label="Deslizá a la derecha para empezar el partido">⚽</button>
+          </div>
+          <p id="kickoff-hint" class="fc-muted mt-2 text-center text-xs"></p>
+
           <!-- Reloj de juego: corre como el del FC (90' en la duración elegida) -->
           <div class="fc-clock-row">
             <span id="match-clock" class="fc-game-clock">00:00</span>
@@ -236,7 +244,7 @@ const tabs = [
             <span class="fc-label">Goles</span>
           </div>
           <ol id="goal-log" class="fc-goal-log"></ol>
-          <p id="goal-empty" class="fc-muted mt-2 text-xs">Tocá + y cada gol queda con su minuto.</p>
+          <p id="goal-empty" class="fc-muted mt-2 text-xs"></p>
         </div>
 
         <label class="mt-4 block">
@@ -1335,9 +1343,133 @@ const tabs = [
 
     }
 
+    /* Deslizar para confirmar el partido */
+
+    .fc-swipe {
+
+      --x: 0px;
+
+      position: relative;
+
+      height: 3.5rem;
+
+      margin-bottom: .2rem;
+
+      border-radius: 999px;
+
+      border: 1px solid color-mix(in oklab, var(--fc-accent) 40%, transparent);
+
+      background: rgb(255 255 255 / .05);
+
+      overflow: hidden;
+
+      user-select: none;
+
+      -webkit-user-select: none;
+
+    }
+
+    .fc-swipe[hidden] { display: none; }
+
+    .fc-swipe[aria-disabled='true'] { opacity: .45; border-color: var(--fc-line); }
+
+    .fc-swipe-fill {
+
+      position: absolute;
+
+      inset: 0 auto 0 0;
+
+      width: calc(var(--x) + 3.25rem);
+
+      background: color-mix(in oklab, var(--fc-accent) 22%, transparent);
+
+      border-radius: 999px;
+
+    }
+
+    .fc-swipe-text {
+
+      position: absolute;
+
+      inset: 0;
+
+      display: grid;
+
+      place-items: center;
+
+      padding-left: 2.5rem;
+
+      font-size: .9rem;
+
+      font-weight: 800;
+
+      color: transparent;
+
+      background: linear-gradient(90deg, rgb(255 255 255 / .45) 0%, #fff 50%, rgb(255 255 255 / .45) 100%) 0 0 / 200% 100%;
+
+      -webkit-background-clip: text;
+
+      background-clip: text;
+
+      animation: fc-shimmer 2.2s linear infinite;
+
+      pointer-events: none;
+
+      opacity: calc(1 - var(--p, 0) * 1.6);
+
+    }
+
+    @keyframes fc-shimmer { to { background-position: -200% 0; } }
+
+    .fc-swipe-thumb {
+
+      position: absolute;
+
+      top: .25rem;
+
+      left: .25rem;
+
+      width: 3rem;
+
+      height: 3rem;
+
+      border-radius: 999px;
+
+      background: var(--fc-accent);
+
+      font-size: 1.5rem;
+
+      line-height: 1;
+
+      translate: var(--x) 0;
+
+      rotate: calc(var(--p, 0) * 540deg);
+
+      touch-action: none;
+
+      cursor: grab;
+
+      box-shadow: 0 4px 16px color-mix(in oklab, var(--fc-accent) 40%, transparent);
+
+    }
+
+    .fc-swipe-thumb:active { cursor: grabbing; }
+
+    .fc-swipe[aria-disabled='true'] .fc-swipe-thumb { cursor: not-allowed; }
+
+    /* Al soltar sin llegar, vuelve con un resorte */
+
+    .fc-swipe.back .fc-swipe-thumb, .fc-swipe.back .fc-swipe-fill { transition: translate .35s var(--ease-out), rotate .35s var(--ease-out), width .35s var(--ease-out); }
+
+    .fc-swipe.done { border-color: var(--fc-accent); }
+
+    .fc-stepper:has(:disabled) { opacity: .4; }
+
     /* Reloj de juego */
 
     .fc-clock-row { display: flex; align-items: center; gap: .4rem; }
+
+    .fc-clock-row[hidden] { display: none; }
 
     .fc-game-clock {
 
@@ -2883,13 +3015,90 @@ const tabs = [
     (form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value = String(n);
   }
 
+  // --- Deslizar para confirmar el partido nuevo ---
+  const swipeEl = $('#kickoff');
+  const swipeThumb = swipeEl.querySelector<HTMLButtonElement>('.fc-swipe-thumb')!;
+  let swipeDragging = false;
+  let swipeStart = 0;
+  let swipeX = 0;
+  const swipeMax = () => swipeEl.clientWidth - swipeThumb.offsetWidth - 8;
+
+  function setSwipe(x: number) {
+    swipeX = Math.max(0, Math.min(swipeMax(), x));
+    swipeEl.style.setProperty('--x', `${swipeX}px`);
+    swipeEl.style.setProperty('--p', String(swipeMax() > 0 ? swipeX / swipeMax() : 0));
+  }
+
+  function confirmKickoff() {
+    if (startedAt || swipeEl.getAttribute('aria-disabled') === 'true') return;
+    setSwipe(swipeMax());
+    swipeEl.classList.add('done');
+    navigator.vibrate?.([20, 30, 60]);
+    // Un toque de pausa para que se vea llegar la pelota y arranca
+    setTimeout(() => {
+      startClock();
+      syncForm();
+      saveDraft();
+      notify('⚽ ¡Arrancó el partido!');
+    }, 220);
+  }
+
+  swipeThumb.addEventListener('pointerdown', (e) => {
+    if (swipeEl.getAttribute('aria-disabled') === 'true') return;
+    swipeThumb.setPointerCapture(e.pointerId);
+    swipeEl.classList.remove('back');
+    swipeDragging = true;
+    swipeStart = e.clientX - swipeX;
+  });
+  swipeThumb.addEventListener('pointermove', (e) => {
+    if (swipeDragging) setSwipe(e.clientX - swipeStart);
+  });
+  const endSwipe = () => {
+    if (!swipeDragging) return;
+    swipeDragging = false;
+    if (swipeX >= swipeMax() * 0.85) confirmKickoff();
+    else {
+      // No llegó: vuelve al principio
+      swipeEl.classList.add('back');
+      setSwipe(0);
+    }
+  };
+  swipeThumb.addEventListener('pointerup', endSwipe);
+  swipeThumb.addEventListener('pointercancel', endSwipe);
+  // Con teclado: flecha a la derecha o Enter
+  swipeThumb.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') {
+      e.preventDefault();
+      confirmKickoff();
+    }
+  });
+  swipeThumb.addEventListener('click', (e) => e.preventDefault());
+
   function renderClock() {
+    const started = Boolean(startedAt);
+    const ready = Boolean(pickedPlayer('home') && pickedPlayer('away'));
+    // Antes de confirmar: solo la barra para deslizar; después: reloj, pausa y ajustes
+    const swipe = $('#kickoff');
+    swipe.hidden = started;
+    swipe.setAttribute('aria-disabled', String(!ready));
+    if (!started && !swipeDragging) setSwipe(0);
+    swipe.classList.remove('done');
+    $('#kickoff-hint').hidden = started;
+    $('#kickoff-hint').textContent = ready ? 'Con el pitazo inicial, llevá la pelota hasta la derecha.' : 'Elegí los dos jugadores para poder empezar.';
+    form.querySelectorAll<HTMLElement>('.fc-clock-row, #clock-note').forEach((el) => (el.hidden = !started));
+    // Los goles se cargan recién con el partido confirmado
+    form.querySelectorAll<HTMLInputElement | HTMLButtonElement>('.fc-stepper button, .fc-stepper input').forEach(
+      (el) => (el.disabled = !started),
+    );
+    $('#goal-empty').textContent = started
+      ? 'Tocá + y cada gol queda con su minuto.'
+      : 'Los goles se cargan cuando empieza el partido.';
     const clock = $('#match-clock');
     clock.textContent = fmtGame(gameSeconds(clockState()));
     clock.classList.toggle('paused', Boolean(pausedAt));
     $('#clock-toggle').textContent = !startedAt ? '▶ Empezar' : pausedAt ? '▶ Seguir' : '⏸ Pausa';
     $('#clock-note').textContent = !startedAt
-      ? `Tocá Empezar con el pitazo inicial (o arranca solo con el primer gol). 90' en ${duration} min.`
+      ? ''
       : pausedAt
         ? 'En pausa (entretiempo o juego frenado).'
         : `Empezó ${clockFmt.format(startedAt)} · 90' en ${duration} min. Si no coincide con la tele, ajustalo con −1' / +1'.`;
@@ -2997,7 +3206,7 @@ const tabs = [
           await fetch(`${API}/live/${livePushed}`, { method: 'DELETE' });
           livePushed = undefined;
         }
-        if (draft.liveId && hasData(draft)) {
+        if (draft.liveId && hasData(draft) && draft.startedAt) {
           const res = await fetch(`${API}/live/${draft.liveId}`, {
             method: 'PUT',
             headers: { 'content-type': 'application/json' },
