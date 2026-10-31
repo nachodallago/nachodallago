@@ -157,6 +157,7 @@ const tabs = [
         <div class="fc-grabber" aria-hidden="true"></div>
         <div class="flex items-center justify-between">
           <h2 id="sheet-title" class="text-lg font-extrabold">Nuevo partido</h2>
+          <button type="button" id="clear-draft" class="fc-link ml-auto mr-2" hidden>Limpiar</button>
           <button type="button" class="fc-icon-btn" data-close aria-label="Cerrar">
             <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.close} />
           </button>
@@ -517,7 +518,8 @@ const tabs = [
       place-items: center;
       width: 3.5rem;
       height: 3.5rem;
-      margin-top: -1.75rem;
+      position: relative;
+    margin-top: -1.75rem;
       border-radius: 999px;
       background: var(--fc-accent);
       color: #07090a;
@@ -525,6 +527,19 @@ const tabs = [
       touch-action: manipulation;
       transition: transform .15s ease;
     }
+    /* Puntito: hay un partido a medio cargar */
+    .fc-fab.has-draft::after {
+      content: '';
+      position: absolute;
+      top: .2rem;
+      right: .2rem;
+      width: .8rem;
+      height: .8rem;
+      border-radius: 999px;
+      background: #ff9354;
+      box-shadow: 0 0 0 3px var(--fc-bg);
+    }
+    .fc-link { min-height: 2.75rem; padding: 0 .5rem; font-size: .85rem; font-weight: 700; color: var(--fc-muted); }
     .fc-fab .fc-ico { width: 1.6rem; height: 1.6rem; stroke-width: 2.5; }
     .fc-fab:active { transform: scale(.92); }
 
@@ -786,6 +801,8 @@ const tabs = [
   };
 
   const KEY = 'fc26-matches';
+  // Partido a medio cargar: sobrevive a recargar la página
+  const DRAFT_KEY = 'fc26-draft';
   const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
   const form = $<HTMLFormElement>('#match-form');
@@ -1091,8 +1108,77 @@ const tabs = [
         (form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value || '0';
     }
   }
-  form.addEventListener('change', syncForm);
-  form.addEventListener('input', syncForm);
+  // --- Borrador ---
+  const draftFields = ['homePlayer', 'awayPlayer', 'homeTeam', 'awayTeam', 'homeGoals', 'awayGoals', 'date'] as const;
+  type Draft = Partial<Record<(typeof draftFields)[number], string>> & { open?: boolean };
+
+  const todayLocal = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement | RadioNodeList;
+
+  function readDraft(): Draft {
+    const fd = new FormData(form);
+    const draft: Draft = { open: sheet.open };
+    for (const k of draftFields) draft[k] = String(fd.get(k) ?? '');
+    return draft;
+  }
+
+  const hasData = (d: Draft) =>
+    Boolean(d.homePlayer || d.awayPlayer || d.homeTeam || d.awayTeam || Number(d.homeGoals) || Number(d.awayGoals));
+
+  function saveDraft() {
+    const draft = readDraft();
+    const dirty = hasData(draft);
+    document.querySelectorAll('.fc-fab').forEach((f) => f.classList.toggle('has-draft', dirty && !sheet.open));
+    $('#clear-draft').hidden = !dirty;
+    try {
+      if (dirty || draft.open) localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      else localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Sin storage: el borrador vive solo en esta pestaña
+    }
+  }
+
+  function clearDraft() {
+    form.reset();
+    (field('date') as HTMLInputElement).value = todayLocal();
+    syncForm();
+    saveDraft();
+  }
+
+  function restoreDraft() {
+    (field('date') as HTMLInputElement).value = todayLocal();
+    let draft: Draft = {};
+    try {
+      draft = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? '{}') ?? {};
+    } catch {
+      return;
+    }
+    for (const k of draftFields) {
+      const v = draft[k];
+      if (typeof v !== 'string' || !v) continue;
+      const f = field(k);
+      if (f instanceof RadioNodeList) {
+        // Solo jugadores que siguen en la lista
+        if (roster.includes(v)) f.value = v;
+      } else f.value = v;
+    }
+    syncForm();
+    if (draft.open) sheet.showModal();
+  }
+
+  form.addEventListener('change', () => {
+    syncForm();
+    saveDraft();
+  });
+  form.addEventListener('input', () => {
+    syncForm();
+    saveDraft();
+  });
+  sheet.addEventListener('close', saveDraft);
+  $('#clear-draft').addEventListener('click', clearDraft);
 
   form.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-step]');
@@ -1101,6 +1187,7 @@ const tabs = [
     input.value = String(Math.min(99, Math.max(0, (Number(input.value) || 0) + Number(btn.dataset.delta))));
     navigator.vibrate?.(10);
     syncForm();
+    saveDraft();
   });
 
   document.querySelectorAll('[data-open-sheet]').forEach((b) =>
@@ -1108,6 +1195,7 @@ const tabs = [
       formError.textContent = '';
       syncForm();
       sheet.showModal();
+      saveDraft();
     }),
   );
   sheet.querySelector('[data-close]')!.addEventListener('click', () => sheet.close());
@@ -1148,8 +1236,12 @@ const tabs = [
       render();
     });
     form.reset();
-    (form.elements.namedItem('date') as HTMLInputElement).value = m.date;
+    (field('date') as HTMLInputElement).value = m.date;
     syncForm();
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {}
+    saveDraft();
     notify(`⚽ ${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer} guardado`);
   });
 
@@ -1203,5 +1295,6 @@ const tabs = [
   document.querySelectorAll('.fc-section').forEach((s) => spy.observe(s));
 
   render();
-  syncForm();
+  restoreDraft();
+  saveDraft();
 </script>
