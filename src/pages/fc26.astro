@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import EaLogo from '../components/EaLogo.astro';
+// Logo oficial de EA SPORTS FC (Wikimedia Commons, dominio público), en versión para fondo oscuro
+import eaLogo from '../assets/ea-sports-fc.svg?raw';
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -24,12 +25,12 @@ const tabs = [
   <div class="pitch min-h-dvh">
     <header class="sticky top-0 z-40 border-b-4 border-white/80 bg-black/80 pt-[env(safe-area-inset-top)] backdrop-blur">
       <div class="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5 md:py-4">
-        <EaLogo class="size-10 shrink-0 drop-shadow-[0_0_12px_rgb(255_255_255/.35)] md:size-14" />
+        <span class="ea-logo block h-10 shrink-0 md:h-14" set:html={eaLogo} />
         <div class="min-w-0 flex-1">
-          <p class="font-mono text-[10px] tracking-[.3em] text-white/60">EA SPORTS</p>
+          <p class="font-mono text-[10px] tracking-[.3em] text-white/60">TEMPORADA 2026</p>
           <h1 class="truncate text-lg font-black italic uppercase leading-tight md:text-3xl">FC 26 <span class="text-acid">·</span> Resultados</h1>
         </div>
-        <a href="/" class="grid size-11 shrink-0 place-items-center rounded-full font-mono text-white/60 hover:text-white md:w-auto md:px-3 md:text-xs" aria-label="Volver al inicio">
+        <a href="/" class="flex size-11 shrink-0 items-center justify-center rounded-full font-mono text-white/60 hover:text-white md:w-auto md:px-3 md:text-xs" aria-label="Volver al inicio">
           <span aria-hidden="true">←</span><span class="sr-only md:not-sr-only md:ml-1">inicio</span>
         </a>
       </div>
@@ -181,6 +182,8 @@ const tabs = [
       linear-gradient(to bottom, transparent 18rem, rgb(255 255 255 / .18) 18rem, rgb(255 255 255 / .18) calc(18rem + 3px), transparent calc(18rem + 3px)),
       repeating-linear-gradient(to bottom, #1f7a3a 0 5rem, #23883f 5rem 10rem);
   }
+
+  .ea-logo :global(svg) { height: 100%; width: auto; }
 
   .section-title {
     display: inline-block;
