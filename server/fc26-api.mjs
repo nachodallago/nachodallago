@@ -63,15 +63,28 @@ db.exec(`
 `);
 
 const listStmt = db.prepare('SELECT * FROM matches ORDER BY date, created_at');
-// Bases creadas antes de los torneos: se agrega la columna sin tocar los partidos
-if (!db.prepare('PRAGMA table_info(matches)').all().some((c) => c.name === 'tournament_id')) {
-  db.exec('ALTER TABLE matches ADD COLUMN tournament_id TEXT');
+// Bases creadas antes: se agregan las columnas nuevas sin tocar los partidos
+{
+  const cols = new Set(db.prepare('PRAGMA table_info(matches)').all().map((c) => c.name));
+  const add = (name, type) => !cols.has(name) && db.exec(`ALTER TABLE matches ADD COLUMN ${name} ${type}`);
+  add('tournament_id', 'TEXT');
+  add('extra_time', 'INTEGER NOT NULL DEFAULT 0'); // se jugó prórroga
+  add('penalties', 'TEXT'); // tanda de penales: {"home":[true,false…],"away":[…]}
+  add('clock_sec', 'INTEGER'); // reloj de juego (segundos) al terminar: para reabrirlo donde quedó
+  add('duration', 'INTEGER'); // duración real del partido (min) con la que corría el reloj
 }
 
 const insertStmt = db.prepare(`
   INSERT OR IGNORE INTO matches
-    (id, date, home_player, home_team, home_goals, away_player, away_team, away_goals, started_at, goals, created_at, tournament_id)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, date, home_player, home_team, home_goals, away_player, away_team, away_goals, started_at, goals, created_at, tournament_id,
+     extra_time, penalties, clock_sec, duration)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+// Reabrir y volver a guardar un partido: se reemplazan sus datos (se mantienen id y fecha de alta)
+const updateStmt = db.prepare(`
+  UPDATE matches SET date = ?, home_player = ?, home_team = ?, home_goals = ?, away_player = ?, away_team = ?,
+    away_goals = ?, started_at = ?, goals = ?, tournament_id = ?, extra_time = ?, penalties = ?, clock_sec = ?, duration = ?
+  WHERE id = ?
 `);
 const deleteStmt = db.prepare('DELETE FROM matches WHERE id = ?');
 const photoVersionsStmt = db.prepare('SELECT name, updated_at FROM photos');
@@ -117,6 +130,10 @@ const toMatch = (r) => ({
   ...(r.started_at != null && { startedAt: r.started_at }),
   goals: JSON.parse(r.goals),
   ...(r.tournament_id && { tournamentId: r.tournament_id }),
+  ...(r.extra_time && { extraTime: true }),
+  ...(r.penalties && { penalties: JSON.parse(r.penalties) }),
+  ...(r.clock_sec != null && { clockSec: r.clock_sec }),
+  ...(r.duration != null && { duration: r.duration }),
 });
 
 // --- Validación: nunca se guarda lo que manda el cliente sin limpiar ---
@@ -125,6 +142,14 @@ const score = (v) => (Number.isInteger(v) && v >= 0 && v <= 99 ? v : null);
 const time = (v) => (Number.isFinite(v) && v > 0 && v < 8.64e15 ? Math.trunc(v) : null);
 // Minuto del juego en que entró el gol (90' + descuento + alargue)
 const gameMinute = (v) => (Number.isInteger(v) && v >= 1 && v <= 200 ? v : null);
+// Penales: lista de patadas por lado (true = gol, false = errado)
+const penalties = (p) => {
+  if (!p || typeof p !== 'object') return null;
+  const side = (a) => (Array.isArray(a) ? a.slice(0, 50).map((x) => x === true) : []);
+  const out = { home: side(p.home), away: side(p.away) };
+  return out.home.length || out.away.length ? out : null;
+};
+const duration = (v) => (Number.isFinite(v) && v >= 1 && v <= 120 ? v : null);
 
 function clean(m) {
   if (!m || typeof m !== 'object') return null;
@@ -148,6 +173,10 @@ function clean(m) {
     goals,
     // Solo se acepta un torneo que exista
     tournamentId: typeof m.tournamentId === 'string' && tournamentExists.get(m.tournamentId) ? m.tournamentId : null,
+    extraTime: m.extraTime === true,
+    penalties: penalties(m.penalties),
+    clockSec: Number.isFinite(m.clockSec) && m.clockSec >= 0 && m.clockSec < 30000 ? Math.trunc(m.clockSec) : null,
+    duration: duration(m.duration),
   };
 }
 
@@ -167,7 +196,9 @@ function cleanLive(m) {
     awayGoals: score(m.awayGoals) ?? 0,
     startedAt: time(m.startedAt),
     // Reloj de juego: duración real del partido (min), tiempo pausado acumulado y pausa en curso
-    duration: Number.isFinite(m.duration) && m.duration >= 1 && m.duration <= 120 ? m.duration : 20,
+    duration: duration(m.duration) ?? 20,
+    extraTime: m.extraTime === true,
+    penalties: penalties(m.penalties),
     pausedMs: Number.isFinite(m.pausedMs) && m.pausedMs >= 0 ? Math.trunc(m.pausedMs) : 0,
     pausedAt: time(m.pausedAt),
     goals,
@@ -370,6 +401,7 @@ async function handle(req, res) {
         const r = insertStmt.run(
           m.id, m.date, m.homePlayer, m.homeTeam, m.homeGoals,
           m.awayPlayer, m.awayTeam, m.awayGoals, m.startedAt, JSON.stringify(m.goals), now + i, m.tournamentId,
+          m.extraTime ? 1 : 0, m.penalties && JSON.stringify(m.penalties), m.clockSec, m.duration,
         );
         added += Number(r.changes);
       });
@@ -454,6 +486,33 @@ async function handle(req, res) {
   }
 
   const del = path.match(/^\/api\/fc26\/matches\/([\w-]{1,64})$/);
+  // Guardar de nuevo un partido reabierto
+  if (del && req.method === 'PUT') {
+    const auth = checkPin(req);
+    if (!auth.ok) return send(res, auth.status, { error: auth.error });
+    const body = await readJson(req);
+    const m = clean({ ...body, id: del[1] });
+    if (!m) return send(res, 400, { error: 'Partido inválido' });
+    const liveId = typeof body?.liveId === 'string' ? body.liveId : '';
+    db.exec('BEGIN');
+    try {
+      const r = updateStmt.run(
+        m.date, m.homePlayer, m.homeTeam, m.homeGoals, m.awayPlayer, m.awayTeam, m.awayGoals, m.startedAt,
+        JSON.stringify(m.goals), m.tournamentId, m.extraTime ? 1 : 0, m.penalties && JSON.stringify(m.penalties),
+        m.clockSec, m.duration, m.id,
+      );
+      if (liveId) deleteLiveStmt.run(liveId);
+      db.exec('COMMIT');
+      if (!Number(r.changes)) return send(res, 404, { error: 'Ese partido ya no existe' });
+    } catch (e) {
+      db.exec('ROLLBACK');
+      throw e;
+    }
+    const liveNow = live();
+    if (liveId) broadcast('live', { live: liveNow });
+    broadcast('changed');
+    return send(res, 200, { matches: all(), live: liveNow });
+  }
   if (del && req.method === 'DELETE') {
     const auth = checkPin(req);
     if (!auth.ok) return send(res, auth.status, { error: auth.error });

@@ -256,6 +256,29 @@ const tabs = [
           </div>
         </div>
 
+        <!-- Prórroga y penales -->
+        <div class="fc-board-extra">
+          <button type="button" id="et-toggle" class="fc-pill-btn" aria-pressed="false">⏱ Prórroga</button>
+          <button type="button" id="pens-toggle" class="fc-pill-btn">🥅 Penales</button>
+        </div>
+        <div id="pens" class="fc-pens" hidden>
+          <div class="fc-pens-head">
+            <span class="fc-label">Penales</span>
+            <b id="pens-score" class="fc-pens-score">0 - 0</b>
+            <button type="button" id="pens-undo" class="fc-link !min-h-9 text-xs">Deshacer</button>
+          </div>
+          {
+            sides.map((s) => (
+              <div class="fc-pens-row" data-pens-side={s.key}>
+                <b class="fc-pens-name" data-pens-name={s.key}>{s.label}</b>
+                <span class="fc-pens-kicks" data-pens-kicks={s.key}></span>
+                <button type="button" class="fc-pen-btn ok" data-pen={s.key} data-ok="1" aria-label={`Penal convertido del ${s.label.toLowerCase()}`}>✓</button>
+                <button type="button" class="fc-pen-btn miss" data-pen={s.key} data-ok="0" aria-label={`Penal errado del ${s.label.toLowerCase()}`}>✗</button>
+              </div>
+            ))
+          }
+        </div>
+
         <!-- Goles con su minuto -->
         <div id="goal-panel" class="fc-goal-panel">
           <ol id="goal-log" class="fc-goal-log"></ol>
@@ -354,6 +377,8 @@ const tabs = [
       </div>
       <h2 id="md-title" class="sr-only">Detalle del partido</h2>
       <div id="md-score" class="fc-md-score"></div>
+      <p id="md-extra" class="fc-md-extra"></p>
+      <div id="md-pens" class="fc-md-pens" hidden></div>
       <label id="md-tournament-wrap" class="fc-md-tournament">
         <span>🏆 Torneo</span>
         <select id="md-tournament" class="fc-input fc-select"></select>
@@ -363,6 +388,7 @@ const tabs = [
       <p id="md-halves" class="fc-md-halves"></p>
       <h3 class="fc-label mt-5 mb-2">Gol por gol</h3>
       <ol id="md-goals" class="fc-md-goals"></ol>
+      <button type="button" id="md-reopen" class="fc-btn fc-btn-ghost fc-btn-block mt-5">↩ Reabrir partido</button>
     </dialog>
 
     <!-- Ficha de un jugador: sus números y todos sus partidos -->
@@ -490,6 +516,7 @@ const tabs = [
       <div class="min-w-0"><p class="fc-player"></p><p class="fc-team"></p></div>
     </div>
     <p class="fc-score"><span></span><span></span></p>
+    <p class="fc-match-extra"></p>
     <div class="fc-match-side fc-match-away">
       <span class="fc-avatar"></span>
       <div class="min-w-0"><p class="fc-player"></p><p class="fc-team"></p></div>
@@ -1205,6 +1232,7 @@ const tabs = [
     /* Eje central (hairline) y entretiempo */
     .fc-tl-axis { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgb(255 255 255 / .18); }
     .fc-tl-ht { position: absolute; top: 0; bottom: 0; width: 1px; background: rgb(255 255 255 / .3); }
+    .fc-tl-et::after { content: 'PR' !important; }
     .fc-tl-ht::after {
       content: 'ET';
       position: absolute;
@@ -1536,6 +1564,38 @@ const tabs = [
     .fc-options[open] summary::after { rotate: 180deg; }
     .fc-options-body { display: grid; gap: .75rem; padding: 0 .9rem 1rem; }
     .fc-options-body .fc-duration { margin-top: 0; }
+    /* Prórroga y penales */
+    .fc-board-extra { display: flex; justify-content: center; gap: .5rem; margin-top: .6rem; }
+    #match-form[data-phase='setup'] .fc-board-extra, #match-form[data-phase='setup'] .fc-pens { display: none; }
+    .fc-pill-btn { min-height: 2.5rem; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--fc-line); background: rgb(255 255 255 / .04); font-size: .82rem; font-weight: 700; }
+    .fc-pill-btn[hidden] { display: none; }
+    .fc-pill-btn[aria-pressed='true'] { border-color: #facc15; color: #facc15; background: rgb(250 204 21 / .1); }
+    .fc-pens { margin-top: .75rem; padding: .8rem; border-radius: 1.1rem; border: 1px solid rgb(250 204 21 / .45); background: rgb(250 204 21 / .06); }
+    .fc-pens[hidden] { display: none; }
+    .fc-pens-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+    .fc-pens-score { font-size: 1.4rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .fc-pens-head .fc-link { margin-left: auto; }
+    .fc-pens-row { display: grid; grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr) 2.9rem 2.9rem; align-items: center; gap: .45rem; padding: .3rem 0; }
+    .fc-pens-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .85rem; }
+    .fc-pens-kicks { display: flex; flex-wrap: wrap; gap: .2rem; }
+    .fc-pens-kicks i { display: grid; place-items: center; width: 1.05rem; height: 1.05rem; border-radius: 999px; font-style: normal; font-size: .6rem; font-weight: 900; border: 1.5px solid rgb(255 255 255 / .25); }
+    .fc-pens-kicks i.ok { background: var(--fc-win); border-color: var(--fc-win); color: #07090a; }
+    .fc-pens-kicks i.miss { background: var(--fc-loss); border-color: var(--fc-loss); color: #07090a; }
+    .fc-pen-btn { height: 2.9rem; border-radius: .8rem; font-size: 1.2rem; font-weight: 900; touch-action: manipulation; }
+    .fc-pen-btn.ok { background: color-mix(in oklab, var(--fc-win) 85%, transparent); color: #07090a; }
+    .fc-pen-btn.miss { background: rgb(255 255 255 / .08); color: var(--fc-loss); border: 1px solid color-mix(in oklab, var(--fc-loss) 50%, transparent); }
+    .fc-match-extra { grid-column: 2; margin-top: -.35rem; text-align: center; font-size: .65rem; font-weight: 700; color: #facc15; white-space: nowrap; }
+    .fc-match-extra:empty { display: none; }
+    .fc-md-extra { margin-top: .6rem; text-align: center; font-size: .85rem; font-weight: 700; color: #facc15; }
+    .fc-md-extra:empty { display: none; }
+    .fc-md-pens { display: grid; gap: .35rem; margin-top: .6rem; padding: .7rem; border-radius: 1rem; background: rgb(250 204 21 / .06); border: 1px solid rgb(250 204 21 / .3); }
+    .fc-md-pens[hidden] { display: none; }
+    .fc-md-pens > div { display: flex; align-items: center; gap: .5rem; font-size: .85rem; }
+    .fc-md-pens > div > b { width: 4.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fc-md-pens > div > span:last-child { margin-left: auto; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .fc-live-extra { margin-top: .4rem; text-align: center; font-size: .75rem; font-weight: 700; color: #facc15; }
+    .fc-live-extra:empty { display: none; }
+    #md-reopen[hidden] { display: none; }
     /* Reloj de juego */
     .fc-clock-row { display: flex; align-items: center; gap: .4rem; }
     .fc-clock-row[hidden] { display: none; }
@@ -1729,7 +1789,29 @@ const tabs = [
     goals?: Goal[];
     startedAt?: number;
     tournamentId?: string;
+    extraTime?: boolean;
+    penalties?: Pens | null;
+    clockSec?: number;
+    duration?: number;
   };
+  // Penales: patadas por lado (true = gol)
+  type Pens = { home: boolean[]; away: boolean[] };
+  const penScore = (p?: Pens | null) => (p ? [p.home.filter(Boolean).length, p.away.filter(Boolean).length] : null);
+  // Quién ganó: por goles; si empataron, por penales (el que gana por penales cuenta como ganador)
+  function winnerOf(m: { homeGoals: number; awayGoals: number; penalties?: Pens | null }): 'home' | 'away' | null {
+    if (m.homeGoals !== m.awayGoals) return m.homeGoals > m.awayGoals ? 'home' : 'away';
+    const ps = penScore(m.penalties);
+    if (ps && ps[0] !== ps[1]) return ps[0] > ps[1] ? 'home' : 'away';
+    return null;
+  }
+  // Texto corto: "PR", "pen. 4-3", "PR · pen. 4-3"
+  function extraLabel(m: { extraTime?: boolean; penalties?: Pens | null }, long = false) {
+    const ps = penScore(m.penalties);
+    const parts = [];
+    if (m.extraTime) parts.push(long ? 'Con prórroga' : 'PR');
+    if (ps) parts.push(long ? `Penales ${ps[0]}-${ps[1]}` : `pen. ${ps[0]}-${ps[1]}`);
+    return parts.join(' · ');
+  }
   type Tournament = { id: string; name: string; createdAt: number };
   // min: minuto del juego en que entró (los goles viejos no lo tienen: se usa el tiempo real)
   type Goal = { side: 'home' | 'away'; at: number; min?: number };
@@ -2158,6 +2240,8 @@ const tabs = [
     pausedMs?: number;
     pausedAt?: number | null;
     goals?: Goal[];
+    extraTime?: boolean;
+    penalties?: Pens | null;
   };
   let liveList: Live[] = [];
   const liveScores = new Map<string, string>();
@@ -2369,6 +2453,9 @@ const tabs = [
         const row = document.createElement('div');
         row.className = 'fc-live-score';
         row.append(side(l.homePlayer, l.homeTeam), score, side(l.awayPlayer, l.awayTeam));
+        const extra = document.createElement('p');
+        extra.className = 'fc-live-extra';
+        extra.textContent = extraLabel(l, true);
 
         const list = document.createElement('ol');
         list.className = 'fc-goals';
@@ -2378,7 +2465,7 @@ const tabs = [
             goalChip(g, start, (g.side === 'home' ? l.homePlayer : l.awayPlayer) || (g.side === 'home' ? 'Local' : 'Visitante')),
           ),
         );
-        card.append(head, row, list);
+        card.append(head, row, extra, list);
 
         // Gol nuevo: la tarjeta destella y se festeja (el que lo carga ya festejó al tocar +)
         const key = `${l.homeGoals ?? 0}-${l.awayGoals ?? 0}`;
@@ -2812,7 +2899,7 @@ const tabs = [
           rival: home ? m.awayPlayer : m.homePlayer,
           myTeam: home ? m.homeTeam : m.awayTeam,
           rivalTeam: home ? m.awayTeam : m.homeTeam,
-          res: gf > gc ? 'w' : gf < gc ? 'l' : 'd',
+          res: winnerOf(m) === null ? 'd' : winnerOf(m) === (home ? 'home' : 'away') ? 'w' : 'l',
         };
       });
 
@@ -2877,7 +2964,8 @@ const tabs = [
 
         const score = document.createElement('p');
         score.className = 'fc-pd-score';
-        score.textContent = `${x.gf} - ${x.gc}`;
+        const ps = penScore(x.m.penalties);
+        score.textContent = `${x.gf} - ${x.gc}${ps ? ` (${x.home ? ps[0] : ps[1]}-${x.home ? ps[1] : ps[0]})` : ''}`;
         li.append(res, mid, score);
 
         // Sus goles con el minuto
@@ -3109,6 +3197,34 @@ const tabs = [
     tsel.disabled = !editable;
     tsel.dataset.matchId = m.id;
     $('#md-title').textContent = `${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer}`;
+    $('#md-extra').textContent = extraLabel(m, true);
+    // Serie de penales patada por patada
+    const mdPens = $('#md-pens');
+    mdPens.hidden = !m.penalties;
+    mdPens.replaceChildren(
+      ...(m.penalties
+        ? (['home', 'away'] as const).map((side) => {
+            const row = document.createElement('div');
+            const n = document.createElement('b');
+            n.textContent = side === 'home' ? m.homePlayer : m.awayPlayer;
+            const kicks = document.createElement('span');
+            kicks.className = 'fc-pens-kicks';
+            for (const ok of m.penalties![side]) {
+              const i = document.createElement('i');
+              i.className = ok ? 'ok' : 'miss';
+              i.textContent = ok ? '✓' : '✗';
+              kicks.append(i);
+            }
+            const total = document.createElement('span');
+            total.textContent = String(m.penalties![side].filter(Boolean).length);
+            row.append(n, kicks, total);
+            return row;
+          })
+        : []),
+    );
+    // Reabrir: vuelve al panel en juego para seguir cargando o corregir
+    $('#md-reopen').hidden = !editable;
+    $('#md-reopen').dataset.matchId = m.id;
 
     const side = (player: string, team: string, label: string) => {
       const d = document.createElement('div');
@@ -3154,19 +3270,20 @@ const tabs = [
     }
 
     // Goles por tiempo
-    const half = (g: { minute: number }) => (g.minute <= 45 ? 1 : 2);
+    const half = (g: { minute: number }) => (g.minute <= 45 ? 1 : g.minute <= 90 || !m.extraTime ? 2 : 3);
     const count = (n: number, s: 'home' | 'away') => rows.filter((g) => half(g) === n && g.side === s).length;
     $('#md-halves').innerHTML = '';
     if (hasTimeline) {
-      for (const n of [1, 2]) {
+      const parts = m.extraTime ? [1, 2, 3] : [1, 2];
+      parts.forEach((n, i) => {
         const span = document.createElement('span');
-        span.append(`${n}° tiempo `);
+        span.append(n === 3 ? 'Prórroga ' : `${n}° tiempo `);
         const b = document.createElement('b');
         b.textContent = `${count(n, 'home')}-${count(n, 'away')}`;
         span.append(b);
-        if (n === 1) span.append('  ·  ');
+        if (i < parts.length - 1) span.append('  ·  ');
         $('#md-halves').append(span);
-      }
+      });
     }
 
     // Tabla gol por gol (también sirve como versión accesible del gráfico)
@@ -3196,7 +3313,7 @@ const tabs = [
   }
 
   // Barras de goles por tramo de 15': local hacia arriba, visitante hacia abajo
-  const BINS = [
+  const BASE_BINS = [
     { from: 1, to: 15, label: "0-15'" },
     { from: 16, to: 30, label: "15-30'" },
     { from: 31, to: 45, label: "30-45'" },
@@ -3205,11 +3322,20 @@ const tabs = [
     { from: 76, to: Infinity, label: "75-90'+" },
   ];
 
+  // Con prórroga se suman 90-105' y 105-120' (y el 75-90' deja de incluir el descuento)
+  const BINS_ET = [
+    ...BASE_BINS.slice(0, 5),
+    { from: 76, to: 90, label: "75-90'" },
+    { from: 91, to: 105, label: "90-105'" },
+    { from: 106, to: Infinity, label: "105-120'+" },
+  ];
+
   function timeline(rows: (Goal & { minute: number; score: string })[], m: Match) {
+    const BINS = m.extraTime ? BINS_ET : BASE_BINS;
     const binOf = (minute: number) => Math.min(BINS.length - 1, Math.max(0, Math.floor((minute - 1) / 15)));
     const goalsIn = (i: number, side: 'home' | 'away') => rows.filter((g) => g.side === side && binOf(g.minute) === i);
     const most = Math.max(1, ...BINS.flatMap((_, i) => [goalsIn(i, 'home').length, goalsIn(i, 'away').length]));
-    const maxMinute = Math.max(90, ...rows.map((g) => g.minute));
+    const maxMinute = Math.max(m.extraTime ? 120 : 90, ...rows.map((g) => g.minute));
 
     const wrap = document.createElement('div');
     wrap.className = 'fc-tl';
@@ -3223,7 +3349,10 @@ const tabs = [
 
     const halves = document.createElement('div');
     halves.className = 'fc-tl-halves';
-    halves.innerHTML = '<span>1° tiempo</span><span>2° tiempo</span>';
+    halves.innerHTML = m.extraTime
+      ? '<span>1° tiempo</span><span>2° tiempo</span><span>Prórroga</span>'
+      : '<span>1° tiempo</span><span>2° tiempo</span>';
+    if (m.extraTime) halves.style.gridTemplateColumns = '3fr 3fr 2fr';
 
     const plot = document.createElement('div');
     plot.className = 'fc-tl-plot fc-bars';
@@ -3231,8 +3360,15 @@ const tabs = [
     axis.className = 'fc-tl-axis';
     const ht = document.createElement('div');
     ht.className = 'fc-tl-ht';
-    ht.style.left = '50%';
+    ht.style.left = `${(3 / BINS.length) * 100}%`;
     plot.append(axis, ht);
+    plot.style.gridTemplateColumns = `repeat(${BINS.length}, minmax(0, 1fr))`;
+    if (m.extraTime) {
+      const et = document.createElement('div');
+      et.className = 'fc-tl-ht fc-tl-et';
+      et.style.left = `${(6 / BINS.length) * 100}%`;
+      plot.append(et);
+    }
 
     BINS.forEach((bin, i) => {
       const col = document.createElement('div');
@@ -3245,7 +3381,7 @@ const tabs = [
           const player = side === 'home' ? m.homePlayer : m.awayPlayer;
           const bar = document.createElement('button');
           bar.type = 'button';
-          bar.className = `fc-bar${i === 0 ? ' edge-l' : ''}${i === BINS.length - 1 ? ' edge-r' : ''}`;
+          bar.className = `fc-bar${i === 0 ? ' edge-l' : ''}${i >= BINS.length - 1 ? ' edge-r' : ''}`;
           bar.style.setProperty('--h', String(list.length / most));
           bar.style.setProperty('--c', colors.get(player) ?? '#71717a');
           const minutes = list.map((g) => `${g.minute}'`).join(', ');
@@ -3267,7 +3403,10 @@ const tabs = [
 
     const ticks = document.createElement('div');
     ticks.className = 'fc-tl-ticks';
-    ['0', '15', '30', '45', '60', '75', maxMinute > 90 ? `${maxMinute}` : '90'].forEach((t, i) => {
+    const tickLabels = m.extraTime
+      ? ['0', '15', '30', '45', '60', '75', '90', '105', maxMinute > 120 ? `${maxMinute}` : '120']
+      : ['0', '15', '30', '45', '60', '75', maxMinute > 90 ? `${maxMinute}` : '90'];
+    tickLabels.forEach((t, i) => {
       const sp = document.createElement('span');
       sp.style.left = `${(i / BINS.length) * 100}%`;
       sp.textContent = `${t}'`;
@@ -3294,6 +3433,54 @@ const tabs = [
     wrap.append(who(m.homePlayer, 'local', 'top'), halves, plot, ticks, who(m.awayPlayer, 'visitante', 'bottom'));
     return wrap;
   }
+
+  // --- Reabrir un partido terminado: vuelve al panel en juego, en pausa donde quedó ---
+  function reopenMatch(id: string) {
+    const m = allMatches.find((x) => x.id === id);
+    if (!m) return;
+    if (hasData(readDraft()) && editingId !== id && !confirm('Hay otro partido cargándose. ¿Lo reemplazás por este?')) return;
+    form.reset();
+    resetGoals();
+    for (const [side, player, team] of [['home', m.homePlayer, m.homeTeam], ['away', m.awayPlayer, m.awayTeam]] as const) {
+      (field(`${side}Player`) as RadioNodeList).value = player;
+      (field(`${side}Team`) as HTMLInputElement).value = team;
+      autoTeam[side] = false;
+    }
+    (field('homeGoals') as HTMLInputElement).value = String(m.homeGoals);
+    (field('awayGoals') as HTMLInputElement).value = String(m.awayGoals);
+    (field('date') as HTMLInputElement).value = m.date;
+    fillTournamentSelect(form.elements.namedItem('tournament') as HTMLSelectElement, m.tournamentId ?? '');
+    // Goles: los guardados; si faltan (partidos viejos sin minutos), se completan sin minuto
+    goals = (m.goals ?? []).map((g) => ({ ...g }));
+    for (const side of ['home', 'away'] as const) {
+      const want = side === 'home' ? m.homeGoals : m.awayGoals;
+      while (goals.filter((g) => g.side === side).length < want) goals.push({ side, at: m.startedAt ?? Date.now() });
+    }
+    duration = m.duration ?? duration;
+    extraTime = Boolean(m.extraTime);
+    if (m.penalties) {
+      penalties = { home: [...m.penalties.home], away: [...m.penalties.away] };
+      // Orden alternado (local primero) para poder deshacer
+      for (let i = 0; i < Math.max(penalties.home.length, penalties.away.length); i++) {
+        if (i < penalties.home.length) penOrder.push('home');
+        if (i < penalties.away.length) penOrder.push('away');
+      }
+    }
+    // Reloj en pausa donde terminó (o al final del partido si no se sabe)
+    const maxMin = Math.max(0, ...goals.map((g) => g.min ?? 0));
+    const sec = m.clockSec ?? Math.max(maxMin * 60, (extraTime ? 120 : 90) * 60);
+    const now = Date.now();
+    startedAt = now - (sec / GAME_SECONDS) * duration * 60_000;
+    pausedMs = 0;
+    pausedAt = now;
+    editingId = m.id;
+    matchDialog.close();
+    syncForm();
+    if (!sheet.open) sheet.showModal();
+    saveDraft();
+    notify('↩ Partido reabierto en pausa: tocá ▶ Seguir para continuar');
+  }
+  $('#md-reopen').addEventListener('click', (e) => reopenMatch((e.currentTarget as HTMLElement).dataset.matchId!));
 
   // Tocar una barra en el celu muestra sus goles (una a la vez)
   matchDialog.addEventListener('click', (e) => {
@@ -3370,8 +3557,9 @@ const tabs = [
       h.pj++; a.pj++;
       h.gf += m.homeGoals; h.gc += m.awayGoals;
       a.gf += m.awayGoals; a.gc += m.homeGoals;
-      if (m.homeGoals > m.awayGoals) { h.g++; a.p++; h.form.push('w'); a.form.push('l'); }
-      else if (m.homeGoals < m.awayGoals) { a.g++; h.p++; a.form.push('w'); h.form.push('l'); }
+      const w = winnerOf(m);
+      if (w === 'home') { h.g++; a.p++; h.form.push('w'); a.form.push('l'); }
+      else if (w === 'away') { a.g++; h.p++; a.form.push('w'); h.form.push('l'); }
       else { h.e++; a.e++; h.form.push('d'); a.form.push('d'); }
     }
     return [...table.values()]
@@ -3498,8 +3686,9 @@ const tabs = [
     fill(away, m.awayPlayer, m.awayTeam);
     hg.textContent = String(m.homeGoals);
     ag.textContent = String(m.awayGoals);
-    if (m.homeGoals !== m.awayGoals) {
-      const homeWon = m.homeGoals > m.awayGoals;
+    li.querySelector('.fc-match-extra')!.textContent = extraLabel(m);
+    if (winnerOf(m)) {
+      const homeWon = winnerOf(m) === 'home';
       (homeWon ? home : away).classList.add('win');
       (homeWon ? away : home).classList.add('lose');
       (homeWon ? hg : ag).classList.add('win');
@@ -3674,6 +3863,10 @@ const tabs = [
   // --- Goles con tiempo ---
   let goals: Goal[] = [];
   let startedAt: number | undefined;
+  let extraTime = false;
+  let penalties: Pens | null = null;
+  let penOrder: ('home' | 'away')[] = []; // para deshacer la última patada
+  let editingId: string | undefined; // partido reabierto: al guardar se actualiza ese mismo
   let pausedMs = 0;
   let pausedAt: number | undefined;
   // Duración real de un partido (min); se recuerda en el celu
@@ -3796,12 +3989,46 @@ const tabs = [
   });
   swipeThumb.addEventListener('click', (e) => e.preventDefault());
 
+  // Prórroga y penales en el panel
+  function renderExtra() {
+    const hg = Number((form.elements.namedItem('homeGoals') as HTMLInputElement).value) || 0;
+    const ag = Number((form.elements.namedItem('awayGoals') as HTMLInputElement).value) || 0;
+    const et = $('#et-toggle');
+    et.setAttribute('aria-pressed', String(extraTime));
+    et.textContent = extraTime ? '✓ Prórroga' : '⏱ Prórroga';
+    // Penales: solo con el partido empatado (o si ya empezaron)
+    $('#pens-toggle').hidden = Boolean(penalties) || hg !== ag;
+    $('#pens').hidden = !penalties;
+    if (!penalties) return;
+    const ps = penScore(penalties)!;
+    $('#pens-score').textContent = `${ps[0]} - ${ps[1]}`;
+    for (const side of ['home', 'away'] as const) {
+      $(`[data-pens-name=${side}]`).textContent = pickedPlayer(side) ?? (side === 'home' ? 'Local' : 'Visitante');
+      const kicks = $(`[data-pens-kicks=${side}]`);
+      const list = penalties[side];
+      kicks.replaceChildren(
+        ...Array.from({ length: Math.max(5, list.length) }, (_, i) => {
+          const el = document.createElement('i');
+          if (i < list.length) {
+            el.className = list[i] ? 'ok' : 'miss';
+            el.textContent = list[i] ? '✓' : '✗';
+          }
+          return el;
+        }),
+      );
+    }
+    $<HTMLButtonElement>('#pens-undo').disabled = !penOrder.length;
+  }
+
   function renderClock() {
     const started = Boolean(startedAt);
     const ready = Boolean(pickedPlayer('home') && pickedPlayer('away'));
     // Antes de confirmar: solo la barra para deslizar; después: reloj, pausa y ajustes
     form.dataset.phase = started ? 'play' : 'setup';
-    $('#sheet-title').textContent = started ? (pausedAt ? '⏸ En pausa' : '🔴 En juego') : 'Nuevo partido';
+    $('#sheet-title').textContent =
+      (editingId ? '✏️ ' : '') + (started ? (pausedAt ? '⏸ En pausa' : '🔴 En juego') : 'Nuevo partido');
+    form.querySelector<HTMLButtonElement>('[type=submit]')!.textContent = editingId ? 'Guardar cambios' : 'Terminar y guardar';
+    renderExtra();
     const swipe = $('#kickoff');
     swipe.hidden = started;
     swipe.setAttribute('aria-disabled', String(!ready));
@@ -3872,6 +4099,10 @@ const tabs = [
     pausedAt?: number;
     duration?: number;
     liveId?: string;
+    extraTime?: boolean;
+    penalties?: Pens | null;
+    penOrder?: ('home' | 'away')[];
+    editingId?: string;
   };
   // Identifica el partido que se está cargando para mostrarlo en vivo
   let liveId: string | undefined;
@@ -3886,7 +4117,7 @@ const tabs = [
 
   function readDraft(): Draft {
     const fd = new FormData(form);
-    const draft: Draft = { open: sheet.open, goals, startedAt, pausedMs, pausedAt, duration, liveId };
+    const draft: Draft = { open: sheet.open, goals, startedAt, pausedMs, pausedAt, duration, liveId, extraTime, penalties, penOrder, editingId };
     for (const k of draftFields) draft[k] = String(fd.get(k) ?? '');
     return draft;
   }
@@ -3912,6 +4143,10 @@ const tabs = [
   function resetGoals() {
     goals = [];
     startedAt = undefined;
+    extraTime = false;
+    penalties = null;
+    penOrder = [];
+    editingId = undefined;
     pausedMs = 0;
     pausedAt = undefined;
     liveId = undefined;
@@ -3944,6 +4179,8 @@ const tabs = [
               pausedMs: draft.pausedMs,
               pausedAt: draft.pausedAt,
               goals: draft.goals,
+              extraTime,
+              penalties,
             }),
           });
           if (res.ok) {
@@ -3992,6 +4229,10 @@ const tabs = [
     if (Number.isFinite(draft.pausedAt)) pausedAt = draft.pausedAt;
     if (Number.isFinite(draft.duration)) duration = draft.duration!;
     if (typeof draft.liveId === 'string') liveId = livePushed = draft.liveId;
+    extraTime = draft.extraTime === true;
+    if (draft.penalties && Array.isArray(draft.penalties.home) && Array.isArray(draft.penalties.away)) penalties = draft.penalties;
+    if (Array.isArray(draft.penOrder)) penOrder = draft.penOrder.filter((x) => x === 'home' || x === 'away');
+    if (typeof draft.editingId === 'string') editingId = draft.editingId;
     // Los números del marcador y la lista de goles siempre coinciden
     setGoals('home', Number((field('homeGoals') as HTMLInputElement).value));
     setGoals('away', Number((field('awayGoals') as HTMLInputElement).value));
@@ -4029,6 +4270,45 @@ const tabs = [
   form.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     const now = Date.now();
+    if (t.closest('#et-toggle')) {
+      extraTime = !extraTime;
+      // La prórroga arranca en 90:00 (si el reloj ya pasó, se lo acomoda ahí)
+      if (extraTime && startedAt && gameSeconds(clockState(), now) > GAME_SECONDS) {
+        startedAt = (pausedAt ?? now) - pausedMs - duration * 60_000;
+      }
+      syncForm();
+      saveDraft();
+      notify(extraTime ? '⏱ Prórroga: el reloj sigue hasta el 120\'' : 'Sin prórroga');
+      return;
+    }
+    if (t.closest('#pens-toggle')) {
+      penalties = { home: [], away: [] };
+      penOrder = [];
+      syncForm();
+      saveDraft();
+      return;
+    }
+    const pen = t.closest<HTMLElement>('[data-pen]');
+    if (pen && penalties) {
+      const side = pen.dataset.pen as 'home' | 'away';
+      const ok = pen.dataset.ok === '1';
+      penalties[side].push(ok);
+      penOrder.push(side);
+      navigator.vibrate?.(ok ? [20, 30, 40] : 60);
+      syncForm();
+      saveDraft();
+      if (ok) pop($('#pens-score'));
+      return;
+    }
+    if (t.closest('#pens-undo') && penalties) {
+      const side = penOrder.pop();
+      if (side) penalties[side].pop();
+      // Sin patadas, se puede volver al partido sin penales
+      if (!penalties.home.length && !penalties.away.length) penalties = null;
+      syncForm();
+      saveDraft();
+      return;
+    }
     if (t.closest('#clock-toggle')) {
       if (!startedAt) startClock();
       else if (pausedAt) {
@@ -4121,13 +4401,30 @@ const tabs = [
       goals: [...goals].sort((a, b) => a.at - b.at),
       ...(str('tournament') && tournamentName(str('tournament')) && { tournamentId: str('tournament') }),
       startedAt,
+      ...(extraTime && { extraTime: true }),
+      // Penales solo si terminó empatado (si después del reabrir alguien hizo un gol, ya no cuentan)
+      ...(penalties &&
+        (penalties.home.length || penalties.away.length) &&
+        Number(str('homeGoals')) === Number(str('awayGoals')) && { penalties }),
+      // Reloj al terminar y duración: para poder reabrirlo donde quedó
+      ...(startedAt && { clockSec: Math.round(gameSeconds(clockState())), duration }),
     };
+    if (editingId) m.id = editingId;
     if (!m.homePlayer || !m.awayPlayer) {
       formError.textContent = 'Elegí quién jugó de local y de visitante';
       return;
     }
     if (!m.date) {
       formError.textContent = 'Poné la fecha del partido';
+      return;
+    }
+    const ps = penScore(m.penalties);
+    if (ps && ps[0] === ps[1] && m.homeGoals === m.awayGoals) {
+      formError.textContent = 'Los penales están empatados: seguí pateando o deshacé la tanda';
+      return;
+    }
+    if (editingId && !(online && canWrite)) {
+      formError.textContent = 'Para guardar un partido reabierto hace falta conexión con el servidor';
       return;
     }
     formError.textContent = '';
@@ -4138,7 +4435,8 @@ const tabs = [
       if (online && canWrite) {
         // Con liveId, el servidor lo saca de "en vivo" al guardarlo
         clearTimeout(liveTimer);
-        await write('POST', '/matches', { ...m, liveId });
+        if (editingId) await write('PUT', `/matches/${encodeURIComponent(editingId)}`, { ...m, liveId });
+        else await write('POST', '/matches', { ...m, liveId });
         livePushed = undefined;
       } else {
         // Sin servidor: queda en este celu y después se sube
