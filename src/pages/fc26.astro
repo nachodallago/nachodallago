@@ -5,9 +5,12 @@ import eaLogo from '../assets/ea-sports-fc.svg?raw';
 
 const today = new Date().toISOString().slice(0, 10);
 
+// Los que juegan
+const players = ['Nacho', 'Mati F', 'Cacha', 'Juan'];
+
 const sides = [
-  { key: 'home', label: 'Local', player: 'Nacho', team: 'Boca' },
-  { key: 'away', label: 'Visitante', player: 'Juan', team: 'River' },
+  { key: 'home', label: 'Local', team: 'Boca' },
+  { key: 'away', label: 'Visitante', team: 'River' },
 ] as const;
 
 const tabs = [
@@ -47,10 +50,17 @@ const tabs = [
               sides.map((s) => (
                 <fieldset class="flex min-w-0 flex-col gap-2.5">
                   <legend class={`side-label ${s.key === 'away' ? 'text-right' : ''} w-full`}>{s.label}</legend>
-                  <label class="field">
+                  <div class="field" role="radiogroup" aria-label={`Jugador ${s.label.toLowerCase()}`}>
                     <span>Jugador</span>
-                    <input name={`${s.key}Player`} list="players" required maxlength="40" placeholder={s.player} autocapitalize="words" enterkeyhint="next" />
-                  </label>
+                    <div class="player-picks">
+                      {players.map((name) => (
+                        <label>
+                          <input type="radio" name={`${s.key}Player`} value={name} required class="sr-only" />
+                          <span>{name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                   <label class="field">
                     <span>Equipo</span>
                     <input name={`${s.key}Team`} list="teams" maxlength="40" placeholder={s.team} autocapitalize="words" enterkeyhint="next" />
@@ -84,7 +94,6 @@ const tabs = [
           </div>
           <p id="form-error" class="mt-3 text-sm font-semibold text-red-400 empty:hidden" role="alert"></p>
 
-          <datalist id="players"></datalist>
           <datalist id="teams"></datalist>
         </form>
       </section>
@@ -110,7 +119,6 @@ const tabs = [
             </thead>
             <tbody id="standings"></tbody>
           </table>
-          <p id="standings-empty" class="p-6 text-center text-white/60">Todavía no hay partidos. ¡Que ruede la pelota!</p>
         </div>
       </section>
 
@@ -229,6 +237,41 @@ const tabs = [
     font-size: 1rem;
   }
   .field input:focus { border-color: var(--color-acid); outline: none; }
+
+  /* Jugadores: se eligen tocando, sin teclado */
+  .player-picks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .35rem;
+  }
+  .player-picks label { display: block; }
+  .player-picks span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0 .3rem;
+    border-radius: .55rem;
+    border: 1px solid rgb(255 255 255 / .18);
+    background: rgb(255 255 255 / .06);
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s ease, color .15s ease;
+  }
+  .player-picks input:checked + span {
+    background: var(--color-acid);
+    border-color: var(--color-acid);
+    color: #050507;
+  }
+  .player-picks input:focus-visible + span { outline: 2px solid var(--color-acid); outline-offset: 2px; }
+  .player-picks input:disabled + span { opacity: .3; cursor: not-allowed; }
 
   /* Marcador con botones − / + grandes para el pulgar */
   .stepper {
@@ -394,9 +437,18 @@ const tabs = [
   const matchesEl = $('#matches');
   const matchesEmpty = $('#matches-empty');
   const standingsEl = $('#standings');
-  const standingsEmpty = $('#standings-empty');
   const tpl = $<HTMLTemplateElement>('#match-tpl');
   const toast = $('#toast');
+  const roster = [...new Set([...form.querySelectorAll<HTMLInputElement>('[name=homePlayer]')].map((i) => i.value))];
+
+  // Un jugador no puede estar de los dos lados: se deshabilita en el otro
+  function syncPicks() {
+    for (const [side, other] of [['homePlayer', 'awayPlayer'], ['awayPlayer', 'homePlayer']]) {
+      const picked = form.querySelector<HTMLInputElement>(`[name=${side}]:checked`)?.value;
+      form.querySelectorAll<HTMLInputElement>(`[name=${other}]`).forEach((i) => (i.disabled = i.value === picked));
+    }
+  }
+  form.addEventListener('change', syncPicks);
   let toastTimer = 0;
 
   function notify(msg: string) {
@@ -481,6 +533,7 @@ const tabs = [
       if (!table.has(k)) table.set(k, { name: name.trim(), pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0 });
       return table.get(k)!;
     };
+    roster.forEach(row);
     for (const m of matches) {
       const h = row(m.homePlayer);
       const a = row(m.awayPlayer);
@@ -511,7 +564,6 @@ const tabs = [
         return tr;
       }),
     );
-    standingsEmpty.hidden = rows.length > 0;
   }
 
   function renderSuggestions() {
@@ -519,7 +571,6 @@ const tabs = [
       const unique = [...new Set(values.map((v) => v.trim()).filter(Boolean))].sort();
       $(id).replaceChildren(...unique.map((v) => Object.assign(document.createElement('option'), { value: v })));
     };
-    fill('#players', matches.flatMap((m) => [m.homePlayer, m.awayPlayer]));
     fill('#teams', matches.flatMap((m) => [m.homeTeam, m.awayTeam]));
   }
 
@@ -552,6 +603,7 @@ const tabs = [
     save();
     render();
     form.reset();
+    syncPicks();
     form.querySelector<HTMLInputElement>('[name=date]')!.value = m.date;
     notify(`⚽ ${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer} guardado`);
   });
