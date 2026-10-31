@@ -2180,9 +2180,9 @@ const tabs = [
     fxFrame = requestAnimationFrame(frame);
   }
 
-  // --- Sonido de gol: grito del relator + hinchada (public/fc26/gol.mp3, con fade de entrada y salida) ---
+  // --- Sonido de gol: grito del relator + hinchada (public/fc26/gol-grito.mp3: desde el grito hasta el final, con fade out) ---
   // Con <audio> (y no Web Audio) en iPhone suena aunque el celu esté en silencio
-  const goalAudio = new Audio('/fc26/gol.mp3');
+  const goalAudio = new Audio('/fc26/gol-grito.mp3');
   goalAudio.preload = 'auto';
   let audioUnlocked = false;
   let goalPlaying = false;
