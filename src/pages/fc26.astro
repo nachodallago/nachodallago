@@ -147,6 +147,9 @@ const tabs = [
         <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.upload} /> Importar resultados
         <input type="file" id="import" accept="application/json,.json" class="sr-only" />
       </label>
+      <button type="button" class="fc-menu-item" data-open-players>
+        <span class="grid w-5 place-items-center" aria-hidden="true">📷</span> Fotos de los jugadores
+      </button>
       <button type="button" id="forget-pin" class="fc-menu-item" hidden>
         <span class="grid w-5 place-items-center" aria-hidden="true">🔒</span> Olvidar el PIN en este celu
       </button>
@@ -222,6 +225,20 @@ const tabs = [
         <button type="submit" class="fc-btn fc-btn-primary fc-btn-block mt-4">Guardar resultado</button>
         <datalist id="teams"></datalist>
       </form>
+    </dialog>
+
+    <!-- Jugadores: fotos de perfil -->
+    <dialog id="players-dialog" class="fc-sheet fc-sheet-sm" aria-labelledby="players-title">
+      <div class="fc-grabber" aria-hidden="true"></div>
+      <div class="flex items-center justify-between">
+        <h2 id="players-title" class="text-lg font-extrabold">Jugadores</h2>
+        <button type="button" class="fc-icon-btn" data-close-players aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.close} />
+        </button>
+      </div>
+      <p id="players-note" class="fc-muted mt-1 text-sm"></p>
+      <ul id="players-list" class="fc-player-list"></ul>
+      <input type="file" id="photo-input" accept="image/*" class="sr-only" tabindex="-1" aria-hidden="true" />
     </dialog>
 
     <!-- PIN para cargar o borrar -->
@@ -706,6 +723,40 @@ const tabs = [
     .fc-picks input:focus-visible + span { outline: 2px solid var(--c); outline-offset: 2px; }
     .fc-picks input:disabled + span { opacity: .25; cursor: not-allowed; }
 
+    /* Fotos de perfil */
+
+    .fc-avatar.has-photo { background-size: cover; background-position: center; color: transparent; }
+
+    .fc-who .fc-avatar { cursor: pointer; }
+
+    .fc-player-list { display: grid; gap: .5rem; margin-top: 1rem; }
+
+    .fc-player-item {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: .75rem;
+
+      padding: .6rem;
+
+      border-radius: 1rem;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .04);
+
+    }
+
+    .fc-player-item > b { flex: 1; min-width: 0; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-player-item .fc-btn { min-height: 2.5rem; padding: 0 .85rem; font-size: .85rem; }
+
+    .fc-player-item .fc-avatar.busy { animation: fc-pulse 1s ease-in-out infinite; }
+
+    @keyframes fc-pulse { 50% { opacity: .4; } }
+
     /* Aviso de sincronización */
 
     .fc-banner {
@@ -1026,6 +1077,9 @@ const tabs = [
   function avatar(el: HTMLElement, name: string) {
     el.textContent = initials(name);
     el.style.setProperty('--c', colors.get(name) ?? '#71717a');
+    const v = photos[name];
+    el.classList.toggle('has-photo', Boolean(v));
+    el.style.backgroundImage = v ? `url("${API}/photos/${encodeURIComponent(name)}?v=${v}")` : '';
   }
 
   // Animación al reordenar (View Transitions), si el navegador la soporta
@@ -1074,6 +1128,25 @@ const tabs = [
     );
   }
 
+  // Fotos de perfil: { jugador: versión }; copia local para verlas sin conexión
+  const PHOTOS_KEY = 'fc26-photos';
+  let photos: Record<string, number> = (() => {
+    try {
+      const data = JSON.parse(localStorage.getItem(PHOTOS_KEY) ?? '{}');
+      return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  function setPhotos(next: unknown) {
+    if (!next || typeof next !== 'object' || Array.isArray(next)) return;
+    photos = Object.fromEntries(Object.entries(next).filter(([, v]) => Number.isFinite(v))) as Record<string, number>;
+    try {
+      localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
+    } catch {}
+  }
+
   let remote = loadKey(CACHE_KEY);
   let localOnly = loadKey(KEY);
   let online = false;
@@ -1102,8 +1175,22 @@ const tabs = [
     update(() => {
       matches = merged();
       render();
+      paintPicks();
     });
     renderSync();
+    if (playersDialog.open) renderPlayers();
+  }
+
+  // Los avatares de los botones de jugador del formulario también llevan la foto
+  function paintPicks() {
+    form.querySelectorAll<HTMLInputElement>('.fc-picks input').forEach((i) => {
+      const el = i.nextElementSibling?.querySelector<HTMLElement>('.fc-avatar');
+      if (el) avatar(el, i.value);
+    });
+    form.querySelectorAll<HTMLElement>('[data-preview]').forEach((el) => {
+      const picked = form.querySelector<HTMLInputElement>(`[name=${el.dataset.preview}Player]:checked`)?.value;
+      if (picked) avatar(el, picked);
+    });
   }
 
   async function sync() {
@@ -1114,6 +1201,7 @@ const tabs = [
       online = true;
       canWrite = Boolean(data.canWrite);
       setRemote(data.matches);
+      setPhotos(data.photos);
     } catch {
       online = false;
     }
@@ -1185,15 +1273,16 @@ const tabs = [
   class Cancelled extends Error {}
 
   // Escritura en la API con el PIN (lo pide si no está o si cambió)
-  async function write(method: 'POST' | 'DELETE', path: string, body?: unknown) {
+  async function write(method: 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown) {
     let message = '';
     for (let attempt = 0; attempt < 3; attempt++) {
       const pin = storedPin() ?? (await askPin(message));
       if (!pin) throw new Cancelled();
+      const isFile = body instanceof Blob;
       const res = await fetch(`${API}${path}`, {
         method,
-        headers: { 'content-type': 'application/json', 'x-fc26-pin': pin },
-        body: body === undefined ? undefined : JSON.stringify(body),
+        headers: { 'content-type': isFile ? body.type : 'application/json', 'x-fc26-pin': pin },
+        body: body === undefined ? undefined : isFile ? body : JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
@@ -1202,7 +1291,8 @@ const tabs = [
         continue;
       }
       if (!res.ok) throw new Error(data.error || 'Error del servidor');
-      setRemote(data.matches);
+      if ('matches' in data) setRemote(data.matches);
+      if ('photos' in data) setPhotos(data.photos);
       return data;
     }
     throw new Error('PIN incorrecto');
@@ -1246,6 +1336,129 @@ const tabs = [
     forgetPin();
     $('#fc-menu').hidePopover();
     notify('PIN olvidado en este celu');
+  });
+
+  // --- Fotos de los jugadores ---
+  const playersDialog = $<HTMLDialogElement>('#players-dialog');
+  const photoInput = $<HTMLInputElement>('#photo-input');
+  let photoFor: string | null = null;
+  let busyPlayer: string | null = null;
+
+  function renderPlayers() {
+    const ready = online && canWrite;
+    $('#players-note').textContent = ready
+      ? 'Tocá "Subir foto" y elegí una de la galería o sacala con la cámara.'
+      : 'Para subir fotos hace falta conexión con el servidor.';
+    $('#players-list').replaceChildren(
+      ...roster.map((name) => {
+        const li = document.createElement('li');
+        li.className = 'fc-player-item';
+        const av = document.createElement('span');
+        av.className = 'fc-avatar fc-avatar-lg';
+        avatar(av, name);
+        av.classList.toggle('busy', busyPlayer === name);
+        const label = document.createElement('b');
+        label.textContent = name;
+        const upload = document.createElement('button');
+        upload.type = 'button';
+        upload.className = 'fc-btn fc-btn-primary';
+        upload.textContent = photos[name] ? 'Cambiar' : 'Subir foto';
+        upload.disabled = !ready || busyPlayer !== null;
+        upload.addEventListener('click', () => {
+          photoFor = name;
+          photoInput.value = '';
+          photoInput.click();
+        });
+        li.append(av, label, upload);
+        if (photos[name]) {
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'fc-btn fc-btn-ghost';
+          remove.textContent = 'Quitar';
+          remove.setAttribute('aria-label', `Quitar foto de ${name}`);
+          remove.disabled = !ready || busyPlayer !== null;
+          remove.addEventListener('click', () => changePhoto(name, null));
+          li.append(remove);
+        }
+        return li;
+      }),
+    );
+  }
+
+  function openPlayers() {
+    $('#fc-menu').hidePopover?.();
+    renderPlayers();
+    playersDialog.showModal();
+  }
+
+  // Recorta al centro en cuadrado y achica: la foto queda en pocos KB
+  async function squarePhoto(file: File): Promise<Blob> {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      if (!side) throw new Error('No se pudo leer la foto');
+      const size = Math.min(320, side);
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      canvas.getContext('2d')!.drawImage(
+        img,
+        (img.naturalWidth - side) / 2,
+        (img.naturalHeight - side) / 2,
+        side,
+        side,
+        0,
+        0,
+        size,
+        size,
+      );
+      const encode = (type: string, q: number) =>
+        new Promise<Blob | null>((ok) => canvas.toBlob(ok, type, q));
+      // WebP si el navegador lo sabe generar; si no, JPEG
+      const webp = await encode('image/webp', 0.85);
+      const blob = webp?.type === 'image/webp' ? webp : await encode('image/jpeg', 0.85);
+      if (!blob) throw new Error('No se pudo procesar la foto');
+      return blob;
+    } catch (e) {
+      throw e instanceof Error && e.message.startsWith('No se pudo') ? e : new Error('No se pudo leer la foto');
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function changePhoto(name: string, file: File | null) {
+    busyPlayer = name;
+    renderPlayers();
+    try {
+      const path = `/photos/${encodeURIComponent(name)}`;
+      if (file) await write('PUT', path, await squarePhoto(file));
+      else await write('DELETE', path);
+      notify(file ? `📷 Foto de ${name} actualizada` : `Foto de ${name} quitada`);
+    } catch (err) {
+      if (!(err instanceof Cancelled)) notify(errorText(err));
+    } finally {
+      busyPlayer = null;
+      refresh();
+      renderPlayers();
+    }
+  }
+
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files?.[0];
+    if (file && photoFor) changePhoto(photoFor, file);
+    photoFor = null;
+  });
+
+  document.querySelectorAll('[data-open-players]').forEach((b) => b.addEventListener('click', openPlayers));
+  playersDialog.querySelector('[data-close-players]')!.addEventListener('click', () => playersDialog.close());
+  playersDialog.addEventListener('click', (e) => {
+    if (e.target === playersDialog) playersDialog.close();
+  });
+  // Tocar un avatar de la tabla abre el panel de fotos
+  standingsEl.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('.fc-avatar')) openPlayers();
   });
 
   // Al volver a la pestaña se traen los partidos que cargaron los demás
@@ -1859,6 +2072,7 @@ const tabs = [
   document.querySelectorAll('.fc-section').forEach((s) => spy.observe(s));
 
   render();
+  paintPicks();
   renderSync();
   restoreDraft();
   saveDraft();

@@ -16,6 +16,7 @@ const PORT = Number(process.env.PORT) || 8787;
 const DB_PATH = resolve(process.env.FC26_DB || 'data/fc26.sqlite');
 const PIN = process.env.FC26_PIN?.trim() || '';
 const MAX_BODY = 256 * 1024;
+const MAX_PHOTO = 200 * 1024;
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
 const db = new DatabaseSync(DB_PATH);
@@ -36,6 +37,12 @@ db.exec(`
     created_at  INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS matches_date ON matches (date);
+  CREATE TABLE IF NOT EXISTS photos (
+    name       TEXT PRIMARY KEY,
+    mime       TEXT NOT NULL,
+    data       BLOB NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
 `);
 
 const listStmt = db.prepare('SELECT * FROM matches ORDER BY date, created_at');
@@ -45,6 +52,13 @@ const insertStmt = db.prepare(`
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const deleteStmt = db.prepare('DELETE FROM matches WHERE id = ?');
+const photoVersionsStmt = db.prepare('SELECT name, updated_at FROM photos');
+const photoStmt = db.prepare('SELECT mime, data FROM photos WHERE name = ?');
+const putPhotoStmt = db.prepare(`
+  INSERT INTO photos (name, mime, data, updated_at) VALUES (?, ?, ?, ?)
+  ON CONFLICT (name) DO UPDATE SET mime = excluded.mime, data = excluded.data, updated_at = excluded.updated_at
+`);
+const deletePhotoStmt = db.prepare('DELETE FROM photos WHERE name = ?');
 
 const toMatch = (r) => ({
   id: r.id,
@@ -109,29 +123,50 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-function readJson(req) {
+function readBody(req, max = MAX_BODY) {
   return new Promise((ok, fail) => {
     let size = 0;
     const chunks = [];
+    // Si se pasa del límite se sigue leyendo (y descartando) para poder responder 413
     req.on('data', (c) => {
       size += c.length;
-      if (size > MAX_BODY) {
-        fail(Object.assign(new Error('Body demasiado grande'), { status: 413 }));
-        req.destroy();
-      } else chunks.push(c);
+      if (size <= max) chunks.push(c);
     });
-    req.on('end', () => {
-      try {
-        ok(JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null'));
-      } catch {
-        fail(Object.assign(new Error('JSON inválido'), { status: 400 }));
-      }
-    });
+    req.on('end', () =>
+      size > max ? fail(Object.assign(new Error('Archivo demasiado grande'), { status: 413 })) : ok(Buffer.concat(chunks)),
+    );
     req.on('error', fail);
   });
 }
 
+async function readJson(req) {
+  const buf = await readBody(req);
+  try {
+    return JSON.parse(buf.toString('utf8') || 'null');
+  } catch {
+    throw Object.assign(new Error('JSON inválido'), { status: 400 });
+  }
+}
+
+// Solo se aceptan imágenes reales: se mira la firma del archivo, no lo que dice el cliente
+function imageType(buf) {
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf.length > 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (buf.length > 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  return null;
+}
+
 const all = () => listStmt.all().map(toMatch);
+// Versión de cada foto (para que el navegador la cachee hasta que cambie)
+const photos = () => Object.fromEntries(photoVersionsStmt.all().map((r) => [r.name, r.updated_at]));
+const playerName = (raw) => {
+  try {
+    const name = decodeURIComponent(raw).trim();
+    return name && name.length <= 40 ? name : null;
+  } catch {
+    return null;
+  }
+};
 
 async function handle(req, res) {
   const url = new URL(req.url ?? '/', 'http://localhost');
@@ -140,7 +175,7 @@ async function handle(req, res) {
   if (path === '/api/fc26/health') return send(res, 200, { ok: true });
 
   if (path === '/api/fc26/matches' && req.method === 'GET') {
-    return send(res, 200, { matches: all(), canWrite: Boolean(pinHash) });
+    return send(res, 200, { matches: all(), photos: photos(), canWrite: Boolean(pinHash) });
   }
 
   if (path === '/api/fc26/pin' && req.method === 'POST') {
@@ -180,6 +215,39 @@ async function handle(req, res) {
     if (!auth.ok) return send(res, auth.status, { error: auth.error });
     deleteStmt.run(del[1]);
     return send(res, 200, { matches: all() });
+  }
+
+  // Fotos de perfil
+  const photo = path.match(/^\/api\/fc26\/photos\/([^/]+)$/);
+  if (photo) {
+    const name = playerName(photo[1]);
+    if (!name) return send(res, 400, { error: 'Jugador inválido' });
+
+    if (req.method === 'GET') {
+      const row = photoStmt.get(name);
+      if (!row) return send(res, 404, { error: 'Sin foto' });
+      res.writeHead(200, {
+        'content-type': row.mime,
+        // La URL lleva ?v=<versión>: cuando cambia la foto, cambia la URL
+        'cache-control': url.searchParams.has('v') ? 'public, max-age=31536000, immutable' : 'no-cache',
+        'content-security-policy': "default-src 'none'",
+        'x-content-type-options': 'nosniff',
+      });
+      return res.end(Buffer.from(row.data));
+    }
+
+    if (req.method === 'PUT' || req.method === 'DELETE') {
+      const auth = checkPin(req);
+      if (!auth.ok) return send(res, auth.status, { error: auth.error });
+      if (req.method === 'DELETE') deletePhotoStmt.run(name);
+      else {
+        const buf = await readBody(req, MAX_PHOTO);
+        const mime = imageType(buf);
+        if (!mime) return send(res, 415, { error: 'La foto tiene que ser JPG, PNG o WebP' });
+        putPhotoStmt.run(name, mime, buf, Date.now());
+      }
+      return send(res, 200, { photos: photos() });
+    }
   }
 
   send(res, 404, { error: 'No encontrado' });
