@@ -37,6 +37,12 @@ db.exec(`
     created_at  INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS matches_date ON matches (date);
+  -- Torneos: separan los partidos (un partido está en un torneo o en ninguno)
+  CREATE TABLE IF NOT EXISTS tournaments (
+    id         TEXT PRIMARY KEY,
+    name       TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
   -- Partidos que se están cargando ahora (se ven en vivo)
   CREATE TABLE IF NOT EXISTS live (
     id         TEXT PRIMARY KEY,
@@ -52,10 +58,15 @@ db.exec(`
 `);
 
 const listStmt = db.prepare('SELECT * FROM matches ORDER BY date, created_at');
+// Bases creadas antes de los torneos: se agrega la columna sin tocar los partidos
+if (!db.prepare('PRAGMA table_info(matches)').all().some((c) => c.name === 'tournament_id')) {
+  db.exec('ALTER TABLE matches ADD COLUMN tournament_id TEXT');
+}
+
 const insertStmt = db.prepare(`
   INSERT OR IGNORE INTO matches
-    (id, date, home_player, home_team, home_goals, away_player, away_team, away_goals, started_at, goals, created_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, date, home_player, home_team, home_goals, away_player, away_team, away_goals, started_at, goals, created_at, tournament_id)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 const deleteStmt = db.prepare('DELETE FROM matches WHERE id = ?');
 const photoVersionsStmt = db.prepare('SELECT name, updated_at FROM photos');
@@ -74,6 +85,15 @@ const deleteLiveStmt = db.prepare('DELETE FROM live WHERE id = ?');
 const staleLiveStmt = db.prepare('DELETE FROM live WHERE updated_at < ?');
 const LIVE_TTL = 3 * 60 * 60_000; // un partido "en vivo" sin cambios por 3 h se descarta
 
+const tournamentsStmt = db.prepare('SELECT id, name, created_at FROM tournaments ORDER BY created_at DESC');
+const tournamentExists = db.prepare('SELECT 1 FROM tournaments WHERE id = ?');
+const insertTournament = db.prepare('INSERT INTO tournaments (id, name, created_at) VALUES (?, ?, ?)');
+const renameTournament = db.prepare('UPDATE tournaments SET name = ? WHERE id = ?');
+const deleteTournament = db.prepare('DELETE FROM tournaments WHERE id = ?');
+const clearTournament = db.prepare('UPDATE matches SET tournament_id = NULL WHERE tournament_id = ?');
+const setMatchTournament = db.prepare('UPDATE matches SET tournament_id = ? WHERE id = ?');
+const tournaments = () => tournamentsStmt.all().map((r) => ({ id: r.id, name: r.name, createdAt: r.created_at }));
+
 const toMatch = (r) => ({
   id: r.id,
   date: r.date,
@@ -85,6 +105,7 @@ const toMatch = (r) => ({
   awayGoals: r.away_goals,
   ...(r.started_at != null && { startedAt: r.started_at }),
   goals: JSON.parse(r.goals),
+  ...(r.tournament_id && { tournamentId: r.tournament_id }),
 });
 
 // --- Validación: nunca se guarda lo que manda el cliente sin limpiar ---
@@ -114,6 +135,8 @@ function clean(m) {
     awayTeam: text(m.awayTeam),
     startedAt: time(m.startedAt),
     goals,
+    // Solo se acepta un torneo que exista
+    tournamentId: typeof m.tournamentId === 'string' && tournamentExists.get(m.tournamentId) ? m.tournamentId : null,
   };
 }
 
@@ -275,7 +298,13 @@ async function handle(req, res) {
   if (!read.ok) return send(res, read.status, { error: read.error, pinRequired: true });
 
   if (path === '/api/fc26/matches' && req.method === 'GET') {
-    return send(res, 200, { matches: all(), photos: photos(), live: live(), canWrite: Boolean(pinHash) });
+    return send(res, 200, {
+      matches: all(),
+      tournaments: tournaments(),
+      photos: photos(),
+      live: live(),
+      canWrite: Boolean(pinHash),
+    });
   }
 
   if (path === '/api/fc26/events' && req.method === 'GET') {
@@ -328,7 +357,7 @@ async function handle(req, res) {
       list.forEach((m, i) => {
         const r = insertStmt.run(
           m.id, m.date, m.homePlayer, m.homeTeam, m.homeGoals,
-          m.awayPlayer, m.awayTeam, m.awayGoals, m.startedAt, JSON.stringify(m.goals), now + i,
+          m.awayPlayer, m.awayTeam, m.awayGoals, m.startedAt, JSON.stringify(m.goals), now + i, m.tournamentId,
         );
         added += Number(r.changes);
       });
@@ -341,6 +370,62 @@ async function handle(req, res) {
     if (liveId) broadcast('live', { live: liveNow });
     broadcast('changed');
     return send(res, 200, { added, matches: all(), live: liveNow });
+  }
+
+  // Torneos: crear / renombrar y definir sus partidos / borrar (los partidos quedan sin torneo)
+  if (path === '/api/fc26/tournaments' || path.startsWith('/api/fc26/tournaments/')) {
+    const auth = checkPin(req);
+    if (!auth.ok) return send(res, auth.status, { error: auth.error });
+    const id = path.match(/^\/api\/fc26\/tournaments\/([\w-]{1,64})$/)?.[1];
+
+    if (id && req.method === 'DELETE') {
+      db.exec('BEGIN');
+      try {
+        clearTournament.run(id);
+        deleteTournament.run(id);
+        db.exec('COMMIT');
+      } catch (e) {
+        db.exec('ROLLBACK');
+        throw e;
+      }
+    } else if ((path === '/api/fc26/tournaments' && req.method === 'POST') || (id && req.method === 'PUT')) {
+      const body = await readJson(req);
+      const name = text(body?.name, 40);
+      if (!name) return send(res, 400, { error: 'Poné un nombre para el torneo' });
+      const tid = id ?? (/^[\w-]{1,64}$/.test(body?.id ?? '') ? body.id : `t-${Date.now().toString(36)}`);
+      if (id && !tournamentExists.get(id)) return send(res, 404, { error: 'Ese torneo no existe' });
+      // matchIds: los partidos que quedan en el torneo (los demás que estaban, salen)
+      const ids = Array.isArray(body?.matchIds) ? body.matchIds.filter((x) => typeof x === 'string').slice(0, 2000) : null;
+      db.exec('BEGIN');
+      try {
+        if (id) renameTournament.run(name, id);
+        else insertTournament.run(tid, name, Date.now());
+        if (ids) {
+          clearTournament.run(tid);
+          for (const mid of ids) setMatchTournament.run(tid, mid);
+        }
+        db.exec('COMMIT');
+      } catch (e) {
+        db.exec('ROLLBACK');
+        throw e;
+      }
+      broadcast('changed');
+      return send(res, 200, { id: tid, tournaments: tournaments(), matches: all() });
+    } else return send(res, 404, { error: 'No encontrado' });
+    broadcast('changed');
+    return send(res, 200, { tournaments: tournaments(), matches: all() });
+  }
+
+  // Mover un partido a otro torneo (o a ninguno)
+  const moveMatch = path.match(/^\/api\/fc26\/matches\/([\w-]{1,64})\/tournament$/);
+  if (moveMatch && req.method === 'PUT') {
+    const auth = checkPin(req);
+    if (!auth.ok) return send(res, auth.status, { error: auth.error });
+    const body = await readJson(req);
+    const tid = typeof body?.tournamentId === 'string' && tournamentExists.get(body.tournamentId) ? body.tournamentId : null;
+    setMatchTournament.run(tid, moveMatch[1]);
+    broadcast('changed');
+    return send(res, 200, { matches: all() });
   }
 
   const del = path.match(/^\/api\/fc26\/matches\/([\w-]{1,64})$/);

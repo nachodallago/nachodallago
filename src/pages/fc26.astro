@@ -76,6 +76,17 @@ const tabs = [
 
     <main id="main" class="mx-auto max-w-3xl space-y-8 px-4 pt-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-16">
       <!-- Resumen -->
+      <!-- Torneo que se está viendo -->
+      <button type="button" id="tournament-btn" class="fc-tbar" aria-haspopup="dialog">
+        <span class="fc-tbar-ico" aria-hidden="true">🏆</span>
+        <span class="min-w-0 flex-1 text-left">
+          <small>Torneo</small>
+          <b id="tournament-name">Todos los partidos</b>
+        </span>
+        <span id="tournament-count" class="fc-pill"></span>
+        <span aria-hidden="true" class="fc-muted">▾</span>
+      </button>
+
       <section id="resumen" aria-label="Resumen" class="fc-section space-y-3">
         <div id="live-list" class="space-y-3" aria-live="polite"></div>
         <div id="sync-banner" class="fc-banner" hidden>
@@ -247,14 +258,63 @@ const tabs = [
           <p id="goal-empty" class="fc-muted mt-2 text-xs"></p>
         </div>
 
-        <label class="mt-4 block">
-          <span class="fc-label">Fecha</span>
-          <input name="date" type="date" required value={today} class="fc-input mt-2" />
-        </label>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <label class="block min-w-0">
+            <span class="fc-label">Fecha</span>
+            <input name="date" type="date" required value={today} class="fc-input mt-2" />
+          </label>
+          <label class="block min-w-0">
+            <span class="fc-label">Torneo</span>
+            <select name="tournament" class="fc-input fc-select mt-2"><option value="">Sin torneo</option></select>
+          </label>
+        </div>
 
         <p id="form-error" class="mt-3 text-sm font-semibold text-red-400 empty:hidden" role="alert"></p>
         <button type="submit" class="fc-btn fc-btn-primary fc-btn-block mt-4">Guardar resultado</button>
         <datalist id="teams"></datalist>
+      </form>
+    </dialog>
+
+    <!-- Torneos: elegir cuál ver, crear y editar -->
+    <dialog id="tournaments-dialog" class="fc-sheet fc-sheet-sm" aria-labelledby="tournaments-title">
+      <div class="fc-grabber" aria-hidden="true"></div>
+      <div class="flex items-center justify-between">
+        <h2 id="tournaments-title" class="text-lg font-extrabold">Torneos</h2>
+        <button type="button" class="fc-icon-btn" data-close-tournaments aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.close} />
+        </button>
+      </div>
+      <ul id="tournament-list" class="fc-tlist"></ul>
+      <button type="button" id="tournament-new" class="fc-btn fc-btn-primary fc-btn-block mt-3">
+        <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.plus} /> Crear torneo
+      </button>
+      <p id="tournament-offline" class="fc-muted mt-2 text-center text-xs" hidden>Para crear o editar torneos hace falta conexión con el servidor.</p>
+    </dialog>
+
+    <dialog id="tournament-edit" class="fc-sheet" aria-labelledby="tedit-title">
+      <form id="tournament-form" novalidate>
+        <div class="fc-grabber" aria-hidden="true"></div>
+        <div class="flex items-center justify-between">
+          <h2 id="tedit-title" class="text-lg font-extrabold">Nuevo torneo</h2>
+          <button type="button" class="fc-icon-btn" data-close-tedit aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.close} />
+          </button>
+        </div>
+        <label class="mt-3 block">
+          <span class="fc-label">Nombre</span>
+          <input name="name" maxlength="40" required placeholder="Ej: Copa Noviembre" class="fc-input mt-2" autocomplete="off" autocapitalize="sentences" />
+        </label>
+        <div class="mt-5 mb-2 flex items-center justify-between gap-2">
+          <span class="fc-label">Partidos del torneo</span>
+          <button type="button" id="tedit-free" class="fc-link !min-h-9 !px-0 text-xs">Sumar los sin torneo</button>
+        </div>
+        <p id="tedit-count" class="fc-muted mb-2 text-xs"></p>
+        <ul id="tedit-matches" class="fc-tpick"></ul>
+        <p id="tedit-error" class="mt-3 text-sm font-semibold text-red-400 empty:hidden" role="alert"></p>
+        <div class="fc-tedit-actions">
+          <button type="button" id="tedit-delete" class="fc-btn fc-btn-ghost text-red-300">Borrar</button>
+          <button type="submit" class="fc-btn fc-btn-primary flex-1">Guardar torneo</button>
+        </div>
       </form>
     </dialog>
 
@@ -269,6 +329,10 @@ const tabs = [
       </div>
       <h2 id="md-title" class="sr-only">Detalle del partido</h2>
       <div id="md-score" class="fc-md-score"></div>
+      <label id="md-tournament-wrap" class="fc-md-tournament">
+        <span>🏆 Torneo</span>
+        <select id="md-tournament" class="fc-input fc-select"></select>
+      </label>
       <h3 class="fc-label mt-5 mb-2">Goles en el tiempo</h3>
       <div id="md-chart"></div>
       <p id="md-halves" class="fc-md-halves"></p>
@@ -1253,6 +1317,128 @@ const tabs = [
 
     .fc-picks .fc-avatar.has-photo, .fc-preview .fc-avatar.has-photo { cursor: inherit; }
 
+    /* Torneos */
+
+    .fc-tbar {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: .7rem;
+
+      width: 100%;
+
+      min-height: 3.5rem;
+
+      padding: .5rem .9rem;
+
+      border-radius: var(--fc-radius);
+
+      border: 1px solid color-mix(in oklab, var(--fc-accent) 30%, transparent);
+
+      background: linear-gradient(90deg, color-mix(in oklab, var(--fc-accent) 10%, transparent), rgb(255 255 255 / .03));
+
+      -webkit-tap-highlight-color: transparent;
+
+    }
+
+    .fc-tbar small { display: block; font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--fc-accent); }
+
+    .fc-tbar b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; }
+
+    .fc-tbar-ico { font-size: 1.4rem; }
+
+    .fc-tlist { display: grid; gap: .4rem; margin-top: 1rem; }
+
+    .fc-tlist li { display: flex; align-items: center; gap: .4rem; }
+
+    .fc-tlist .pick {
+
+      flex: 1;
+
+      min-width: 0;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: .6rem;
+
+      min-height: 3rem;
+
+      padding: 0 .85rem;
+
+      border-radius: .9rem;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .04);
+
+      text-align: left;
+
+      font-weight: 700;
+
+    }
+
+    .fc-tlist .pick span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-tlist .pick small { font-weight: 600; color: var(--fc-muted); white-space: nowrap; }
+
+    .fc-tlist .pick[aria-current='true'] { border-color: var(--fc-accent); background: color-mix(in oklab, var(--fc-accent) 12%, transparent); }
+
+    .fc-tlist .edit { flex-shrink: 0; min-height: 3rem; padding: 0 .8rem; border-radius: .9rem; border: 1px solid var(--fc-line); font-size: .8rem; font-weight: 700; color: var(--fc-muted); }
+
+    .fc-tpick { display: grid; gap: .35rem; max-height: 45dvh; overflow-y: auto; overscroll-behavior: contain; padding-right: .15rem; }
+
+    .fc-tpick label {
+
+      display: grid;
+
+      grid-template-columns: auto minmax(0, 1fr) auto;
+
+      align-items: center;
+
+      gap: .65rem;
+
+      min-height: 3rem;
+
+      padding: .45rem .7rem;
+
+      border-radius: .85rem;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .03);
+
+      cursor: pointer;
+
+    }
+
+    .fc-tpick label:has(:checked) { border-color: var(--fc-accent); background: color-mix(in oklab, var(--fc-accent) 10%, transparent); }
+
+    .fc-tpick input { width: 1.2rem; height: 1.2rem; accent-color: var(--fc-accent); }
+
+    .fc-tpick b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .88rem; }
+
+    .fc-tpick small { display: block; font-size: .7rem; color: var(--fc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-tpick .score { font-weight: 900; font-variant-numeric: tabular-nums; }
+
+    .fc-tedit-actions { position: sticky; bottom: calc(-1 * (1rem + env(safe-area-inset-bottom))); display: flex; gap: .5rem; margin-top: 1rem; padding: .75rem 0 calc(1rem + env(safe-area-inset-bottom)); background: #121416; }
+
+    .fc-tedit-actions [hidden] { display: none; }
+
+    .fc-select { appearance: none; -webkit-appearance: none; padding-right: 2rem; background-image: linear-gradient(45deg, transparent 50%, rgb(255 255 255 / .6) 50%), linear-gradient(135deg, rgb(255 255 255 / .6) 50%, transparent 50%); background-position: calc(100% - 1rem) 50%, calc(100% - .7rem) 50%; background-size: .3rem .3rem; background-repeat: no-repeat; text-overflow: ellipsis; }
+
+    .fc-select option { background: #121416; color: #fff; }
+
+    .fc-md-tournament { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; font-size: .8rem; font-weight: 700; color: var(--fc-muted); white-space: nowrap; }
+
+    .fc-md-tournament[hidden] { display: none; }
+
+    .fc-md-tournament select { min-height: 2.5rem; font-size: .9rem; }
+
     /* Detalle del partido */
 
     .fc-match, .fc-pd-match { cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -2084,7 +2270,9 @@ const tabs = [
     // Cada gol con el momento en que se cargó (ms) y el arranque del partido
     goals?: Goal[];
     startedAt?: number;
+    tournamentId?: string;
   };
+  type Tournament = { id: string; name: string; createdAt: number };
   // min: minuto del juego en que entró (los goles viejos no lo tienen: se usa el tiempo real)
   type Goal = { side: 'home' | 'away'; at: number; min?: number };
 
@@ -2205,7 +2393,49 @@ const tabs = [
     const ids = new Set(remote.map((m) => m.id));
     return [...remote, ...localOnly.filter((m) => !ids.has(m.id))];
   }
-  let matches = merged();
+  // --- Torneos: cuál se está viendo ('all' = todos, 'none' = sin torneo, o el id) ---
+  const TOURNAMENTS_KEY = 'fc26-tournaments';
+  const VIEW_KEY = 'fc26-tournament';
+  let tournaments: Tournament[] = (() => {
+    try {
+      const data = JSON.parse(localStorage.getItem(TOURNAMENTS_KEY) ?? '[]');
+      return Array.isArray(data) ? data.filter((t) => t && typeof t.id === 'string') : [];
+    } catch {
+      return [];
+    }
+  })();
+  let view = (() => {
+    try {
+      return localStorage.getItem(VIEW_KEY) || 'all';
+    } catch {
+      return 'all';
+    }
+  })();
+
+  function setTournaments(list: unknown) {
+    if (!Array.isArray(list)) return;
+    tournaments = list.filter((t) => t && typeof t.id === 'string' && typeof t.name === 'string');
+    try {
+      localStorage.setItem(TOURNAMENTS_KEY, JSON.stringify(tournaments));
+    } catch {}
+    // Si borraron el torneo que se estaba viendo, se vuelve a "todos"
+    if (view !== 'all' && view !== 'none' && !tournaments.some((t) => t.id === view)) setView('all');
+  }
+
+  function setView(v: string) {
+    view = v;
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {}
+  }
+
+  const tournamentName = (id?: string) => tournaments.find((t) => t.id === id)?.name;
+  const inView = (m: Match) =>
+    view === 'all' ? true : view === 'none' ? !m.tournamentId || !tournamentName(m.tournamentId) : m.tournamentId === view;
+
+  // allMatches: todos; matches: los del torneo que se está viendo (de acá sale todo lo que se muestra)
+  let allMatches = merged();
+  let matches = allMatches.filter(inView);
 
   function setRemote(list: unknown) {
     remote = (Array.isArray(list) ? list : []).filter(isMatch);
@@ -2220,9 +2450,12 @@ const tabs = [
   }
 
   function refresh() {
+    // Los datos se recalculan ya (no dentro de la animación, que corre un instante después)
+    allMatches = merged();
+    matches = allMatches.filter(inView);
     update(() => {
-      matches = merged();
       render();
+      renderTournamentBar();
       paintPicks();
       renderLive();
     });
@@ -2318,7 +2551,8 @@ const tabs = [
     locked = true;
     disconnectStream();
     app.classList.add('fc-locked');
-    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer, detailDialog, matchDialog]) if (d.open) d.close();
+    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer, detailDialog, matchDialog, tournamentsDialog, teditDialog])
+      if (d.open) d.close();
     renderSync();
     if (await askPin('', true)) {
       locked = false;
@@ -2358,6 +2592,7 @@ const tabs = [
       canWrite = Boolean(data.canWrite);
       setRemote(data.matches);
       setPhotos(data.photos);
+      setTournaments(data.tournaments);
       setLive(data.live);
       connectStream();
     } catch {
@@ -2387,6 +2622,7 @@ const tabs = [
       if (!res.ok) throw new Error(data.error || 'Error del servidor');
       if ('matches' in data) setRemote(data.matches);
       if ('photos' in data) setPhotos(data.photos);
+      if ('tournaments' in data) setTournaments(data.tournaments);
       if ('live' in data) setLive(data.live);
       return data;
     }
@@ -3157,6 +3393,197 @@ const tabs = [
     );
   }
 
+  // --- Torneos ---
+  const tournamentsDialog = $<HTMLDialogElement>('#tournaments-dialog');
+  const teditDialog = $<HTMLDialogElement>('#tournament-edit');
+  const teditForm = $<HTMLFormElement>('#tournament-form');
+  let editingTournament: string | null = null; // null = nuevo
+
+  function fillTournamentSelect(sel: HTMLSelectElement, value: string) {
+    sel.replaceChildren(
+      Object.assign(document.createElement('option'), { value: '', textContent: 'Sin torneo' }),
+      ...tournaments.map((t) => Object.assign(document.createElement('option'), { value: t.id, textContent: t.name })),
+    );
+    sel.value = tournaments.some((t) => t.id === value) ? value : '';
+  }
+
+  function renderTournamentBar() {
+    $('#tournament-name').textContent =
+      view === 'all' ? 'Todos los partidos' : view === 'none' ? 'Sin torneo' : (tournamentName(view) ?? 'Todos los partidos');
+    $('#tournament-count').textContent = `${matches.length} PJ`;
+    // El selector del formulario sigue a la lista de torneos (sin pisar lo que eligió el que carga)
+    const fsel = form.elements.namedItem('tournament') as HTMLSelectElement;
+    const current = fsel.value;
+    fillTournamentSelect(fsel, current);
+  }
+
+  function renderTournamentList() {
+    const ready = online && canWrite;
+    const count = (pred: (m: Match) => boolean) => allMatches.filter(pred).length;
+    const item = (id: string, label: string, n: number, editable: boolean) => {
+      const li = document.createElement('li');
+      const pick = document.createElement('button');
+      pick.type = 'button';
+      pick.className = 'pick';
+      pick.setAttribute('aria-current', String(view === id));
+      const name = document.createElement('span');
+      name.textContent = label;
+      const sm = document.createElement('small');
+      sm.textContent = `${n} ${n === 1 ? 'partido' : 'partidos'}`;
+      pick.append(name, sm);
+      pick.addEventListener('click', () => {
+        setView(id);
+        tournamentsDialog.close();
+        refresh();
+        notify(`🏆 ${label}`);
+      });
+      li.append(pick);
+      if (editable && ready) {
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'edit';
+        edit.textContent = 'Editar';
+        edit.setAttribute('aria-label', `Editar ${label}`);
+        edit.addEventListener('click', () => openTournamentEditor(id));
+        li.append(edit);
+      }
+      return li;
+    };
+    const noneCount = count((m) => !m.tournamentId || !tournamentName(m.tournamentId));
+    $('#tournament-list').replaceChildren(
+      item('all', 'Todos los partidos', allMatches.length, false),
+      ...tournaments.map((t) => item(t.id, t.name, count((m) => m.tournamentId === t.id), true)),
+      ...(tournaments.length && noneCount ? [item('none', 'Sin torneo', noneCount, false)] : []),
+    );
+    $('#tournament-new').hidden = !ready;
+    $('#tournament-offline').hidden = ready;
+  }
+
+  function openTournaments() {
+    renderTournamentList();
+    tournamentsDialog.showModal();
+  }
+
+  // Editor: nombre + qué partidos (de los ya cargados) quedan en el torneo
+  function openTournamentEditor(id: string | null) {
+    editingTournament = id;
+    const t = tournaments.find((x) => x.id === id);
+    $('#tedit-title').textContent = t ? 'Editar torneo' : 'Nuevo torneo';
+    (teditForm.elements.namedItem('name') as HTMLInputElement).value = t?.name ?? '';
+    $('#tedit-delete').hidden = !t;
+    $('#tedit-error').textContent = '';
+    const list = [...allMatches].filter((m) => !localOnly.some((x) => x.id === m.id)).sort(byDate).reverse();
+    $('#tedit-matches').replaceChildren(
+      ...list.map((m) => {
+        const li = document.createElement('li');
+        const label = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = m.id;
+        cb.checked = Boolean(t && m.tournamentId === t.id);
+        const mid = document.createElement('div');
+        mid.className = 'min-w-0';
+        const b = document.createElement('b');
+        b.textContent = `${m.homePlayer} vs ${m.awayPlayer}`;
+        const sm = document.createElement('small');
+        const other = m.tournamentId && m.tournamentId !== t?.id ? tournamentName(m.tournamentId) : '';
+        sm.textContent = `${dayLabel(m.date)}${other ? ` · ahora en ${other}` : ''}`;
+        mid.append(b, sm);
+        const score = document.createElement('span');
+        score.className = 'score';
+        score.textContent = `${m.homeGoals}-${m.awayGoals}`;
+        label.append(cb, mid, score);
+        li.append(label);
+        return li;
+      }),
+    );
+    if (!list.length) $('#tedit-matches').innerHTML = '<li class="fc-muted py-3 text-center text-sm">Todavía no hay partidos cargados.</li>';
+    renderTeditCount();
+    if (!teditDialog.open) teditDialog.showModal();
+    if (!t) (teditForm.elements.namedItem('name') as HTMLInputElement).focus();
+  }
+
+  function renderTeditCount() {
+    const n = teditForm.querySelectorAll('#tedit-matches input:checked').length;
+    $('#tedit-count').textContent = `${n} ${n === 1 ? 'partido elegido' : 'partidos elegidos'}. Tocá para sumar o sacar.`;
+  }
+  teditForm.addEventListener('change', renderTeditCount);
+
+  $('#tedit-free').addEventListener('click', () => {
+    teditForm.querySelectorAll<HTMLInputElement>('#tedit-matches input').forEach((cb) => {
+      const m = allMatches.find((x) => x.id === cb.value);
+      if (m && (!m.tournamentId || !tournamentName(m.tournamentId))) cb.checked = true;
+    });
+    renderTeditCount();
+  });
+
+  teditForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (teditForm.elements.namedItem('name') as HTMLInputElement).value.trim();
+    if (!name) {
+      $('#tedit-error').textContent = 'Poné un nombre para el torneo';
+      return;
+    }
+    const matchIds = [...teditForm.querySelectorAll<HTMLInputElement>('#tedit-matches input:checked')].map((cb) => cb.value);
+    const btn = teditForm.querySelector<HTMLButtonElement>('[type=submit]')!;
+    btn.disabled = true;
+    try {
+      const data = editingTournament
+        ? await write('PUT', `/tournaments/${editingTournament}`, { name, matchIds })
+        : await write('POST', '/tournaments', { name, matchIds });
+      teditDialog.close();
+      // Un torneo recién creado queda seleccionado y se va directo a él
+      if (!editingTournament && data.id) {
+        setView(data.id);
+        tournamentsDialog.close();
+      }
+      refresh();
+      if (tournamentsDialog.open) renderTournamentList();
+      notify(editingTournament ? `🏆 ${name} actualizado` : `🏆 Torneo "${name}" creado`);
+    } catch (err) {
+      if (!(err instanceof Cancelled)) $('#tedit-error').textContent = errorText(err);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('#tedit-delete').addEventListener('click', async () => {
+    const t = tournaments.find((x) => x.id === editingTournament);
+    if (!t || !confirm(`¿Borrar el torneo "${t.name}"? Sus partidos no se borran: quedan sin torneo.`)) return;
+    try {
+      await write('DELETE', `/tournaments/${t.id}`);
+      teditDialog.close();
+      refresh();
+      if (tournamentsDialog.open) renderTournamentList();
+      notify(`Torneo "${t.name}" borrado`);
+    } catch (err) {
+      if (!(err instanceof Cancelled)) $('#tedit-error').textContent = errorText(err);
+    }
+  });
+
+  $('#tournament-btn').addEventListener('click', openTournaments);
+  $('#tournament-new').addEventListener('click', () => openTournamentEditor(null));
+  tournamentsDialog.querySelector('[data-close-tournaments]')!.addEventListener('click', () => tournamentsDialog.close());
+  teditDialog.querySelector('[data-close-tedit]')!.addEventListener('click', () => teditDialog.close());
+  for (const d of [tournamentsDialog, teditDialog]) {
+    d.addEventListener('click', (e) => {
+      if (e.target === d) d.close();
+    });
+  }
+
+  // Mover un partido de torneo desde su detalle
+  $<HTMLSelectElement>('#md-tournament').addEventListener('change', async (e) => {
+    const sel = e.currentTarget as HTMLSelectElement;
+    const id = sel.dataset.matchId!;
+    try {
+      await write('PUT', `/matches/${encodeURIComponent(id)}/tournament`, { tournamentId: sel.value || null });
+      refresh();
+      notify(sel.value ? `Movido a ${tournamentName(sel.value)}` : 'Partido sin torneo');
+    } catch (err) {
+      if (!(err instanceof Cancelled)) notify(errorText(err));
+    }
+  });
+
   // --- Detalle del partido: línea de tiempo con los goles ---
   const matchDialog = $<HTMLDialogElement>('#match-detail');
   let detailMatchId = '';
@@ -3173,6 +3600,13 @@ const tabs = [
     const m = matches.find((x) => x.id === detailMatchId);
     if (!m) return matchDialog.close();
     $('#md-date').textContent = dayLabel(m.date);
+    // Torneo del partido (se puede mover si hay servidor y el partido ya está subido)
+    const tsel = $<HTMLSelectElement>('#md-tournament');
+    const editable = online && canWrite && !localOnly.some((x) => x.id === m.id);
+    $('#md-tournament-wrap').hidden = !tournaments.length || (!editable && !m.tournamentId);
+    fillTournamentSelect(tsel, m.tournamentId ?? '');
+    tsel.disabled = !editable;
+    tsel.dataset.matchId = m.id;
     $('#md-title').textContent = `${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer}`;
 
     const side = (player: string, team: string, label: string) => {
@@ -3905,7 +4339,7 @@ const tabs = [
     });
   }, 250);
   // --- Borrador ---
-  const draftFields = ['homePlayer', 'awayPlayer', 'homeTeam', 'awayTeam', 'homeGoals', 'awayGoals', 'date'] as const;
+  const draftFields = ['homePlayer', 'awayPlayer', 'homeTeam', 'awayTeam', 'homeGoals', 'awayGoals', 'date', 'tournament'] as const;
   type Draft = Partial<Record<(typeof draftFields)[number], string>> & {
     open?: boolean;
     goals?: Goal[];
@@ -4116,6 +4550,11 @@ const tabs = [
   document.querySelectorAll('[data-open-sheet]').forEach((b) =>
     b.addEventListener('click', () => {
       formError.textContent = '';
+      // Un partido nuevo (sin nada cargado) va al torneo que se está viendo
+      if (!hasData(readDraft())) {
+        const fsel = form.elements.namedItem('tournament') as HTMLSelectElement;
+        fillTournamentSelect(fsel, view !== 'all' && view !== 'none' ? view : '');
+      }
       syncForm();
       sheet.showModal();
       saveDraft();
@@ -4143,6 +4582,7 @@ const tabs = [
       awayTeam: str('awayTeam'),
       awayGoals: Math.min(99, Math.max(0, Math.trunc(Number(str('awayGoals'))) || 0)),
       goals: [...goals].sort((a, b) => a.at - b.at),
+      ...(str('tournament') && tournamentName(str('tournament')) && { tournamentId: str('tournament') }),
       startedAt,
     };
     if (!m.homePlayer || !m.awayPlayer) {
@@ -4195,7 +4635,7 @@ const tabs = [
   const menu = $('#fc-menu');
 
   $('#export').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(matches, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(allMatches, null, 2)], { type: 'application/json' });
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(blob),
       download: `fc26-resultados-${new Date().toISOString().slice(0, 10)}.json`,
@@ -4213,7 +4653,7 @@ const tabs = [
     try {
       const data = JSON.parse(await file.text());
       const incoming = (Array.isArray(data) ? data : []).filter(isMatch);
-      const known = new Set(matches.map((m) => m.id));
+      const known = new Set(allMatches.map((m) => m.id));
       const added = incoming.filter((m) => !known.has(m.id));
       if (added.length) {
         if (online && canWrite) await write('POST', '/matches', added);
@@ -4246,6 +4686,7 @@ const tabs = [
   document.querySelectorAll('.fc-section').forEach((s) => spy.observe(s));
 
   render();
+  renderTournamentBar();
   paintPicks();
   renderSoundToggle();
   renderSync();
