@@ -3,6 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import EaLogo from '../components/EaLogo.astro';
 
 const today = new Date().toISOString().slice(0, 10);
+
+const sides = [
+  { key: 'home', label: 'Local', player: 'Nacho', team: 'Boca' },
+  { key: 'away', label: 'Visitante', player: 'Juan', team: 'River' },
+] as const;
+
+const tabs = [
+  { href: '#cargar', icon: '⚽', label: 'Cargar' },
+  { href: '#tabla', icon: '🏆', label: 'Tabla' },
+  { href: '#partidos', icon: '📋', label: 'Partidos' },
+];
 ---
 
 <Layout
@@ -11,63 +22,66 @@ const today = new Date().toISOString().slice(0, 10);
   noindex
 >
   <div class="pitch min-h-dvh">
-    <header class="border-b-4 border-white/80 bg-black/70 backdrop-blur pt-[env(safe-area-inset-top)]">
-      <div class="mx-auto flex max-w-5xl items-center gap-4 px-5 py-4">
-        <EaLogo class="size-14 shrink-0 drop-shadow-[0_0_12px_rgb(255_255_255/.35)]" />
-        <div class="min-w-0">
-          <p class="font-mono text-[11px] tracking-[.3em] text-white/60">EA SPORTS</p>
-          <h1 class="text-xl font-black italic uppercase min-[380px]:text-2xl sm:text-3xl">FC 26 <span class="hidden text-acid sm:inline">·</span><br class="sm:hidden" /> Resultados</h1>
+    <header class="sticky top-0 z-40 border-b-4 border-white/80 bg-black/80 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <div class="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5 md:py-4">
+        <EaLogo class="size-10 shrink-0 drop-shadow-[0_0_12px_rgb(255_255_255/.35)] md:size-14" />
+        <div class="min-w-0 flex-1">
+          <p class="font-mono text-[10px] tracking-[.3em] text-white/60">EA SPORTS</p>
+          <h1 class="truncate text-lg font-black italic uppercase leading-tight md:text-3xl">FC 26 <span class="text-acid">·</span> Resultados</h1>
         </div>
-        <a href="/" class="ml-auto shrink-0 font-mono text-xs text-white/60 underline-offset-4 hover:text-white hover:underline">← inicio</a>
+        <a href="/" class="grid size-11 shrink-0 place-items-center rounded-full font-mono text-white/60 hover:text-white md:w-auto md:px-3 md:text-xs" aria-label="Volver al inicio">
+          <span aria-hidden="true">←</span><span class="sr-only md:not-sr-only md:ml-1">inicio</span>
+        </a>
       </div>
     </header>
 
-    <main id="main" class="mx-auto max-w-5xl space-y-10 px-5 py-10">
+    <main id="main" class="mx-auto max-w-3xl space-y-8 px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:space-y-10 md:py-10">
       <!-- Cargar partido -->
-      <section aria-labelledby="cargar">
+      <section aria-labelledby="cargar" class="scroll-mt-20">
         <h2 id="cargar" class="section-title">⚽ Cargar partido</h2>
 
-        <form id="match-form" class="scoreboard mt-4 p-5 sm:p-6" autocomplete="off">
-          <div class="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
-            <fieldset class="space-y-3">
-              <legend class="side-label">Local</legend>
-              <label class="field">
-                <span>Jugador</span>
-                <input name="homePlayer" list="players" required maxlength="40" placeholder="Ej: Nacho" />
-              </label>
-              <label class="field">
-                <span>Equipo</span>
-                <input name="homeTeam" list="teams" maxlength="40" placeholder="Ej: Boca Juniors" />
-              </label>
-            </fieldset>
-
-            <div class="flex items-center justify-center gap-3 py-2">
-              <input name="homeGoals" type="number" min="0" max="99" required value="0" class="goal-input" aria-label="Goles local" />
-              <span class="text-3xl font-black text-white/50">–</span>
-              <input name="awayGoals" type="number" min="0" max="99" required value="0" class="goal-input" aria-label="Goles visitante" />
-            </div>
-
-            <fieldset class="space-y-3">
-              <legend class="side-label sm:ml-auto">Visitante</legend>
-              <label class="field">
-                <span>Jugador</span>
-                <input name="awayPlayer" list="players" required maxlength="40" placeholder="Ej: Juan" />
-              </label>
-              <label class="field">
-                <span>Equipo</span>
-                <input name="awayTeam" list="teams" maxlength="40" placeholder="Ej: River Plate" />
-              </label>
-            </fieldset>
+        <form id="match-form" class="scoreboard mt-3 p-4 md:p-6" autocomplete="off">
+          <div class="grid grid-cols-2 gap-3 md:gap-6">
+            {
+              sides.map((s) => (
+                <fieldset class="flex min-w-0 flex-col gap-2.5">
+                  <legend class={`side-label ${s.key === 'away' ? 'text-right' : ''} w-full`}>{s.label}</legend>
+                  <label class="field">
+                    <span>Jugador</span>
+                    <input name={`${s.key}Player`} list="players" required maxlength="40" placeholder={s.player} autocapitalize="words" enterkeyhint="next" />
+                  </label>
+                  <label class="field">
+                    <span>Equipo</span>
+                    <input name={`${s.key}Team`} list="teams" maxlength="40" placeholder={s.team} autocapitalize="words" enterkeyhint="next" />
+                  </label>
+                  <div class="stepper mt-1">
+                    <button type="button" data-step={`${s.key}Goals`} data-delta="-1" aria-label={`Restar gol ${s.label.toLowerCase()}`}>−</button>
+                    <input
+                      name={`${s.key}Goals`}
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      required
+                      value="0"
+                      class="goal-input"
+                      aria-label={`Goles ${s.label.toLowerCase()}`}
+                    />
+                    <button type="button" data-step={`${s.key}Goals`} data-delta="1" aria-label={`Sumar gol ${s.label.toLowerCase()}`}>+</button>
+                  </div>
+                </fieldset>
+              ))
+            }
           </div>
 
-          <div class="mt-5 flex flex-wrap items-end gap-4 border-t border-white/10 pt-5">
-            <label class="field w-44">
+          <div class="mt-4 grid gap-3 border-t border-white/10 pt-4 md:grid-cols-[12rem_1fr] md:items-end">
+            <label class="field">
               <span>Fecha</span>
               <input name="date" type="date" required value={today} />
             </label>
-            <p id="form-error" class="text-sm font-semibold text-red-400" role="alert"></p>
-            <button type="submit" class="kickoff w-full sm:ml-auto sm:w-auto">Pitazo final · Guardar</button>
+            <button type="submit" class="kickoff">Pitazo final · Guardar</button>
           </div>
+          <p id="form-error" class="mt-3 text-sm font-semibold text-red-400 empty:hidden" role="alert"></p>
 
           <datalist id="players"></datalist>
           <datalist id="teams"></datalist>
@@ -75,22 +89,22 @@ const today = new Date().toISOString().slice(0, 10);
       </section>
 
       <!-- Tabla de posiciones -->
-      <section aria-labelledby="tabla">
-        <h2 id="tabla" class="section-title">🏆 Tabla de posiciones</h2>
-        <div class="scoreboard mt-4 overflow-x-auto">
-          <table class="standings w-full min-w-[34rem] text-sm">
+      <section aria-labelledby="tabla" class="scroll-mt-20">
+        <h2 id="tabla" class="section-title">🏆 Tabla</h2>
+        <div class="scoreboard mt-3 overflow-hidden">
+          <table class="standings w-full table-fixed text-sm">
             <thead>
               <tr>
-                <th class="w-10">#</th>
+                <th class="w-8">#</th>
                 <th class="text-left">Jugador</th>
-                <th title="Partidos jugados">PJ</th>
-                <th title="Ganados">G</th>
-                <th title="Empatados">E</th>
-                <th title="Perdidos">P</th>
-                <th title="Goles a favor">GF</th>
-                <th title="Goles en contra">GC</th>
-                <th title="Diferencia de gol">DG</th>
-                <th title="Puntos">Pts</th>
+                <th class="w-9" title="Partidos jugados">PJ</th>
+                <th class="w-8" title="Ganados">G</th>
+                <th class="w-8" title="Empatados">E</th>
+                <th class="w-8" title="Perdidos">P</th>
+                <th class="wide w-10" title="Goles a favor">GF</th>
+                <th class="wide w-10" title="Goles en contra">GC</th>
+                <th class="w-10" title="Diferencia de gol">DG</th>
+                <th class="w-10" title="Puntos">Pts</th>
               </tr>
             </thead>
             <tbody id="standings"></tbody>
@@ -100,72 +114,92 @@ const today = new Date().toISOString().slice(0, 10);
       </section>
 
       <!-- Partidos -->
-      <section aria-labelledby="partidos">
-        <div class="flex flex-wrap items-center gap-3">
-          <h2 id="partidos" class="section-title">📋 Partidos</h2>
-          <div class="ml-auto flex flex-wrap gap-2">
-            <button type="button" id="export" class="chip-btn">Exportar</button>
-            <label class="chip-btn cursor-pointer">
-              Importar
-              <input type="file" id="import" accept="application/json,.json" class="sr-only" />
-            </label>
-          </div>
+      <section aria-labelledby="partidos" class="scroll-mt-20">
+        <h2 id="partidos" class="section-title">📋 Partidos</h2>
+        <ol id="matches" class="mt-3 space-y-2.5"></ol>
+        <p id="matches-empty" class="scoreboard mt-3 p-6 text-center text-white/60">Sin partidos cargados.</p>
+
+        <div class="mt-4 grid grid-cols-2 gap-2 md:flex md:justify-end">
+          <button type="button" id="export" class="chip-btn">⬇ Exportar</button>
+          <label class="chip-btn cursor-pointer">
+            ⬆ Importar
+            <input type="file" id="import" accept="application/json,.json" class="sr-only" />
+          </label>
         </div>
-        <ol id="matches" class="mt-4 space-y-3"></ol>
-        <p id="matches-empty" class="scoreboard mt-4 p-6 text-center text-white/60">Sin partidos cargados.</p>
-        <p class="mt-4 font-mono text-xs text-white/50">
+        <p class="mt-3 font-mono text-xs leading-relaxed text-white/60">
           Los resultados se guardan en este navegador. Usá “Exportar” para pasarle el archivo a tus amigos y “Importar” para sumarlo.
         </p>
       </section>
     </main>
+
+    <!-- Barra de pestañas inferior: navegación con el pulgar en el celu -->
+    <nav aria-label="Secciones" class="tabbar fixed inset-x-0 bottom-0 z-40 border-t-4 border-white/80 bg-black/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <ul class="grid grid-cols-3">
+        {
+          tabs.map((t) => (
+            <li>
+              <a href={t.href} class="flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-bold uppercase tracking-wide text-white/70 active:text-acid">
+                <span class="text-lg leading-none" aria-hidden="true">{t.icon}</span>
+                {t.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <p id="toast" class="toast" role="status" aria-live="polite"></p>
   </div>
 </Layout>
 
 <template id="match-tpl">
-  <li class="match scoreboard flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-    <time class="w-full font-mono text-[11px] tracking-widest text-white/50 sm:w-24"></time>
-    <div class="side flex-1 text-right">
-      <p class="player font-bold text-white"></p>
-      <p class="team text-xs text-white/60"></p>
+  <li class="match scoreboard px-3 pt-1.5 pb-3 md:px-4">
+    <div class="flex items-center justify-between">
+      <time class="font-mono text-[11px] tracking-widest text-white/60"></time>
+      <button type="button" class="delete -mr-2 grid size-11 place-items-center rounded-full text-white/50 hover:bg-red-500/20 hover:text-red-300" aria-label="Borrar partido">✕</button>
     </div>
-    <p class="score font-mono text-2xl font-black tabular-nums"></p>
-    <div class="side flex-1">
-      <p class="player font-bold text-white"></p>
-      <p class="team text-xs text-white/60"></p>
+    <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-4">
+      <div class="side min-w-0 text-right">
+        <p class="player truncate font-bold text-white"></p>
+        <p class="team truncate text-xs text-white/60"></p>
+      </div>
+      <p class="score rounded-md bg-white px-2.5 py-1 font-mono text-xl font-black tabular-nums text-black md:text-2xl"></p>
+      <div class="side min-w-0">
+        <p class="player truncate font-bold text-white"></p>
+        <p class="team truncate text-xs text-white/60"></p>
+      </div>
     </div>
-    <button type="button" class="delete grid size-8 place-items-center rounded-full text-white/40 hover:bg-red-500/20 hover:text-red-300" aria-label="Borrar partido">✕</button>
   </li>
 </template>
 
 <style>
+  /* Mobile first: los estilos base son para el celu; @media (min-width) agrega para pantallas grandes */
   .pitch {
     color: #fff;
     background:
-      radial-gradient(circle at 50% 22rem, transparent 9rem, rgb(255 255 255 / .18) 9rem, rgb(255 255 255 / .18) calc(9rem + 3px), transparent calc(9rem + 3px)),
-      linear-gradient(to bottom, transparent 22rem, rgb(255 255 255 / .18) 22rem, rgb(255 255 255 / .18) calc(22rem + 3px), transparent calc(22rem + 3px)),
-      repeating-linear-gradient(to bottom, #1f7a3a 0 6rem, #23883f 6rem 12rem);
+      radial-gradient(circle at 50% 18rem, transparent 7rem, rgb(255 255 255 / .18) 7rem, rgb(255 255 255 / .18) calc(7rem + 3px), transparent calc(7rem + 3px)),
+      linear-gradient(to bottom, transparent 18rem, rgb(255 255 255 / .18) 18rem, rgb(255 255 255 / .18) calc(18rem + 3px), transparent calc(18rem + 3px)),
+      repeating-linear-gradient(to bottom, #1f7a3a 0 5rem, #23883f 5rem 10rem);
   }
 
   .section-title {
     display: inline-block;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 900;
     font-style: italic;
     text-transform: uppercase;
     letter-spacing: .02em;
     color: #fff;
     background: #000;
-    padding: .35rem 1rem;
-    clip-path: polygon(0 0, 100% 0, calc(100% - .8rem) 100%, 0 100%);
-    padding-right: 1.8rem;
+    padding: .3rem 1.6rem .3rem .9rem;
+    clip-path: polygon(0 0, 100% 0, calc(100% - .7rem) 100%, 0 100%);
   }
 
   .scoreboard {
     border-radius: .9rem;
-    background: rgb(0 0 0 / .72);
+    background: rgb(0 0 0 / .75);
     border: 2px solid rgb(255 255 255 / .14);
-    box-shadow: 0 10px 30px rgb(0 0 0 / .35);
-    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / .35);
   }
 
   .side-label {
@@ -174,31 +208,55 @@ const today = new Date().toISOString().slice(0, 10);
     letter-spacing: .25em;
     text-transform: uppercase;
     color: var(--color-acid);
-    margin-bottom: .25rem;
+    margin-bottom: .1rem;
   }
 
-  .field { display: grid; gap: .3rem; }
+  .field { display: grid; gap: .25rem; min-width: 0; }
   .field span { font-size: .75rem; color: rgb(255 255 255 / .65); }
   .field input {
-    min-height: 2.75rem;
+    width: 100%;
+    min-width: 0;
+    min-height: 2.9rem;
     border-radius: .55rem;
     border: 1px solid rgb(255 255 255 / .18);
     background: rgb(255 255 255 / .06);
-    padding: 0 .8rem;
+    padding: 0 .7rem;
     color: #fff;
+    /* 16px: iOS no hace zoom al enfocar */
     font-size: 1rem;
   }
   .field input:focus { border-color: var(--color-acid); outline: none; }
 
+  /* Marcador con botones − / + grandes para el pulgar */
+  .stepper {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr 2.75rem;
+    align-items: center;
+    gap: .35rem;
+  }
+  .stepper button {
+    height: 2.75rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / .1);
+    border: 1px solid rgb(255 255 255 / .2);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stepper button:active { background: var(--color-acid); color: #050507; }
+
   .goal-input {
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: .7rem;
+    width: 100%;
+    min-width: 0;
+    height: 3.75rem;
+    border-radius: .6rem;
     border: 2px solid rgb(255 255 255 / .25);
     background: #000;
     color: var(--color-acid);
     font-family: var(--font-mono);
-    font-size: 2.4rem;
+    font-size: 2.1rem;
     font-weight: 900;
     text-align: center;
     -moz-appearance: textfield;
@@ -208,7 +266,8 @@ const today = new Date().toISOString().slice(0, 10);
   .goal-input:focus { border-color: var(--color-acid); outline: none; }
 
   .kickoff {
-    min-height: 3rem;
+    width: 100%;
+    min-height: 3.25rem;
     padding: 0 1.5rem;
     border-radius: 999px;
     background: var(--color-acid);
@@ -216,44 +275,100 @@ const today = new Date().toISOString().slice(0, 10);
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: .03em;
+    touch-action: manipulation;
     transition: transform .15s ease, box-shadow .2s ease;
   }
-  .kickoff:hover { box-shadow: 0 0 28px rgb(196 255 77 / .45); }
   .kickoff:active { transform: scale(.97); }
 
   .chip-btn {
     display: inline-flex;
     align-items: center;
-    min-height: 2.5rem;
-    padding: 0 1rem;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
     border-radius: 999px;
-    background: rgb(0 0 0 / .6);
+    background: rgb(0 0 0 / .65);
     border: 1px solid rgb(255 255 255 / .2);
-    font-size: .85rem;
+    font-size: .9rem;
     font-weight: 600;
   }
-  .chip-btn:hover { border-color: var(--color-acid); }
+  .chip-btn:focus-within { outline: 2px solid var(--color-acid); outline-offset: 3px; }
 
   .standings th {
-    padding: .7rem .5rem;
+    padding: .6rem .15rem;
     font-family: var(--font-mono);
-    font-size: .7rem;
-    letter-spacing: .1em;
-    color: rgb(255 255 255 / .55);
+    font-size: .65rem;
+    letter-spacing: .05em;
+    color: rgb(255 255 255 / .6);
     border-bottom: 2px solid rgb(255 255 255 / .12);
   }
   .standings :global(td) {
-    padding: .65rem .5rem;
+    padding: .6rem .15rem;
     text-align: center;
     font-variant-numeric: tabular-nums;
     border-bottom: 1px solid rgb(255 255 255 / .06);
   }
-  .standings :global(td.name) { text-align: left; font-weight: 700; }
+  .standings :global(td.name) {
+    text-align: left;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .standings :global(td.pts) { font-weight: 900; color: var(--color-acid); }
   .standings :global(tr:first-child td:first-child) { color: #facc15; }
+  /* GF y GC solo entran con más ancho; en el celu queda la DG */
+  .standings :global(.wide) { display: none; }
 
-  :global(.match .score) { min-width: 5.5rem; text-align: center; }
+  :global(.match .score) { min-width: 4.5rem; text-align: center; }
   :global(.match .win .player)::after { content: ' ✓'; color: var(--color-acid); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+    z-index: 50;
+    translate: -50% 1rem;
+    opacity: 0;
+    pointer-events: none;
+    padding: .7rem 1.2rem;
+    border-radius: 999px;
+    background: var(--color-acid);
+    color: #050507;
+    font-weight: 800;
+    white-space: nowrap;
+    max-width: calc(100vw - 2rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 8px 24px rgb(0 0 0 / .4);
+    transition: opacity .2s ease, translate .25s var(--ease-out);
+  }
+  .toast.show { opacity: 1; translate: -50% 0; }
+
+  @media (min-width: 40rem) {
+    .section-title { font-size: 1.25rem; }
+    .standings th, .standings :global(td) { padding-inline: .4rem; }
+    .standings :global(.wide) { display: table-cell; }
+  }
+
+  @media (min-width: 48rem) {
+    .pitch {
+      background:
+        radial-gradient(circle at 50% 22rem, transparent 9rem, rgb(255 255 255 / .18) 9rem, rgb(255 255 255 / .18) calc(9rem + 3px), transparent calc(9rem + 3px)),
+        linear-gradient(to bottom, transparent 22rem, rgb(255 255 255 / .18) 22rem, rgb(255 255 255 / .18) calc(22rem + 3px), transparent calc(22rem + 3px)),
+        repeating-linear-gradient(to bottom, #1f7a3a 0 6rem, #23883f 6rem 12rem);
+    }
+    .goal-input { height: 4.5rem; font-size: 2.4rem; }
+    .stepper { grid-template-columns: 3rem 1fr 3rem; }
+    .stepper button { height: 3rem; }
+    .toast { bottom: 2rem; }
+  }
+
+  @media (hover: hover) {
+    .kickoff:hover { box-shadow: 0 0 28px rgb(196 255 77 / .45); }
+    .chip-btn:hover, .stepper button:hover { border-color: var(--color-acid); }
+  }
 </style>
 
 <script>
@@ -278,6 +393,25 @@ const today = new Date().toISOString().slice(0, 10);
   const standingsEl = $('#standings');
   const standingsEmpty = $('#standings-empty');
   const tpl = $<HTMLTemplateElement>('#match-tpl');
+  const toast = $('#toast');
+  let toastTimer = 0;
+
+  function notify(msg: string) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // Botones − / + del marcador
+  form.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-step]');
+    if (!btn) return;
+    const input = form.elements.namedItem(btn.dataset.step!) as HTMLInputElement;
+    const next = (Number(input.value) || 0) + Number(btn.dataset.delta);
+    input.value = String(Math.min(99, Math.max(0, next)));
+    navigator.vibrate?.(10);
+  });
 
   function load(): Match[] {
     try {
@@ -362,7 +496,7 @@ const today = new Date().toISOString().slice(0, 10);
       ...rows.map((r, i) => {
         const tr = document.createElement('tr');
         const cells: [string | number, string?][] = [
-          [i + 1], [r.name, 'name'], [r.pj], [r.g], [r.e], [r.p], [r.gf], [r.gc],
+          [i + 1], [r.name, 'name'], [r.pj], [r.g], [r.e], [r.p], [r.gf, 'wide'], [r.gc, 'wide'],
           [r.dg > 0 ? `+${r.dg}` : r.dg], [r.pts, 'pts'],
         ];
         for (const [v, cls] of cells) {
@@ -416,7 +550,7 @@ const today = new Date().toISOString().slice(0, 10);
     render();
     form.reset();
     form.querySelector<HTMLInputElement>('[name=date]')!.value = m.date;
-    form.querySelector<HTMLInputElement>('[name=homePlayer]')!.focus();
+    notify(`⚽ ${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer} guardado`);
   });
 
   $('#export').addEventListener('click', () => {
@@ -441,9 +575,9 @@ const today = new Date().toISOString().slice(0, 10);
       matches.push(...added);
       save();
       render();
-      alert(`Se importaron ${added.length} partido(s).`);
+      notify(`Se importaron ${added.length} partido(s)`);
     } catch {
-      alert('El archivo no es válido.');
+      notify('El archivo no es válido');
     }
     input.value = '';
   });
