@@ -258,6 +258,24 @@ const tabs = [
       </form>
     </dialog>
 
+    <!-- Detalle de un partido: línea de tiempo con los goles por tiempo -->
+    <dialog id="match-detail" class="fc-sheet" aria-labelledby="md-title">
+      <div class="fc-grabber" aria-hidden="true"></div>
+      <div class="flex items-center justify-between gap-2">
+        <p id="md-date" class="fc-label"></p>
+        <button type="button" class="fc-icon-btn shrink-0" data-close-match aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.close} />
+        </button>
+      </div>
+      <h2 id="md-title" class="sr-only">Detalle del partido</h2>
+      <div id="md-score" class="fc-md-score"></div>
+      <h3 class="fc-label mt-5 mb-2">Goles en el tiempo</h3>
+      <div id="md-chart"></div>
+      <p id="md-halves" class="fc-md-halves"></p>
+      <h3 class="fc-label mt-5 mb-2">Gol por gol</h3>
+      <ol id="md-goals" class="fc-md-goals"></ol>
+    </dialog>
+
     <!-- Ficha de un jugador: sus números y todos sus partidos -->
     <dialog id="player-detail" class="fc-sheet" aria-labelledby="pd-name">
       <div class="fc-grabber" aria-hidden="true"></div>
@@ -1235,6 +1253,235 @@ const tabs = [
 
     .fc-picks .fc-avatar.has-photo, .fc-preview .fc-avatar.has-photo { cursor: inherit; }
 
+    /* Detalle del partido */
+
+    .fc-match, .fc-pd-match { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    .fc-match:focus-visible, .fc-pd-match:focus-visible { outline: 2px solid var(--fc-accent); outline-offset: 2px; }
+
+    .fc-md-score { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: .5rem; margin-top: .75rem; }
+
+    .fc-md-side { display: grid; justify-items: center; gap: .3rem; min-width: 0; text-align: center; }
+
+    .fc-md-side b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-md-side small { max-width: 100%; font-size: .72rem; color: var(--fc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-md-score > p { font-size: 2.6rem; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+
+
+    /* Línea de tiempo: 0'–90' en dos tiempos; local arriba, visitante abajo */
+
+    .fc-tl { --rows: 2; --row: 1.75rem; }
+
+    .fc-tl-halves { display: grid; grid-template-columns: 1fr 1fr; margin-left: var(--lane-w, 0); font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--fc-muted); }
+
+    .fc-tl-halves span { text-align: center; }
+
+    .fc-tl-plot {
+
+      position: relative;
+
+      height: calc(var(--rows) * var(--row) * 2 + 1rem);
+
+      margin-top: .35rem;
+
+      border-radius: .85rem;
+
+      background:
+
+        linear-gradient(90deg, rgb(255 255 255 / .03) 50%, rgb(255 255 255 / .015) 50%);
+
+      border: 1px solid var(--fc-line);
+
+    }
+
+    /* Eje central (hairline) y entretiempo */
+
+    .fc-tl-axis { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgb(255 255 255 / .18); }
+
+    .fc-tl-grid { position: absolute; top: 0; bottom: 0; width: 1px; background: rgb(255 255 255 / .06); }
+
+    .fc-tl-ht { position: absolute; top: 0; bottom: 0; width: 1px; background: rgb(255 255 255 / .3); }
+
+    .fc-tl-ht::after {
+
+      content: 'ET';
+
+      position: absolute;
+
+      top: 50%;
+
+      left: 50%;
+
+      translate: -50% -50%;
+
+      padding: .05rem .3rem;
+
+      border-radius: .3rem;
+
+      background: #121416;
+
+      font-size: .55rem;
+
+      font-weight: 800;
+
+      color: var(--fc-muted);
+
+    }
+
+    /* Cada gol: palito desde el eje + punto con anillo del color de la superficie + minuto */
+
+    .fc-tl-goal {
+
+      position: absolute;
+
+      left: var(--x);
+
+      width: 2.75rem;
+
+      height: var(--row);
+
+      translate: -50% 0;
+
+      display: grid;
+
+      place-items: center;
+
+      border-radius: .5rem;
+
+      touch-action: manipulation;
+
+      -webkit-tap-highlight-color: transparent;
+
+    }
+
+    .fc-tl-goal.home { bottom: calc(50% + .5rem + var(--r) * var(--row)); }
+
+    .fc-tl-goal.away { top: calc(50% + .5rem + var(--r) * var(--row)); }
+
+    .fc-tl-goal::before {
+
+      content: '';
+
+      position: absolute;
+
+      left: 50%;
+
+      width: 1px;
+
+      height: calc(.5rem + var(--r) * var(--row) + var(--row) / 2);
+
+      background: color-mix(in oklab, var(--c) 55%, transparent);
+
+    }
+
+    .fc-tl-goal.home::before { top: 50%; }
+
+    .fc-tl-goal.away::before { bottom: 50%; }
+
+    .fc-tl-goal i {
+
+      position: relative;
+
+      width: .75rem;
+
+      height: .75rem;
+
+      border-radius: 999px;
+
+      background: var(--c);
+
+      box-shadow: 0 0 0 2px #121416;
+
+    }
+
+    .fc-tl-goal span { position: absolute; left: calc(50% + .6rem); font-size: .7rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; white-space: nowrap; }
+
+    .fc-tl-goal.flip span { left: auto; right: calc(50% + .6rem); }
+
+    .fc-tl-tip {
+
+      position: absolute;
+
+      bottom: calc(100% + .3rem);
+
+      left: 50%;
+
+      translate: -50% .25rem;
+
+      z-index: 2;
+
+      padding: .35rem .55rem;
+
+      border-radius: .55rem;
+
+      background: #1f2226;
+
+      border: 1px solid var(--fc-line);
+
+      box-shadow: 0 8px 24px rgb(0 0 0 / .5);
+
+      font-size: .72rem;
+
+      font-weight: 600;
+
+      white-space: nowrap;
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      transition: opacity .15s ease, translate .15s ease;
+
+    }
+
+    .fc-tl-goal.away .fc-tl-tip { bottom: auto; top: calc(100% + .3rem); }
+
+    .fc-tl-goal.edge-l .fc-tl-tip { left: 0; translate: 0 .25rem; }
+
+    .fc-tl-goal.edge-r .fc-tl-tip { left: auto; right: 0; translate: 0 .25rem; }
+
+    .fc-tl-goal:hover .fc-tl-tip, .fc-tl-goal:focus-visible .fc-tl-tip, .fc-tl-goal.show .fc-tl-tip { opacity: 1; translate: -50% 0; }
+
+    .fc-tl-goal.edge-l:hover .fc-tl-tip, .fc-tl-goal.edge-l:focus-visible .fc-tl-tip, .fc-tl-goal.edge-l.show .fc-tl-tip,
+
+    .fc-tl-goal.edge-r:hover .fc-tl-tip, .fc-tl-goal.edge-r:focus-visible .fc-tl-tip, .fc-tl-goal.edge-r.show .fc-tl-tip { translate: 0 0; }
+
+    .fc-tl-ticks { position: relative; height: 1.1rem; margin-top: .3rem; font-size: .62rem; color: var(--fc-muted); font-variant-numeric: tabular-nums; }
+
+    .fc-tl-ticks span { position: absolute; translate: -50% 0; }
+
+    .fc-tl-ticks span:first-child { translate: 0 0; }
+
+    .fc-tl-ticks span:last-child { translate: -100% 0; }
+
+    .fc-tl-legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; margin-top: .4rem; font-size: .75rem; color: var(--fc-muted); }
+
+    .fc-tl-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+
+    .fc-tl-legend i { width: .6rem; height: .6rem; border-radius: 999px; background: var(--c); }
+
+    .fc-md-halves { margin-top: .75rem; font-size: .85rem; color: var(--fc-muted); }
+
+    .fc-md-halves b { color: #fff; font-variant-numeric: tabular-nums; }
+
+    .fc-md-goals { display: grid; gap: .35rem; }
+
+    .fc-md-goals li { display: grid; grid-template-columns: 2.6rem auto minmax(0, 1fr) auto; align-items: center; gap: .55rem; padding: .45rem .6rem; border-radius: .8rem; background: rgb(255 255 255 / .04); font-size: .85rem; }
+
+    .fc-md-goals li > b:first-child { color: var(--fc-accent); font-variant-numeric: tabular-nums; }
+
+    .fc-md-goals .fc-avatar { width: 1.7rem; height: 1.7rem; font-size: .55rem; box-shadow: none; }
+
+    .fc-md-goals li > span:nth-child(3) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+
+    .fc-md-goals small { color: var(--fc-muted); font-variant-numeric: tabular-nums; }
+
+    .fc-md-goals .score { font-weight: 900; font-variant-numeric: tabular-nums; }
+
+    .fc-md-empty { padding: 1.25rem; border-radius: 1rem; border: 1px dashed var(--fc-line); text-align: center; font-size: .85rem; color: var(--fc-muted); }
+
     /* Ficha del jugador */
 
     .fc-row { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s ease; }
@@ -1968,6 +2215,7 @@ const tabs = [
     renderSync();
     if (playersDialog.open) renderPlayers();
     if (detailDialog.open) renderPlayerDetail();
+    if (matchDialog.open) renderMatchDetail();
   }
 
   // Los avatares de los botones de jugador del formulario también llevan la foto
@@ -2056,7 +2304,7 @@ const tabs = [
     locked = true;
     disconnectStream();
     app.classList.add('fc-locked');
-    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer, detailDialog]) if (d.open) d.close();
+    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer, detailDialog, matchDialog]) if (d.open) d.close();
     renderSync();
     if (await askPin('', true)) {
       locked = false;
@@ -2849,6 +3097,9 @@ const tabs = [
       ...mine.map((x) => {
         const li = document.createElement('li');
         li.className = 'fc-pd-match';
+        li.dataset.matchId = x.m.id;
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
         const res = document.createElement('span');
         res.className = `fc-res ${x.res}`;
         res.textContent = formLetter[x.res];
@@ -2890,6 +3141,224 @@ const tabs = [
         return li;
       }),
     );
+  }
+
+  // --- Detalle del partido: línea de tiempo con los goles ---
+  const matchDialog = $<HTMLDialogElement>('#match-detail');
+  let detailMatchId = '';
+
+  function openMatchDetail(id: string) {
+    if (!matches.some((m) => m.id === id)) return;
+    detailMatchId = id;
+    renderMatchDetail();
+    matchDialog.showModal();
+    matchDialog.scrollTop = 0;
+  }
+
+  function renderMatchDetail() {
+    const m = matches.find((x) => x.id === detailMatchId);
+    if (!m) return matchDialog.close();
+    $('#md-date').textContent = dayLabel(m.date);
+    $('#md-title').textContent = `${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer}`;
+
+    const side = (player: string, team: string, label: string) => {
+      const d = document.createElement('div');
+      d.className = 'fc-md-side';
+      const av = document.createElement('span');
+      av.className = 'fc-avatar fc-avatar-lg';
+      avatar(av, player);
+      const b = document.createElement('b');
+      b.textContent = player;
+      const sm = document.createElement('small');
+      sm.textContent = team ? `${team} · ${label}` : label;
+      d.append(av, b, sm);
+      return d;
+    };
+    const score = document.createElement('p');
+    score.textContent = `${m.homeGoals} - ${m.awayGoals}`;
+    $('#md-score').replaceChildren(side(m.homePlayer, m.homeTeam, 'local'), score, side(m.awayPlayer, m.awayTeam, 'visitante'));
+
+    // Goles con su minuto (los viejos sin minuto de juego usan el tiempo real)
+    const start = m.startedAt ?? m.goals?.[0]?.at ?? 0;
+    const goals = [...(m.goals ?? [])]
+      .map((g) => ({ ...g, minute: g.min ?? minuteOf(g.at, start) }))
+      .sort((a, b) => a.minute - b.minute || a.at - b.at);
+    const hasTimeline = goals.length > 0 && goals.length === m.homeGoals + m.awayGoals;
+    const name = (sideKey: 'home' | 'away') => (sideKey === 'home' ? m.homePlayer : m.awayPlayer);
+
+    // Marcador después de cada gol
+    let h = 0;
+    let a = 0;
+    const rows = goals.map((g) => {
+      if (g.side === 'home') h++;
+      else a++;
+      return { ...g, score: `${h}-${a}` };
+    });
+
+    const chart = $('#md-chart');
+    if (!m.homeGoals && !m.awayGoals) {
+      chart.innerHTML = '<p class="fc-md-empty">Terminó sin goles.</p>';
+    } else if (!hasTimeline) {
+      chart.innerHTML = '<p class="fc-md-empty">Este partido se cargó sin los minutos de los goles.</p>';
+    } else {
+      chart.replaceChildren(timeline(rows, m));
+    }
+
+    // Goles por tiempo
+    const half = (g: { minute: number }) => (g.minute <= 45 ? 1 : 2);
+    const count = (n: number, s: 'home' | 'away') => rows.filter((g) => half(g) === n && g.side === s).length;
+    $('#md-halves').innerHTML = '';
+    if (hasTimeline) {
+      for (const n of [1, 2]) {
+        const span = document.createElement('span');
+        span.append(`${n}° tiempo `);
+        const b = document.createElement('b');
+        b.textContent = `${count(n, 'home')}-${count(n, 'away')}`;
+        span.append(b);
+        if (n === 1) span.append('  ·  ');
+        $('#md-halves').append(span);
+      }
+    }
+
+    // Tabla gol por gol (también sirve como versión accesible del gráfico)
+    $('#md-goals').replaceChildren(
+      ...rows.map((g) => {
+        const li = document.createElement('li');
+        const min = document.createElement('b');
+        min.textContent = `${g.minute}'`;
+        const av = document.createElement('span');
+        av.className = 'fc-avatar';
+        avatar(av, name(g.side));
+        const n = document.createElement('span');
+        n.textContent = name(g.side);
+        const right = document.createElement('span');
+        right.className = 'flex items-baseline gap-2';
+        const time = document.createElement('small');
+        time.textContent = clockFmt.format(g.at);
+        const sc = document.createElement('span');
+        sc.className = 'score';
+        sc.textContent = g.score;
+        right.append(time, sc);
+        li.append(min, av, n, right);
+        return li;
+      }),
+    );
+    $('#md-goals').previousElementSibling!.toggleAttribute('hidden', rows.length === 0);
+  }
+
+  function timeline(rows: (Goal & { minute: number; score: string })[], m: Match) {
+    const max = Math.max(90, ...rows.map((g) => g.minute));
+    const pct = (min: number) => (Math.min(min, max) / max) * 100;
+    // Goles muy juntos en el mismo lado se apilan en otra fila para que no se pisen
+    const placed: { side: string; x: number; r: number }[] = [];
+    const rowOf = (side: string, x: number) => {
+      let r = 0;
+      while (placed.some((p) => p.side === side && p.r === r && Math.abs(p.x - x) < 14)) r++;
+      placed.push({ side, x, r });
+      return r;
+    };
+    // Los puntos no tocan los bordes (un gol al 1' o al 95' queda adentro del gráfico)
+    const items = rows.map((g) => {
+      const x = Math.min(96, Math.max(4, pct(g.minute)));
+      return { g, x, r: rowOf(g.side, x) };
+    });
+    const rowsNeeded = Math.max(1, ...items.map((i) => i.r + 1));
+
+    const wrap = document.createElement('div');
+    wrap.className = 'fc-tl';
+    wrap.style.setProperty('--rows', String(rowsNeeded));
+    wrap.setAttribute('role', 'img');
+    wrap.setAttribute(
+      'aria-label',
+      `Goles en el tiempo: ${rows.map((g) => `${g.minute}' ${g.side === 'home' ? m.homePlayer : m.awayPlayer}`).join(', ')}`,
+    );
+
+    const halves = document.createElement('div');
+    halves.className = 'fc-tl-halves';
+    halves.style.gridTemplateColumns = `${pct(45)}fr ${100 - pct(45)}fr`;
+    halves.innerHTML = '<span>1° tiempo</span><span>2° tiempo</span>';
+
+    const plot = document.createElement('div');
+    plot.className = 'fc-tl-plot';
+    const add = (cls: string, styles: Record<string, string> = {}, text = '') => {
+      const el = document.createElement('div');
+      el.className = cls;
+      Object.assign(el.style, styles);
+      if (text) el.textContent = text;
+      plot.append(el);
+      return el;
+    };
+    for (const t of [15, 30, 60, 75]) add('fc-tl-grid', { left: `${pct(t)}%` });
+    add('fc-tl-axis');
+    add('fc-tl-ht', { left: `${pct(45)}%` });
+
+    for (const { g, x, r } of items) {
+      const player = g.side === 'home' ? m.homePlayer : m.awayPlayer;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = `fc-tl-goal ${g.side}${x > 82 ? ' flip edge-r' : ''}${x < 12 ? ' edge-l' : ''}`;
+      b.style.setProperty('--x', `${x}%`);
+      b.style.setProperty('--r', String(r));
+      b.style.setProperty('--c', colors.get(player) ?? '#71717a');
+      b.setAttribute('aria-label', `${g.minute}', gol de ${player}, ${g.score}`);
+      const dot = document.createElement('i');
+      const lbl = document.createElement('span');
+      lbl.textContent = `${g.minute}'`;
+      const tip = document.createElement('span');
+      tip.className = 'fc-tl-tip';
+      tip.textContent = `⚽ ${player} · ${g.score} · ${clockFmt.format(g.at)}`;
+      b.append(dot, lbl, tip);
+      plot.append(b);
+    }
+
+    const ticks = document.createElement('div');
+    ticks.className = 'fc-tl-ticks';
+    for (const t of [0, 15, 30, 45, 60, 75, max]) {
+      const sp = document.createElement('span');
+      sp.style.left = `${pct(t)}%`;
+      sp.textContent = t === max && max > 90 ? `${max}'` : `${t}'`;
+      ticks.append(sp);
+    }
+
+    const legend = document.createElement('div');
+    legend.className = 'fc-tl-legend';
+    for (const [player, where] of [[m.homePlayer, 'local, arriba'], [m.awayPlayer, 'visitante, abajo']]) {
+      const sp = document.createElement('span');
+      const i = document.createElement('i');
+      i.style.setProperty('--c', colors.get(player) ?? '#71717a');
+      sp.append(i, `${player} (${where})`);
+      legend.append(sp);
+    }
+
+    wrap.append(halves, plot, ticks, legend);
+    return wrap;
+  }
+
+  // Tocar un gol en el celu muestra su cartelito (uno a la vez)
+  matchDialog.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t === matchDialog) return matchDialog.close();
+    const goal = t.closest<HTMLElement>('.fc-tl-goal');
+    matchDialog.querySelectorAll('.fc-tl-goal.show').forEach((g) => g !== goal && g.classList.remove('show'));
+    goal?.classList.toggle('show');
+  });
+  matchDialog.querySelector('[data-close-match]')!.addEventListener('click', () => matchDialog.close());
+
+  // Abrir el detalle desde la lista de partidos y desde la ficha del jugador
+  for (const container of [matchesEl, $('#pd-matches')]) {
+    container.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('.fc-delete, .fc-avatar.has-photo')) return;
+      const card = t.closest<HTMLElement>('[data-match-id]');
+      if (card) openMatchDetail(card.dataset.matchId!);
+    });
+    container.addEventListener('keydown', (e) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>('[data-match-id]');
+      if (card && e.target === card && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        openMatchDetail(card.dataset.matchId!);
+      }
+    });
   }
 
   detailDialog.querySelector('[data-close-detail]')!.addEventListener('click', () => detailDialog.close());
@@ -3052,6 +3521,11 @@ const tabs = [
   function matchEl(m: Match) {
     const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
     li.style.viewTransitionName = `m-${m.id.replace(/[^a-z0-9-]/gi, '')}`;
+    // Tocar la tarjeta abre el detalle (salvo el tacho o una foto)
+    li.dataset.matchId = m.id;
+    li.tabIndex = 0;
+    li.setAttribute('role', 'button');
+    li.setAttribute('aria-label', `Ver el partido ${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer}`);
     const [home, away] = li.querySelectorAll<HTMLElement>('.fc-match-side');
     const [hg, ag] = li.querySelectorAll<HTMLElement>('.fc-score span');
     const fill = (side: HTMLElement, player: string, team: string) => {
