@@ -2048,9 +2048,12 @@ const tabs = [
     fxFrame = requestAnimationFrame(frame);
   }
 
-  // --- Sonido de gol: hinchada sintetizada (Web Audio) + grito "¡GOOOL!" (voz del celu) ---
-  let audioCtx: AudioContext | null = null;
-  let speechReady = false;
+  // --- Sonido de gol: grito del relator + hinchada (public/fc26/gol.mp3, con fade de entrada y salida) ---
+  // Con <audio> (y no Web Audio) en iPhone suena aunque el celu esté en silencio
+  const goalAudio = new Audio('/fc26/gol.mp3');
+  goalAudio.preload = 'auto';
+  let audioUnlocked = false;
+  let goalPlaying = false;
   let soundOn = (() => {
     try {
       return localStorage.getItem('fc26-sound') !== 'off';
@@ -2067,136 +2070,45 @@ const tabs = [
     btn.querySelector<SVGElement>('[data-sound=off]')!.classList.toggle('hidden', soundOn);
   }
 
-  // Los celus solo dejan sonar después de un toque: el primero "destraba" el audio y la voz
+  // Los celus solo dejan sonar después de un toque: el primero "destraba" el audio
+  // (se reproduce en silencio y se frena, salvo que justo ese toque haya sido un gol)
   function unlockAudio() {
-    try {
-      audioCtx ??= new AudioContext();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    } catch {}
-    if (!speechReady && 'speechSynthesis' in window) {
-      speechSynthesis.speak(Object.assign(new SpeechSynthesisUtterance(' '), { volume: 0 }));
-      speechReady = true;
-    }
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    goalAudio.muted = true;
+    goalAudio
+      .play()
+      .then(() => {
+        if (goalPlaying) return;
+        goalAudio.pause();
+        goalAudio.currentTime = 0;
+      })
+      .catch(() => (audioUnlocked = false))
+      .finally(() => (goalAudio.muted = false));
   }
   document.addEventListener('pointerdown', unlockAudio, { capture: true });
+  goalAudio.addEventListener('ended', () => (goalPlaying = false));
 
   $('#sound-toggle').addEventListener('click', () => {
     soundOn = !soundOn;
     try {
       localStorage.setItem('fc26-sound', soundOn ? 'on' : 'off');
     } catch {}
+    if (!soundOn) {
+      goalAudio.pause();
+      goalPlaying = false;
+    }
     renderSoundToggle();
     notify(soundOn ? '🔊 Sonido de gol activado' : '🔇 Sonido de gol apagado');
   });
 
-  function noiseBuffer(ctx: BaseAudioContext, seconds: number) {
-    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * seconds), ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    return buf;
-  }
-
-  // Hinchada: rugido (ruido filtrado) + "ooooh" de muchas voces + palmas/cánticos que laten
-  function crowd(ctx: BaseAudioContext, out: AudioNode, t0 = ctx.currentTime, dur = 4.5) {
-    const env = (g: GainNode, peak: number, attack = 0.5) => {
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(peak, t0 + attack);
-      g.gain.setValueAtTime(peak, t0 + dur * 0.55);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    };
-    const noise = noiseBuffer(ctx, dur);
-
-    // Rugido grave y medio
-    for (const [freq, q, peak] of [[350, 0.6, 0.55], [1100, 0.9, 0.35], [2600, 1.2, 0.12]] as const) {
-      const src = ctx.createBufferSource();
-      src.buffer = noise;
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = freq;
-      bp.Q.value = q;
-      const g = ctx.createGain();
-      env(g, peak, 0.35);
-      src.connect(bp).connect(g).connect(out);
-      src.start(t0);
-      src.stop(t0 + dur);
-    }
-
-    // "Ooooh": muchas voces desafinadas entre sí, que suben de tono al festejar
-    const voices = ctx.createGain();
-    env(voices, 0.09, 0.6);
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = 1400;
-    voices.connect(lp).connect(out);
-    for (let i = 0; i < 14; i++) {
-      const o = ctx.createOscillator();
-      o.type = 'sawtooth';
-      const base = 180 + Math.random() * 160;
-      o.frequency.setValueAtTime(base, t0);
-      o.frequency.linearRampToValueAtTime(base * 1.25, t0 + 0.8);
-      o.frequency.linearRampToValueAtTime(base * 1.15, t0 + dur);
-      const vib = ctx.createOscillator();
-      vib.frequency.value = 4 + Math.random() * 3;
-      const vibGain = ctx.createGain();
-      vibGain.gain.value = base * 0.02;
-      vib.connect(vibGain).connect(o.frequency);
-      o.connect(voices);
-      o.start(t0);
-      vib.start(t0);
-      o.stop(t0 + dur);
-      vib.stop(t0 + dur);
-    }
-
-    // Palmas / bombo: golpes de ruido corto a ritmo de cántico
-    const clapBuf = noiseBuffer(ctx, 0.08);
-    for (let b = 0; b < 8; b++) {
-      const at = t0 + 1.1 + b * 0.38;
-      if (at > t0 + dur - 0.3) break;
-      const src = ctx.createBufferSource();
-      src.buffer = clapBuf;
-      const hp = ctx.createBiquadFilter();
-      hp.type = 'bandpass';
-      hp.frequency.value = b % 2 ? 1800 : 900;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.5, at);
-      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
-      src.connect(hp).connect(g).connect(out);
-      src.start(at);
-    }
-  }
-
-  // El grito con la voz del celu, en castellano y bien estirado
-  function shout() {
-    if (!('speechSynthesis' in window)) return;
-    const voices = speechSynthesis.getVoices();
-    const voice =
-      voices.find((v) => /es[-_]AR/i.test(v.lang)) ??
-      voices.find((v) => /es[-_](419|MX|US)/i.test(v.lang)) ??
-      voices.find((v) => v.lang?.toLowerCase().startsWith('es'));
-    const u = new SpeechSynthesisUtterance('¡Goooooooool!');
-    u.lang = voice?.lang ?? 'es-AR';
-    if (voice) u.voice = voice;
-    u.rate = 0.75;
-    u.pitch = 1.4;
-    u.volume = 1;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  }
-
   function goalSound() {
     if (!soundOn) return;
-    try {
-      audioCtx ??= new AudioContext();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const master = audioCtx.createGain();
-      master.gain.value = 0.9;
-      // Compresor para que suene fuerte sin saturar
-      const comp = audioCtx.createDynamicsCompressor();
-      master.connect(comp).connect(audioCtx.destination);
-      crowd(audioCtx, master);
-    } catch {}
-    // El grito arranca un toque después, cuando la pelota entra
-    setTimeout(shout, 450);
+    goalPlaying = true;
+    goalAudio.muted = false;
+    // Otro gol mientras suena: arranca de nuevo
+    goalAudio.currentTime = 0;
+    goalAudio.play().catch(() => (goalPlaying = false));
   }
 
   function celebrate(scoreEl?: Element | null) {
