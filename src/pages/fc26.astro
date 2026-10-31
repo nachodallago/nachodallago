@@ -242,6 +242,35 @@ const tabs = [
       <input type="file" id="photo-input" accept="image/*" class="sr-only" tabindex="-1" aria-hidden="true" />
     </dialog>
 
+    <!-- Ajustar la foto antes de subirla -->
+    <dialog id="crop-dialog" class="fc-sheet fc-sheet-sm" aria-labelledby="crop-title">
+      <div class="fc-grabber" aria-hidden="true"></div>
+      <h2 id="crop-title" class="text-center text-lg font-extrabold">Ajustá la foto</h2>
+      <div id="crop-stage" class="fc-crop" aria-label="Arrastrá para mover la foto">
+        <img id="crop-img" alt="" draggable="false" />
+        <div class="fc-crop-mask" aria-hidden="true"></div>
+      </div>
+      <label class="fc-crop-zoom">
+        <span aria-hidden="true">−</span>
+        <input id="crop-zoom" type="range" min="1" max="4" step="0.01" value="1" aria-label="Zoom" />
+        <span aria-hidden="true">+</span>
+      </label>
+      <p class="fc-muted mt-1 text-center text-xs">Arrastrá para moverla · pellizcá o usá la barra para el zoom</p>
+      <div class="mt-4 grid grid-cols-2 gap-2">
+        <button type="button" id="crop-cancel" class="fc-btn fc-btn-ghost">Cancelar</button>
+        <button type="button" id="crop-ok" class="fc-btn fc-btn-primary">Usar foto</button>
+      </div>
+    </dialog>
+
+    <!-- Ver la foto en grande -->
+    <dialog id="photo-viewer" class="fc-viewer" aria-label="Foto de perfil">
+      <figure>
+        <img id="viewer-img" alt="" />
+        <figcaption id="viewer-name"></figcaption>
+      </figure>
+      <button type="button" id="viewer-change" class="fc-btn fc-btn-ghost">Cambiar foto</button>
+    </dialog>
+
     <!-- PIN para cargar o borrar -->
     <dialog id="pin-dialog" class="fc-sheet fc-sheet-sm" aria-labelledby="pin-title">
       <form id="pin-form" class="text-center" novalidate>
@@ -798,6 +827,163 @@ const tabs = [
     .fc-pin-actions { grid-template-columns: 1fr 1fr; }
     .fc-pin-gate .fc-pin-actions { grid-template-columns: 1fr; }
 
+    /* Editor de recorte */
+
+    .fc-crop {
+
+      position: relative;
+
+      width: min(100%, 18rem);
+
+      aspect-ratio: 1;
+
+      margin: 1rem auto 0;
+
+      overflow: hidden;
+
+      border-radius: 1rem;
+
+      background: #000;
+
+      touch-action: none;
+
+      cursor: grab;
+
+      user-select: none;
+
+      -webkit-user-select: none;
+
+    }
+
+    .fc-crop:active { cursor: grabbing; }
+
+    .fc-crop img {
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      max-width: none;
+
+      transform-origin: 0 0;
+
+      pointer-events: none;
+
+      -webkit-user-drag: none;
+
+    }
+
+    /* Fuera del círculo se oscurece: lo que queda adentro es lo que se ve en el avatar */
+
+    .fc-crop-mask {
+
+      position: absolute;
+
+      inset: 0;
+
+      pointer-events: none;
+
+      background: radial-gradient(circle closest-side, transparent 99%, rgb(0 0 0 / .6) 100%);
+
+      box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1);
+
+    }
+
+    .fc-crop-mask::after {
+
+      content: '';
+
+      position: absolute;
+
+      inset: 0;
+
+      border-radius: 999px;
+
+      box-shadow: 0 0 0 2px rgb(255 255 255 / .85);
+
+    }
+
+    .fc-crop-zoom { display: flex; align-items: center; gap: .75rem; margin: 1rem auto 0; width: min(100%, 18rem); font-weight: 800; color: var(--fc-muted); }
+
+    .fc-crop-zoom input { flex: 1; accent-color: var(--fc-accent); height: 2.75rem; }
+
+
+    /* Visor de foto (tocar y se agranda) */
+
+    .fc-viewer {
+
+      position: fixed;
+
+      inset: 0;
+
+      width: 100%;
+
+      height: 100%;
+
+      max-width: none;
+
+      max-height: none;
+
+      margin: 0;
+
+      padding: 1.5rem;
+
+      border: 0;
+
+      background: transparent;
+
+      color: #fff;
+
+      display: none;
+
+      place-content: center;
+
+      justify-items: center;
+
+      gap: 1.25rem;
+
+      opacity: 0;
+
+      transition: opacity .2s ease, display .25s allow-discrete, overlay .25s allow-discrete;
+
+    }
+
+    .fc-viewer[open] { display: grid; opacity: 1; }
+
+    @starting-style { .fc-viewer[open] { opacity: 0; } }
+
+    .fc-viewer::backdrop { background: rgb(0 0 0 / .85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+
+    .fc-viewer figure { display: grid; justify-items: center; gap: 1rem; }
+
+    .fc-viewer img {
+
+      width: min(82vw, 26rem);
+
+      aspect-ratio: 1;
+
+      border-radius: 999px;
+
+      object-fit: cover;
+
+      box-shadow: 0 0 0 3px var(--c, #fff), 0 30px 80px rgb(0 0 0 / .6);
+
+      transition: scale .35s var(--ease-out);
+
+    }
+
+    @starting-style { .fc-viewer[open] img { scale: .6; } }
+
+    .fc-viewer figcaption { font-size: 1.4rem; font-weight: 800; }
+
+    .fc-viewer .fc-btn[hidden] { display: none; }
+
+    .fc-avatar.has-photo { cursor: zoom-in; }
+
+    .fc-picks .fc-avatar.has-photo, .fc-preview .fc-avatar.has-photo { cursor: inherit; }
+
     /* Fotos de perfil */
 
     .fc-avatar.has-photo { background-size: cover; background-position: center; color: transparent; }
@@ -1150,6 +1336,7 @@ const tabs = [
   };
 
   function avatar(el: HTMLElement, name: string) {
+    el.dataset.player = name;
     el.textContent = initials(name);
     el.style.setProperty('--c', colors.get(name) ?? '#71717a');
     const v = photos[name];
@@ -1348,7 +1535,7 @@ const tabs = [
     locked = true;
     disconnectStream();
     app.classList.add('fc-locked');
-    for (const d of [sheet, confirmDialog, playersDialog]) if (d.open) d.close();
+    for (const d of [sheet, confirmDialog, playersDialog, cropDialog, viewer]) if (d.open) d.close();
     renderSync();
     if (await askPin('', true)) {
       locked = false;
@@ -1662,50 +1849,176 @@ const tabs = [
     playersDialog.showModal();
   }
 
-  // Recorta al centro en cuadrado y achica: la foto queda en pocos KB
-  async function squarePhoto(file: File): Promise<Blob> {
-    const url = URL.createObjectURL(file);
-    try {
-      const img = new Image();
-      img.src = url;
-      await img.decode();
-      const side = Math.min(img.naturalWidth, img.naturalHeight);
-      if (!side) throw new Error('No se pudo leer la foto');
-      const size = Math.min(320, side);
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = size;
-      canvas.getContext('2d')!.drawImage(
-        img,
-        (img.naturalWidth - side) / 2,
-        (img.naturalHeight - side) / 2,
-        side,
-        side,
-        0,
-        0,
-        size,
-        size,
-      );
-      const encode = (type: string, q: number) =>
-        new Promise<Blob | null>((ok) => canvas.toBlob(ok, type, q));
-      // WebP si el navegador lo sabe generar; si no, JPEG
-      const webp = await encode('image/webp', 0.85);
-      const blob = webp?.type === 'image/webp' ? webp : await encode('image/jpeg', 0.85);
-      if (!blob) throw new Error('No se pudo procesar la foto');
-      return blob;
-    } catch (e) {
-      throw e instanceof Error && e.message.startsWith('No se pudo') ? e : new Error('No se pudo leer la foto');
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+  // --- Editor de recorte: mover con el dedo, zoom con pellizco, barra o rueda ---
+  const cropDialog = $<HTMLDialogElement>('#crop-dialog');
+  const cropStage = $('#crop-stage');
+  const cropImg = $<HTMLImageElement>('#crop-img');
+  const cropZoom = $<HTMLInputElement>('#crop-zoom');
+  const PHOTO_SIZE = 600; // se guarda en 600×600: se ve nítida también en grande
+  const crop = { x: 0, y: 0, zoom: 1, base: 1, w: 0, h: 0, stage: 0 };
+  let cropResolve: ((b: Blob | null) => void) | null = null;
+
+  const cropScale = () => crop.base * crop.zoom;
+  function clampCrop() {
+    // La foto siempre cubre todo el cuadro (no quedan bordes vacíos)
+    const s = cropScale();
+    crop.x = Math.min(0, Math.max(crop.stage - crop.w * s, crop.x));
+    crop.y = Math.min(0, Math.max(crop.stage - crop.h * s, crop.y));
+  }
+  function drawCrop() {
+    clampCrop();
+    cropImg.style.transform = `translate(${crop.x}px, ${crop.y}px) scale(${cropScale()})`;
+    cropZoom.value = String(crop.zoom);
+  }
+  // Zoom manteniendo fijo el punto (px, py) del cuadro
+  function zoomAt(zoom: number, px = crop.stage / 2, py = crop.stage / 2) {
+    const before = cropScale();
+    crop.zoom = Math.min(4, Math.max(1, zoom));
+    const after = cropScale();
+    crop.x = px - ((px - crop.x) / before) * after;
+    crop.y = py - ((py - crop.y) / before) * after;
+    drawCrop();
   }
 
+  const pointers = new Map<number, { x: number; y: number }>();
+  const stagePoint = (e: PointerEvent | WheelEvent) => {
+    const r = cropStage.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  cropStage.addEventListener('pointerdown', (e) => {
+    cropStage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, stagePoint(e));
+  });
+  cropStage.addEventListener('pointermove', (e) => {
+    const prev = pointers.get(e.pointerId);
+    if (!prev) return;
+    const now = stagePoint(e);
+    if (pointers.size === 1) {
+      crop.x += now.x - prev.x;
+      crop.y += now.y - prev.y;
+      drawCrop();
+    } else if (pointers.size === 2) {
+      // Pellizco: el zoom sigue la distancia entre los dos dedos
+      const other = [...pointers].find(([id]) => id !== e.pointerId)![1];
+      const d0 = Math.hypot(prev.x - other.x, prev.y - other.y);
+      const d1 = Math.hypot(now.x - other.x, now.y - other.y);
+      if (d0 > 0) zoomAt(crop.zoom * (d1 / d0), (now.x + other.x) / 2, (now.y + other.y) / 2);
+    }
+    pointers.set(e.pointerId, now);
+  });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+    cropStage.addEventListener(type, (e) => pointers.delete(e.pointerId));
+  }
+  cropStage.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      const p = stagePoint(e);
+      zoomAt(crop.zoom * Math.exp(-e.deltaY * 0.0015), p.x, p.y);
+    },
+    { passive: false },
+  );
+  cropZoom.addEventListener('input', () => zoomAt(Number(cropZoom.value)));
+
+  async function cropPhoto(file: File): Promise<Blob | null> {
+    const url = URL.createObjectURL(file);
+    try {
+      cropImg.src = url;
+      await cropImg.decode();
+    } catch {
+      URL.revokeObjectURL(url);
+      throw new Error('No se pudo leer la foto');
+    }
+    crop.w = cropImg.naturalWidth;
+    crop.h = cropImg.naturalHeight;
+    cropDialog.showModal();
+    crop.stage = cropStage.getBoundingClientRect().width;
+    crop.base = crop.stage / Math.min(crop.w, crop.h);
+    crop.zoom = 1;
+    // Arranca centrada
+    crop.x = (crop.stage - crop.w * crop.base) / 2;
+    crop.y = (crop.stage - crop.h * crop.base) / 2;
+    drawCrop();
+    const blob = await new Promise<Blob | null>((ok) => (cropResolve = ok));
+    URL.revokeObjectURL(url);
+    return blob;
+  }
+
+  async function exportCrop() {
+    const s = cropScale();
+    const side = crop.stage / s;
+    const size = Math.min(PHOTO_SIZE, Math.round(side));
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    canvas.getContext('2d')!.drawImage(cropImg, -crop.x / s, -crop.y / s, side, side, 0, 0, size, size);
+    const encode = (type: string, q: number) => new Promise<Blob | null>((ok) => canvas.toBlob(ok, type, q));
+    // WebP si el navegador lo sabe generar; si no, JPEG
+    const webp = await encode('image/webp', 0.85);
+    return webp?.type === 'image/webp' ? webp : await encode('image/jpeg', 0.85);
+  }
+
+  $('#crop-ok').addEventListener('click', async () => {
+    const blob = await exportCrop();
+    const done = cropResolve;
+    cropResolve = null;
+    cropDialog.close();
+    done?.(blob);
+  });
+  $('#crop-cancel').addEventListener('click', () => cropDialog.close());
+  cropDialog.addEventListener('close', () => {
+    cropResolve?.(null);
+    cropResolve = null;
+    pointers.clear();
+  });
+
+  // --- Visor: tocar una foto la abre en grande ---
+  const viewer = $<HTMLDialogElement>('#photo-viewer');
+  const viewerImg = $<HTMLImageElement>('#viewer-img');
+  let viewerPlayer = '';
+
+  function openViewer(name: string) {
+    const v = photos[name];
+    if (!v) return;
+    viewerPlayer = name;
+    viewerImg.src = `${API}/photos/${encodeURIComponent(name)}?v=${v}`;
+    viewerImg.alt = `Foto de ${name}`;
+    viewer.style.setProperty('--c', colors.get(name) ?? '#fff');
+    $('#viewer-name').textContent = name;
+    $('#viewer-change').hidden = !(online && canWrite && roster.includes(name));
+    viewer.showModal();
+  }
+  // Tocar en cualquier lado (menos el botón) cierra
+  viewer.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('#viewer-change')) viewer.close();
+  });
+  $('#viewer-change').addEventListener('click', () => {
+    viewer.close();
+    photoFor = viewerPlayer;
+    photoInput.value = '';
+    photoInput.click();
+  });
+  // Cualquier avatar con foto (menos los botones para elegir jugador) abre el visor
+  document.addEventListener('click', (e) => {
+    const av = (e.target as HTMLElement).closest<HTMLElement>('.fc-avatar.has-photo');
+    if (!av || av.closest('.fc-picks, .fc-preview') || !av.dataset.player) return;
+    openViewer(av.dataset.player);
+  });
+
   async function changePhoto(name: string, file: File | null) {
-    busyPlayer = name;
-    renderPlayers();
     try {
       const path = `/photos/${encodeURIComponent(name)}`;
-      if (file) await write('PUT', path, await squarePhoto(file));
-      else await write('DELETE', path);
+      if (file) {
+        // Primero se ajusta; si cancela, no se sube nada
+        const blob = await cropPhoto(file);
+        if (!blob) return;
+        busyPlayer = name;
+        renderPlayers();
+        await write('PUT', path, blob);
+      } else {
+        busyPlayer = name;
+        renderPlayers();
+        await write('DELETE', path);
+      }
       notify(file ? `📷 Foto de ${name} actualizada` : `Foto de ${name} quitada`);
     } catch (err) {
       if (!(err instanceof Cancelled)) notify(errorText(err));
@@ -1727,9 +2040,9 @@ const tabs = [
   playersDialog.addEventListener('click', (e) => {
     if (e.target === playersDialog) playersDialog.close();
   });
-  // Tocar un avatar de la tabla abre el panel de fotos
+  // Tocar un avatar de la tabla sin foto abre el panel para subirla (con foto, abre el visor)
   standingsEl.addEventListener('click', (e) => {
-    if ((e.target as HTMLElement).closest('.fc-avatar')) openPlayers();
+    if ((e.target as HTMLElement).closest('.fc-avatar:not(.has-photo)')) openPlayers();
   });
 
   // Al volver a la pestaña se traen los partidos que cargaron los demás
