@@ -20,5 +20,9 @@ export default defineConfig({
   integrations: [sitemap({ filter: (page) => !page.includes('/fc26') })],
   vite: {
     plugins: [tailwindcss()],
+    // En dev, la API de FC 26 corre aparte con `npm run api`
+    server: {
+      proxy: { '/api/fc26': 'http://127.0.0.1:8787' },
+    },
   },
 });
