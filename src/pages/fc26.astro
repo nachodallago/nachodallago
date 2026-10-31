@@ -1456,11 +1456,25 @@ const tabs = [
 
     .fc-tl-ticks span:last-child { translate: -100% 0; }
 
-    .fc-tl-legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; margin-top: .4rem; font-size: .75rem; color: var(--fc-muted); }
+    .fc-tl-player { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 
-    .fc-tl-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+    .fc-tl-player.top { margin-bottom: .6rem; }
 
-    .fc-tl-legend i { width: .6rem; height: .6rem; border-radius: 999px; background: var(--c); }
+    .fc-tl-player.bottom { margin-top: .35rem; }
+
+    .fc-tl-player .fc-avatar { width: 1.9rem; height: 1.9rem; font-size: .6rem; box-shadow: 0 0 0 2px #121416, 0 0 0 3.5px var(--c); }
+
+    .fc-tl-player b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .fc-tl-player small { margin-left: auto; font-size: .72rem; color: var(--fc-muted); white-space: nowrap; }
+
+    /* Flechita que indica de qué lado de la línea están sus goles */
+
+    .fc-tl-player b::after { margin-left: .35rem; font-size: .7rem; color: var(--fc-muted); }
+
+    .fc-tl-player.top b::after { content: '▼'; }
+
+    .fc-tl-player.bottom b::after { content: '▲'; }
 
     .fc-md-halves { margin-top: .75rem; font-size: .85rem; color: var(--fc-muted); }
 
@@ -3320,17 +3334,24 @@ const tabs = [
       ticks.append(sp);
     }
 
-    const legend = document.createElement('div');
-    legend.className = 'fc-tl-legend';
-    for (const [player, where] of [[m.homePlayer, 'local, arriba'], [m.awayPlayer, 'visitante, abajo']]) {
-      const sp = document.createElement('span');
-      const i = document.createElement('i');
-      i.style.setProperty('--c', colors.get(player) ?? '#71717a');
-      sp.append(i, `${player} (${where})`);
-      legend.append(sp);
-    }
+    // El jugador A (local) arriba del gráfico y el B (visitante) abajo, del lado de sus goles
+    const who = (player: string, where: string, cls: string) => {
+      const row = document.createElement('div');
+      row.className = `fc-tl-player ${cls}`;
+      row.style.setProperty('--c', colors.get(player) ?? '#71717a');
+      const av = document.createElement('span');
+      av.className = 'fc-avatar';
+      avatar(av, player);
+      const name = document.createElement('b');
+      name.textContent = player;
+      const sm = document.createElement('small');
+      const goals = rows.filter((g) => (cls === 'top' ? g.side === 'home' : g.side === 'away')).length;
+      sm.textContent = `${where} · ${goals} ${goals === 1 ? 'gol' : 'goles'}`;
+      row.append(av, name, sm);
+      return row;
+    };
 
-    wrap.append(halves, plot, ticks, legend);
+    wrap.append(who(m.homePlayer, 'local', 'top'), halves, plot, ticks, who(m.awayPlayer, 'visitante', 'bottom'));
     return wrap;
   }
 
