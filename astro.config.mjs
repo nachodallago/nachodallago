@@ -17,7 +17,7 @@ export default defineConfig({
     prefetchAll: true,
     defaultStrategy: 'viewport',
   },
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (page) => !page.includes('/fc26') })],
   vite: {
     plugins: [tailwindcss()],
   },

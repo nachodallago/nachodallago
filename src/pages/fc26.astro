@@ -1,0 +1,452 @@
+---
+import Layout from '../layouts/Layout.astro';
+import EaLogo from '../components/EaLogo.astro';
+
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<Layout
+  title="EA SPORTS FC 26 — Resultados · Nacho Dal Lago"
+  description="Cargá los resultados de los partidos de EA SPORTS FC 26: quién jugó, con qué equipo y cómo salió."
+  noindex
+>
+  <div class="pitch min-h-dvh">
+    <header class="border-b-4 border-white/80 bg-black/70 backdrop-blur pt-[env(safe-area-inset-top)]">
+      <div class="mx-auto flex max-w-5xl items-center gap-4 px-5 py-4">
+        <EaLogo class="size-14 shrink-0 drop-shadow-[0_0_12px_rgb(255_255_255/.35)]" />
+        <div class="min-w-0">
+          <p class="font-mono text-[11px] tracking-[.3em] text-white/60">EA SPORTS</p>
+          <h1 class="text-xl font-black italic uppercase min-[380px]:text-2xl sm:text-3xl">FC 26 <span class="hidden text-acid sm:inline">·</span><br class="sm:hidden" /> Resultados</h1>
+        </div>
+        <a href="/" class="ml-auto shrink-0 font-mono text-xs text-white/60 underline-offset-4 hover:text-white hover:underline">← inicio</a>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto max-w-5xl space-y-10 px-5 py-10">
+      <!-- Cargar partido -->
+      <section aria-labelledby="cargar">
+        <h2 id="cargar" class="section-title">⚽ Cargar partido</h2>
+
+        <form id="match-form" class="scoreboard mt-4 p-5 sm:p-6" autocomplete="off">
+          <div class="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
+            <fieldset class="space-y-3">
+              <legend class="side-label">Local</legend>
+              <label class="field">
+                <span>Jugador</span>
+                <input name="homePlayer" list="players" required maxlength="40" placeholder="Ej: Nacho" />
+              </label>
+              <label class="field">
+                <span>Equipo</span>
+                <input name="homeTeam" list="teams" maxlength="40" placeholder="Ej: Boca Juniors" />
+              </label>
+            </fieldset>
+
+            <div class="flex items-center justify-center gap-3 py-2">
+              <input name="homeGoals" type="number" min="0" max="99" required value="0" class="goal-input" aria-label="Goles local" />
+              <span class="text-3xl font-black text-white/50">–</span>
+              <input name="awayGoals" type="number" min="0" max="99" required value="0" class="goal-input" aria-label="Goles visitante" />
+            </div>
+
+            <fieldset class="space-y-3">
+              <legend class="side-label sm:ml-auto">Visitante</legend>
+              <label class="field">
+                <span>Jugador</span>
+                <input name="awayPlayer" list="players" required maxlength="40" placeholder="Ej: Juan" />
+              </label>
+              <label class="field">
+                <span>Equipo</span>
+                <input name="awayTeam" list="teams" maxlength="40" placeholder="Ej: River Plate" />
+              </label>
+            </fieldset>
+          </div>
+
+          <div class="mt-5 flex flex-wrap items-end gap-4 border-t border-white/10 pt-5">
+            <label class="field w-44">
+              <span>Fecha</span>
+              <input name="date" type="date" required value={today} />
+            </label>
+            <p id="form-error" class="text-sm font-semibold text-red-400" role="alert"></p>
+            <button type="submit" class="kickoff w-full sm:ml-auto sm:w-auto">Pitazo final · Guardar</button>
+          </div>
+
+          <datalist id="players"></datalist>
+          <datalist id="teams"></datalist>
+        </form>
+      </section>
+
+      <!-- Tabla de posiciones -->
+      <section aria-labelledby="tabla">
+        <h2 id="tabla" class="section-title">🏆 Tabla de posiciones</h2>
+        <div class="scoreboard mt-4 overflow-x-auto">
+          <table class="standings w-full min-w-[34rem] text-sm">
+            <thead>
+              <tr>
+                <th class="w-10">#</th>
+                <th class="text-left">Jugador</th>
+                <th title="Partidos jugados">PJ</th>
+                <th title="Ganados">G</th>
+                <th title="Empatados">E</th>
+                <th title="Perdidos">P</th>
+                <th title="Goles a favor">GF</th>
+                <th title="Goles en contra">GC</th>
+                <th title="Diferencia de gol">DG</th>
+                <th title="Puntos">Pts</th>
+              </tr>
+            </thead>
+            <tbody id="standings"></tbody>
+          </table>
+          <p id="standings-empty" class="p-6 text-center text-white/60">Todavía no hay partidos. ¡Que ruede la pelota!</p>
+        </div>
+      </section>
+
+      <!-- Partidos -->
+      <section aria-labelledby="partidos">
+        <div class="flex flex-wrap items-center gap-3">
+          <h2 id="partidos" class="section-title">📋 Partidos</h2>
+          <div class="ml-auto flex flex-wrap gap-2">
+            <button type="button" id="export" class="chip-btn">Exportar</button>
+            <label class="chip-btn cursor-pointer">
+              Importar
+              <input type="file" id="import" accept="application/json,.json" class="sr-only" />
+            </label>
+          </div>
+        </div>
+        <ol id="matches" class="mt-4 space-y-3"></ol>
+        <p id="matches-empty" class="scoreboard mt-4 p-6 text-center text-white/60">Sin partidos cargados.</p>
+        <p class="mt-4 font-mono text-xs text-white/50">
+          Los resultados se guardan en este navegador. Usá “Exportar” para pasarle el archivo a tus amigos y “Importar” para sumarlo.
+        </p>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<template id="match-tpl">
+  <li class="match scoreboard flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+    <time class="w-full font-mono text-[11px] tracking-widest text-white/50 sm:w-24"></time>
+    <div class="side flex-1 text-right">
+      <p class="player font-bold text-white"></p>
+      <p class="team text-xs text-white/60"></p>
+    </div>
+    <p class="score font-mono text-2xl font-black tabular-nums"></p>
+    <div class="side flex-1">
+      <p class="player font-bold text-white"></p>
+      <p class="team text-xs text-white/60"></p>
+    </div>
+    <button type="button" class="delete grid size-8 place-items-center rounded-full text-white/40 hover:bg-red-500/20 hover:text-red-300" aria-label="Borrar partido">✕</button>
+  </li>
+</template>
+
+<style>
+  .pitch {
+    color: #fff;
+    background:
+      radial-gradient(circle at 50% 22rem, transparent 9rem, rgb(255 255 255 / .18) 9rem, rgb(255 255 255 / .18) calc(9rem + 3px), transparent calc(9rem + 3px)),
+      linear-gradient(to bottom, transparent 22rem, rgb(255 255 255 / .18) 22rem, rgb(255 255 255 / .18) calc(22rem + 3px), transparent calc(22rem + 3px)),
+      repeating-linear-gradient(to bottom, #1f7a3a 0 6rem, #23883f 6rem 12rem);
+  }
+
+  .section-title {
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    color: #fff;
+    background: #000;
+    padding: .35rem 1rem;
+    clip-path: polygon(0 0, 100% 0, calc(100% - .8rem) 100%, 0 100%);
+    padding-right: 1.8rem;
+  }
+
+  .scoreboard {
+    border-radius: .9rem;
+    background: rgb(0 0 0 / .72);
+    border: 2px solid rgb(255 255 255 / .14);
+    box-shadow: 0 10px 30px rgb(0 0 0 / .35);
+    backdrop-filter: blur(6px);
+  }
+
+  .side-label {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--color-acid);
+    margin-bottom: .25rem;
+  }
+
+  .field { display: grid; gap: .3rem; }
+  .field span { font-size: .75rem; color: rgb(255 255 255 / .65); }
+  .field input {
+    min-height: 2.75rem;
+    border-radius: .55rem;
+    border: 1px solid rgb(255 255 255 / .18);
+    background: rgb(255 255 255 / .06);
+    padding: 0 .8rem;
+    color: #fff;
+    font-size: 1rem;
+  }
+  .field input:focus { border-color: var(--color-acid); outline: none; }
+
+  .goal-input {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: .7rem;
+    border: 2px solid rgb(255 255 255 / .25);
+    background: #000;
+    color: var(--color-acid);
+    font-family: var(--font-mono);
+    font-size: 2.4rem;
+    font-weight: 900;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .goal-input::-webkit-inner-spin-button,
+  .goal-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .goal-input:focus { border-color: var(--color-acid); outline: none; }
+
+  .kickoff {
+    min-height: 3rem;
+    padding: 0 1.5rem;
+    border-radius: 999px;
+    background: var(--color-acid);
+    color: #050507;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    transition: transform .15s ease, box-shadow .2s ease;
+  }
+  .kickoff:hover { box-shadow: 0 0 28px rgb(196 255 77 / .45); }
+  .kickoff:active { transform: scale(.97); }
+
+  .chip-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / .6);
+    border: 1px solid rgb(255 255 255 / .2);
+    font-size: .85rem;
+    font-weight: 600;
+  }
+  .chip-btn:hover { border-color: var(--color-acid); }
+
+  .standings th {
+    padding: .7rem .5rem;
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .1em;
+    color: rgb(255 255 255 / .55);
+    border-bottom: 2px solid rgb(255 255 255 / .12);
+  }
+  .standings :global(td) {
+    padding: .65rem .5rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid rgb(255 255 255 / .06);
+  }
+  .standings :global(td.name) { text-align: left; font-weight: 700; }
+  .standings :global(td.pts) { font-weight: 900; color: var(--color-acid); }
+  .standings :global(tr:first-child td:first-child) { color: #facc15; }
+
+  :global(.match .score) { min-width: 5.5rem; text-align: center; }
+  :global(.match .win .player)::after { content: ' ✓'; color: var(--color-acid); }
+</style>
+
+<script>
+  type Match = {
+    id: string;
+    date: string;
+    homePlayer: string;
+    homeTeam: string;
+    homeGoals: number;
+    awayPlayer: string;
+    awayTeam: string;
+    awayGoals: number;
+  };
+
+  const KEY = 'fc26-matches';
+  const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+
+  const form = $<HTMLFormElement>('#match-form');
+  const formError = $('#form-error');
+  const matchesEl = $('#matches');
+  const matchesEmpty = $('#matches-empty');
+  const standingsEl = $('#standings');
+  const standingsEmpty = $('#standings-empty');
+  const tpl = $<HTMLTemplateElement>('#match-tpl');
+
+  function load(): Match[] {
+    try {
+      const data = JSON.parse(localStorage.getItem(KEY) ?? '[]');
+      return Array.isArray(data) ? data.filter(isMatch) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(matches));
+    } catch {
+      // Sin storage (modo privado): los datos viven solo mientras la pestaña esté abierta
+    }
+  }
+
+  function isMatch(m: any): m is Match {
+    return (
+      m && typeof m.id === 'string' && typeof m.date === 'string' &&
+      typeof m.homePlayer === 'string' && typeof m.awayPlayer === 'string' &&
+      Number.isInteger(m.homeGoals) && Number.isInteger(m.awayGoals)
+    );
+  }
+
+  let matches = load();
+
+  function formatDate(iso: string) {
+    const [y, m, d] = iso.split('-');
+    return d && m && y ? `${d}/${m}/${y}` : iso;
+  }
+
+  function renderMatches() {
+    matchesEl.replaceChildren();
+    const sorted = [...matches].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    for (const m of sorted) {
+      const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+      const [home, away] = li.querySelectorAll<HTMLElement>('.side');
+      li.querySelector('time')!.textContent = formatDate(m.date);
+      li.querySelector('time')!.dateTime = m.date;
+      home.querySelector('.player')!.textContent = m.homePlayer;
+      home.querySelector('.team')!.textContent = m.homeTeam;
+      away.querySelector('.player')!.textContent = m.awayPlayer;
+      away.querySelector('.team')!.textContent = m.awayTeam;
+      li.querySelector('.score')!.textContent = `${m.homeGoals} - ${m.awayGoals}`;
+      if (m.homeGoals > m.awayGoals) home.classList.add('win');
+      if (m.awayGoals > m.homeGoals) away.classList.add('win');
+      li.querySelector('.delete')!.addEventListener('click', () => {
+        if (!confirm(`¿Borrar ${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer}?`)) return;
+        matches = matches.filter((x) => x.id !== m.id);
+        save();
+        render();
+      });
+      matchesEl.append(li);
+    }
+    matchesEmpty.hidden = matches.length > 0;
+  }
+
+  function renderStandings() {
+    const table = new Map<string, { name: string; pj: number; g: number; e: number; p: number; gf: number; gc: number }>();
+    const row = (name: string) => {
+      const k = name.trim().toLowerCase();
+      if (!table.has(k)) table.set(k, { name: name.trim(), pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0 });
+      return table.get(k)!;
+    };
+    for (const m of matches) {
+      const h = row(m.homePlayer);
+      const a = row(m.awayPlayer);
+      h.pj++; a.pj++;
+      h.gf += m.homeGoals; h.gc += m.awayGoals;
+      a.gf += m.awayGoals; a.gc += m.homeGoals;
+      if (m.homeGoals > m.awayGoals) { h.g++; a.p++; }
+      else if (m.homeGoals < m.awayGoals) { a.g++; h.p++; }
+      else { h.e++; a.e++; }
+    }
+    const rows = [...table.values()]
+      .map((r) => ({ ...r, dg: r.gf - r.gc, pts: r.g * 3 + r.e }))
+      .sort((x, y) => y.pts - x.pts || y.dg - x.dg || y.gf - x.gf || x.name.localeCompare(y.name));
+
+    standingsEl.replaceChildren(
+      ...rows.map((r, i) => {
+        const tr = document.createElement('tr');
+        const cells: [string | number, string?][] = [
+          [i + 1], [r.name, 'name'], [r.pj], [r.g], [r.e], [r.p], [r.gf], [r.gc],
+          [r.dg > 0 ? `+${r.dg}` : r.dg], [r.pts, 'pts'],
+        ];
+        for (const [v, cls] of cells) {
+          const td = document.createElement('td');
+          td.textContent = String(v);
+          if (cls) td.className = cls;
+          tr.append(td);
+        }
+        return tr;
+      }),
+    );
+    standingsEmpty.hidden = rows.length > 0;
+  }
+
+  function renderSuggestions() {
+    const fill = (id: string, values: string[]) => {
+      const unique = [...new Set(values.map((v) => v.trim()).filter(Boolean))].sort();
+      $(id).replaceChildren(...unique.map((v) => Object.assign(document.createElement('option'), { value: v })));
+    };
+    fill('#players', matches.flatMap((m) => [m.homePlayer, m.awayPlayer]));
+    fill('#teams', matches.flatMap((m) => [m.homeTeam, m.awayTeam]));
+  }
+
+  function render() {
+    renderMatches();
+    renderStandings();
+    renderSuggestions();
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const str = (k: string) => String(fd.get(k) ?? '').trim();
+    const m: Match = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      date: str('date'),
+      homePlayer: str('homePlayer'),
+      homeTeam: str('homeTeam'),
+      homeGoals: Number(str('homeGoals')),
+      awayPlayer: str('awayPlayer'),
+      awayTeam: str('awayTeam'),
+      awayGoals: Number(str('awayGoals')),
+    };
+    if (m.homePlayer.toLowerCase() === m.awayPlayer.toLowerCase()) {
+      formError.textContent = 'No podés jugar contra vos mismo 😅';
+      return;
+    }
+    formError.textContent = '';
+    matches.push(m);
+    save();
+    render();
+    form.reset();
+    form.querySelector<HTMLInputElement>('[name=date]')!.value = m.date;
+    form.querySelector<HTMLInputElement>('[name=homePlayer]')!.focus();
+  });
+
+  $('#export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(matches, null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `fc26-resultados-${new Date().toISOString().slice(0, 10)}.json`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  $<HTMLInputElement>('#import').addEventListener('change', async (e) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      const incoming = (Array.isArray(data) ? data : []).filter(isMatch);
+      const known = new Set(matches.map((m) => m.id));
+      const added = incoming.filter((m) => !known.has(m.id));
+      matches.push(...added);
+      save();
+      render();
+      alert(`Se importaron ${added.length} partido(s).`);
+    } catch {
+      alert('El archivo no es válido.');
+    }
+    input.value = '';
+  });
+
+  render();
+</script>
