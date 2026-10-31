@@ -260,9 +260,12 @@ const tabs = [
       --fc-radius: 1.25rem;
       color: #fff;
       min-height: 100dvh;
-      position: relative;
-      isolation: isolate;
-    }
+        position: relative;
+        isolation: isolate;
+        /* Nada puede empujar el ancho: sin scroll ni arrastre horizontal en el celu */
+        overflow-x: clip;
+        touch-action: pan-y pinch-zoom;
+      }
     /* Fondo: estadio de noche con líneas de cancha muy sutiles */
     .fc::before {
       content: '';
@@ -409,7 +412,7 @@ const tabs = [
     .fc-rank.lead { color: #facc15; }
     .fc-who { display: flex; align-items: center; gap: .65rem; min-width: 0; }
     .fc-who p { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .fc-who small { display: block; font-size: .7rem; color: var(--fc-muted); }
+    .fc-who small { display: block; font-size: .7rem; color: var(--fc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .fc-pts { font-weight: 900; font-size: 1.05rem; color: var(--fc-accent); }
     .fc-form { display: none; gap: .2rem; justify-content: center; }
     .fc-form i {
@@ -442,6 +445,7 @@ const tabs = [
       padding: .9rem 2.4rem .9rem .9rem;
     }
     .fc-match-side { display: flex; flex-direction: column; align-items: center; gap: .35rem; text-align: center; min-width: 0; }
+    .fc-match-side > div { width: 100%; }
     .fc-player { font-weight: 700; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fc-muted); }
     .fc-team { font-size: .7rem; color: var(--fc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .fc-match .win .fc-player { color: #fff; }
@@ -568,6 +572,7 @@ const tabs = [
       max-width: none;
       max-height: 92dvh;
       overflow-y: auto;
+      overflow-x: hidden;
       overscroll-behavior: contain;
       padding: .5rem 1rem calc(1rem + env(safe-area-inset-bottom));
       border: 1px solid var(--fc-line);
@@ -603,6 +608,9 @@ const tabs = [
       font-size: 1rem;
       color-scheme: dark;
     }
+    /* iOS le da al date un ancho mínimo propio que rompe el layout */
+    .fc-input[type='date'] { display: block; -webkit-appearance: none; appearance: none; line-height: 2.9rem; }
+    .fc-input::-webkit-date-and-time-value { text-align: left; }
     .fc-input::placeholder { color: rgb(255 255 255 / .35); }
     .fc-input:focus { outline: none; border-color: var(--fc-accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--fc-accent) 25%, transparent); }
 
@@ -722,6 +730,7 @@ const tabs = [
       .fc-who .fc-form { display: none; }
       .fc-match { padding-inline: 1.25rem 2.75rem; }
       .fc-match-side { flex-direction: row; justify-content: flex-end; text-align: right; }
+      .fc-match-side > div { width: auto; }
       .fc-match-side .fc-avatar { order: 2; }
       .fc-match-away { justify-content: flex-start; text-align: left; }
       .fc-match-away .fc-avatar { order: 0; }
