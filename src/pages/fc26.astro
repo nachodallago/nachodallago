@@ -1159,9 +1159,14 @@ const tabs = [
 
   // Animación al reordenar (View Transitions), si el navegador la soporta
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  // Con el tiempo real pueden llegar dos cambios seguidos: si ya hay una animación, se aplica directo
+  let transitioning = false;
   function update(fn: () => void) {
-    if (!document.startViewTransition || reduceMotion.matches) return fn();
-    document.startViewTransition(fn);
+    if (!document.startViewTransition || reduceMotion.matches || transitioning) return fn();
+    transitioning = true;
+    const t = document.startViewTransition(fn);
+    t.finished.catch(() => {}).finally(() => (transitioning = false));
+    t.ready.catch(() => {});
   }
 
   let toastTimer = 0;
@@ -1341,6 +1346,7 @@ const tabs = [
   async function lock() {
     if (locked) return;
     locked = true;
+    disconnectStream();
     app.classList.add('fc-locked');
     for (const d of [sheet, confirmDialog, playersDialog]) if (d.open) d.close();
     renderSync();
@@ -1383,6 +1389,7 @@ const tabs = [
       setRemote(data.matches);
       setPhotos(data.photos);
       setLive(data.live);
+      connectStream();
     } catch {
       online = false;
     }
@@ -1497,7 +1504,8 @@ const tabs = [
         badge.append(document.createElement('i'), 'En vivo');
         const clock = document.createElement('span');
         clock.className = 'fc-clock';
-        clock.textContent = l.startedAt ? `⏱ ${minuteOf(Date.now(), l.startedAt)}'` : '';
+        if (l.startedAt) clock.dataset.started = String(l.startedAt);
+        clock.textContent = l.startedAt ? `⏱ ${elapsed(l.startedAt)}` : '';
         head.append(badge, clock);
 
         const side = (player = '', team = '') => {
@@ -1546,22 +1554,60 @@ const tabs = [
     for (const id of [...liveScores.keys()]) if (!seen.has(id)) liveScores.delete(id);
   }
 
-  // Se consulta cada 4 s mientras la página está a la vista
+  function applyLive(list: unknown) {
+    const before = liveList.map((l) => l.id);
+    setLive(list);
+    renderLive();
+    // Un partido dejó de estar en vivo: seguramente se guardó, se trae la tabla nueva
+    if (before.some((id) => !liveList.some((l) => l.id === id))) sync();
+  }
+
+  // --- Tiempo real: el servidor empuja cada cambio (Server-Sent Events) ---
+  let stream: EventSource | null = null;
+  let streaming = false;
+  let changedTimer = 0;
+
+  function connectStream() {
+    if (stream || locked || !('EventSource' in window)) return;
+    const es = new EventSource(`${API}/events`);
+    stream = es;
+    es.addEventListener('open', () => (streaming = true));
+    es.addEventListener('live', (e) => {
+      try {
+        applyLive(JSON.parse((e as MessageEvent).data).live);
+      } catch {}
+    });
+    // Cambió la tabla, un partido o una foto: se pide todo de nuevo (agrupando ráfagas)
+    es.addEventListener('changed', () => {
+      clearTimeout(changedTimer);
+      changedTimer = window.setTimeout(sync, 150);
+    });
+    es.addEventListener('error', () => {
+      streaming = false;
+      // Si el navegador no va a reintentar solo (p. ej. 401), se reintenta en un rato
+      if (es.readyState === EventSource.CLOSED) {
+        stream = null;
+        setTimeout(connectStream, 5000);
+      }
+    });
+  }
+
+  function disconnectStream() {
+    stream?.close();
+    stream = null;
+    streaming = false;
+  }
+
+  // Respaldo si el stream no está conectado: se consulta cada 4 s
   async function pollLive() {
-    if (document.visibilityState !== 'visible' || locked || !online) return;
+    if (streaming || document.visibilityState !== 'visible' || locked || !online) return;
     try {
       const res = await fetch(`${API}/live`, { cache: 'no-store' });
       if (res.status === 401) return lock();
-      if (!res.ok) return;
-      const before = liveList.map((l) => l.id);
-      setLive((await res.json()).live);
-      renderLive();
-      // Un partido dejó de estar en vivo: seguramente se guardó, se trae la tabla nueva
-      if (before.some((id) => !liveList.some((l) => l.id === id))) sync();
+      if (res.ok) applyLive((await res.json()).live);
     } catch {}
   }
   setInterval(pollLive, 4000);
-  setInterval(() => liveList.length && renderLive(), 15000);
 
   // --- Fotos de los jugadores ---
   const playersDialog = $<HTMLDialogElement>('#players-dialog');
@@ -2008,6 +2054,11 @@ const tabs = [
 
   const clockFmt = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   const minuteOf = (at: number, start = at) => Math.max(1, Math.floor((at - start) / 60000) + 1);
+  // Reloj corrido del partido: 12:34
+  const elapsed = (start: number, now = Date.now()) => {
+    const sec = Math.max(0, Math.floor((now - start) / 1000));
+    return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+  };
   const pickedPlayer = (side: string) => form.querySelector<HTMLInputElement>(`[name=${side}Player]:checked`)?.value;
 
   // Ajusta la lista de goles de un lado a la cantidad pedida: suma con la hora actual o saca el último
@@ -2032,7 +2083,7 @@ const tabs = [
     const panel = $('#goal-panel');
     panel.hidden = !goals.length && !startedAt;
     $('#match-clock').textContent = startedAt
-      ? `⏱ ${minuteOf(Date.now(), startedAt)}' · empezó ${clockFmt.format(startedAt)}`
+      ? `⏱ ${elapsed(startedAt)} · empezó ${clockFmt.format(startedAt)}`
       : '';
     $('#goal-empty').hidden = goals.length > 0;
     $('#goal-log').replaceChildren(
@@ -2054,10 +2105,15 @@ const tabs = [
     );
   }
 
-  // El reloj del partido avanza mientras el panel está abierto
+  // Los relojes corren segundo a segundo (solo se toca el texto; 4 veces por segundo para no atrasar)
   setInterval(() => {
-    if (sheet.open && startedAt) renderGoalLog();
-  }, 15000);
+    if (sheet.open && startedAt) {
+      $('#match-clock').textContent = `⏱ ${elapsed(startedAt)} · empezó ${clockFmt.format(startedAt)}`;
+    }
+    document.querySelectorAll<HTMLElement>('.fc-live [data-started]').forEach((el) => {
+      el.textContent = `⏱ ${elapsed(Number(el.dataset.started))}`;
+    });
+  }, 250);
   // --- Borrador ---
   const draftFields = ['homePlayer', 'awayPlayer', 'homeTeam', 'awayTeam', 'homeGoals', 'awayGoals', 'date'] as const;
   type Draft = Partial<Record<(typeof draftFields)[number], string>> & {
@@ -2143,7 +2199,7 @@ const tabs = [
       } catch {
         // Sin conexión: se reintenta con el próximo cambio
       }
-    }, 400);
+    }, 150);
   }
 
   function clearDraft() {

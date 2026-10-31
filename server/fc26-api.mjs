@@ -220,6 +220,23 @@ function imageType(buf) {
 }
 
 const all = () => listStmt.all().map(toMatch);
+
+// --- Tiempo real: Server-Sent Events ---
+// Cada celu abre /api/fc26/events y recibe los cambios apenas pasan:
+//   live     → la lista de partidos en curso (con los datos completos)
+//   changed  → cambiaron partidos o fotos: el celu vuelve a pedir la tabla
+const streams = new Set();
+const MAX_STREAMS = 200;
+
+function broadcast(event, data = {}) {
+  const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  for (const res of streams) res.write(msg);
+}
+
+// Un comentario cada 25 s mantiene viva la conexión a través de proxies
+setInterval(() => {
+  for (const res of streams) res.write(': ping\n\n');
+}, 25_000).unref();
 // Versión de cada foto (para que el navegador la cachee hasta que cambie)
 const photos = () => Object.fromEntries(photoVersionsStmt.all().map((r) => [r.name, r.updated_at]));
 const playerName = (raw) => {
@@ -255,7 +272,20 @@ async function handle(req, res) {
     return send(res, 200, { matches: all(), photos: photos(), live: live(), canWrite: Boolean(pinHash) });
   }
 
-  // Partidos en curso: se consultan seguido, por eso es una ruta liviana aparte
+  if (path === '/api/fc26/events' && req.method === 'GET') {
+    if (streams.size >= MAX_STREAMS) return send(res, 503, { error: 'Demasiadas conexiones' });
+    res.writeHead(200, {
+      'content-type': 'text/event-stream; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-accel-buffering': 'no',
+    });
+    res.write(`retry: 3000\n\nevent: live\ndata: ${JSON.stringify({ live: live() })}\n\n`);
+    streams.add(res);
+    req.on('close', () => streams.delete(res));
+    return;
+  }
+
+  // Respaldo por si el stream no anda: se consulta seguido, por eso es una ruta liviana aparte
   if (path === '/api/fc26/live' && req.method === 'GET') {
     return send(res, 200, { live: live() });
   }
@@ -270,7 +300,9 @@ async function handle(req, res) {
       if (!data) return send(res, 400, { error: 'Partido inválido' });
       putLiveStmt.run(liveMatch[1], JSON.stringify(data), Date.now());
     }
-    return send(res, 200, { live: live() });
+    const liveNow = live();
+    broadcast('live', { live: liveNow });
+    return send(res, 200, { live: liveNow });
   }
 
   // Alta de uno o varios partidos (importar / subir los que estaban solo en el celu)
@@ -299,7 +331,10 @@ async function handle(req, res) {
       db.exec('ROLLBACK');
       throw e;
     }
-    return send(res, 200, { added, matches: all(), live: live() });
+    const liveNow = live();
+    if (liveId) broadcast('live', { live: liveNow });
+    broadcast('changed');
+    return send(res, 200, { added, matches: all(), live: liveNow });
   }
 
   const del = path.match(/^\/api\/fc26\/matches\/([\w-]{1,64})$/);
@@ -307,6 +342,7 @@ async function handle(req, res) {
     const auth = checkPin(req);
     if (!auth.ok) return send(res, auth.status, { error: auth.error });
     deleteStmt.run(del[1]);
+    broadcast('changed');
     return send(res, 200, { matches: all() });
   }
 
@@ -339,6 +375,7 @@ async function handle(req, res) {
         if (!mime) return send(res, 415, { error: 'La foto tiene que ser JPG, PNG o WebP' });
         putPhotoStmt.run(name, mime, buf, Date.now());
       }
+      broadcast('changed');
       return send(res, 200, { photos: photos() });
     }
   }
@@ -359,6 +396,7 @@ server.listen(PORT, '127.0.0.1', () => {
 
 for (const sig of ['SIGTERM', 'SIGINT']) {
   process.on(sig, () => server.close(() => {
+    for (const res of streams) res.end();
     db.close();
     process.exit(0);
   }));
