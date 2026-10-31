@@ -19,8 +19,8 @@ const initials = (name: string) => {
 };
 
 const sides = [
-  { key: 'home', label: 'Local', team: 'Boca' },
-  { key: 'away', label: 'Visitante', team: 'River' },
+  { key: 'home', label: 'Local' },
+  { key: 'away', label: 'Visitante' },
 ] as const;
 
 // Íconos de trazo (estilo Lucide), inline para no sumar requests
@@ -186,7 +186,8 @@ const tabs = [
                     </label>
                   ))}
                 </div>
-                <input name={`${s.key}Team`} list="teams" maxlength="40" placeholder={`Equipo (ej: ${s.team})`} class="fc-input" aria-label={`Equipo ${s.label.toLowerCase()}`} autocapitalize="words" />
+                <input name={`${s.key}Team`} list="teams" maxlength="40" placeholder="Equipo" class="fc-input" aria-label={`Equipo ${s.label.toLowerCase()}`} autocapitalize="words" />
+                <div class="fc-team-chips" data-team-chips={s.key} aria-label={`Equipos guardados ${s.label.toLowerCase()}`}></div>
                 <div class="fc-stepper">
                   <button type="button" data-step={`${s.key}Goals`} data-delta="-1" aria-label={`Restar gol ${s.label.toLowerCase()}`}>−</button>
                   <input name={`${s.key}Goals`} type="number" inputmode="numeric" min="0" max="99" value="0" aria-label={`Goles ${s.label.toLowerCase()}`} />
@@ -195,6 +196,16 @@ const tabs = [
               </fieldset>
             ))
           }
+        </div>
+
+        <!-- Goles con su tiempo -->
+        <div id="goal-panel" class="fc-goal-panel" hidden>
+          <div class="flex items-center justify-between gap-2">
+            <span class="fc-label">Goles</span>
+            <span id="match-clock" class="fc-clock"></span>
+          </div>
+          <ol id="goal-log" class="fc-goal-log"></ol>
+          <p id="goal-empty" class="fc-muted mt-2 text-xs">Tocá + y cada gol queda con su minuto.</p>
         </div>
 
         <label class="mt-4 block">
@@ -242,6 +253,7 @@ const tabs = [
     <button type="button" class="fc-delete" aria-label="Borrar partido">
       <svg viewBox="0 0 24 24" class="fc-ico" set:html={icons.trash} />
     </button>
+    <ol class="fc-goals" aria-label="Goles"></ol>
   </li>
 </template>
 
@@ -673,6 +685,136 @@ const tabs = [
     .fc-picks input:focus-visible + span { outline: 2px solid var(--c); outline-offset: 2px; }
     .fc-picks input:disabled + span { opacity: .25; cursor: not-allowed; }
 
+    /* Equipos guardados: se eligen tocando */
+
+    .fc-team-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: -.3rem; }
+
+    .fc-team-chips:empty { display: none; }
+
+    .fc-team-chips button {
+
+      max-width: 100%;
+
+      min-height: 2.25rem;
+
+      padding: 0 .75rem;
+
+      border-radius: 999px;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .05);
+
+      color: var(--fc-muted);
+
+      font-size: .78rem;
+
+      font-weight: 600;
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      touch-action: manipulation;
+
+      -webkit-tap-highlight-color: transparent;
+
+    }
+
+    .fc-team-chips button.on {
+
+      border-color: var(--fc-accent);
+
+      background: color-mix(in oklab, var(--fc-accent) 14%, transparent);
+
+      color: #fff;
+
+    }
+
+
+    /* Línea de tiempo de goles */
+
+    .fc-goal-panel {
+
+      margin-top: 1rem;
+
+      padding: .85rem;
+
+      border-radius: 1rem;
+
+      border: 1px solid var(--fc-line);
+
+      background: rgb(255 255 255 / .04);
+
+    }
+
+    .fc-clock { font-size: .8rem; font-weight: 700; color: var(--fc-accent); font-variant-numeric: tabular-nums; }
+
+    .fc-goal-log { display: grid; gap: .4rem; margin-top: .6rem; }
+
+    .fc-goal-log li { display: flex; align-items: center; gap: .5rem; font-size: .85rem; min-width: 0; }
+
+    .fc-goal-log li.away { flex-direction: row-reverse; text-align: right; }
+
+    .fc-goal-log b { min-width: 2.25rem; color: var(--fc-accent); font-variant-numeric: tabular-nums; }
+
+    .fc-goal-log span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+
+    .fc-goal-log small { color: var(--fc-muted); font-variant-numeric: tabular-nums; }
+
+    .fc-goal-log i { width: .6rem; height: .6rem; border-radius: 999px; background: var(--c, #71717a); flex-shrink: 0; }
+
+
+    /* Goles en la tarjeta del partido */
+
+    .fc-goals {
+
+      grid-column: 1 / -1;
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: .3rem;
+
+      margin-right: -1.5rem;
+
+      padding-top: .65rem;
+
+      border-top: 1px solid var(--fc-line);
+
+    }
+
+    .fc-goals:empty { display: none; }
+
+    .fc-goals li {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: .3rem;
+
+      padding: .2rem .55rem;
+
+      border-radius: 999px;
+
+      background: rgb(255 255 255 / .06);
+
+      font-size: .72rem;
+
+      font-weight: 600;
+
+    }
+
+    .fc-goals li::before { content: ''; width: .5rem; height: .5rem; border-radius: 999px; background: var(--c, #71717a); }
+
+    .fc-goals b { font-variant-numeric: tabular-nums; }
+
+    .fc-goals small { color: var(--fc-muted); font-variant-numeric: tabular-nums; }
+
     .fc-stepper {
       display: grid;
       grid-template-columns: 2.75rem 1fr 2.75rem;
@@ -798,11 +940,17 @@ const tabs = [
     awayPlayer: string;
     awayTeam: string;
     awayGoals: number;
+    // Cada gol con el momento en que se cargó (ms) y el arranque del partido
+    goals?: Goal[];
+    startedAt?: number;
   };
+  type Goal = { side: 'home' | 'away'; at: number };
 
   const KEY = 'fc26-matches';
   // Partido a medio cargar: sobrevive a recargar la página
   const DRAFT_KEY = 'fc26-draft';
+  // Equipos usados: quedan para elegirlos de nuevo aunque se borren partidos
+  const TEAMS_KEY = 'fc26-teams';
   const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
   const form = $<HTMLFormElement>('#match-form');
@@ -1035,6 +1183,22 @@ const tabs = [
       (homeWon ? away : home).classList.add('lose');
       (homeWon ? hg : ag).classList.add('win');
     }
+    if (Array.isArray(m.goals) && m.goals.length) {
+      const start = Number.isFinite(m.startedAt) ? m.startedAt : m.goals[0].at;
+      li.querySelector('.fc-goals')!.append(
+        ...m.goals.map((g) => {
+          const chip = document.createElement('li');
+          const player = g.side === 'home' ? m.homePlayer : m.awayPlayer;
+          chip.style.setProperty('--c', colors.get(player) ?? '#71717a');
+          const min = document.createElement('b');
+          min.textContent = `${minuteOf(g.at, start)}'`;
+          const time = document.createElement('small');
+          time.textContent = clockFmt.format(g.at);
+          chip.append(min, ` ${player} `, time);
+          return chip;
+        }),
+      );
+    }
     li.querySelector('.fc-delete')!.addEventListener('click', () => {
       pendingDelete = m;
       $('#confirm-text').textContent = `${m.homePlayer} ${m.homeGoals}-${m.awayGoals} ${m.awayPlayer} · ${dayLabel(m.date)}`;
@@ -1065,9 +1229,49 @@ const tabs = [
     $('#matches-count').textContent = matches.length ? String(matches.length) : '';
   }
 
+  // --- Equipos guardados ---
+  const sameTeam = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+  function uniqueTeams(list: (string | undefined)[]) {
+    const out: string[] = [];
+    for (const t of list) {
+      const name = t?.trim();
+      if (name && !out.some((x) => sameTeam(x, name))) out.push(name);
+    }
+    return out;
+  }
+
+  // Más recientes primero: los guardados + los que aparecen en partidos
+  let savedTeams: string[] = (() => {
+    let stored: string[] = [];
+    try {
+      const data = JSON.parse(localStorage.getItem(TEAMS_KEY) ?? '[]');
+      if (Array.isArray(data)) stored = data.filter((t) => typeof t === 'string');
+    } catch {}
+    const fromMatches = [...matches].sort(byDate).reverse().flatMap((m) => [m.homeTeam, m.awayTeam]);
+    return uniqueTeams([...stored, ...fromMatches]);
+  })();
+
+  function rememberTeams(names: string[]) {
+    savedTeams = uniqueTeams([...names, ...savedTeams]).slice(0, 40);
+    try {
+      localStorage.setItem(TEAMS_KEY, JSON.stringify(savedTeams));
+    } catch {}
+  }
+
+  // Primero los equipos que ya usó ese jugador, después el resto
+  function teamsFor(player?: string) {
+    const own = player
+      ? [...matches]
+          .sort(byDate)
+          .reverse()
+          .flatMap((m) => [m.homePlayer === player ? m.homeTeam : '', m.awayPlayer === player ? m.awayTeam : ''])
+      : [];
+    return uniqueTeams([...own, ...savedTeams]).slice(0, 4);
+  }
+
   function renderTeams() {
-    const unique = [...new Set(matches.flatMap((m) => [m.homeTeam, m.awayTeam]).map((v) => v?.trim()).filter(Boolean))].sort();
-    $('#teams').replaceChildren(...unique.map((v) => Object.assign(document.createElement('option'), { value: v })));
+    $('#teams').replaceChildren(...savedTeams.map((v) => Object.assign(document.createElement('option'), { value: v })));
   }
 
   function render() {
@@ -1106,11 +1310,82 @@ const tabs = [
       form.querySelector(`[data-preview-name=${side}]`)!.textContent = picked ?? (side === 'home' ? 'Local' : 'Visitante');
       form.querySelector(`[data-preview-goals=${side}]`)!.textContent =
         (form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value || '0';
+
+      const current = (form.elements.namedItem(`${side}Team`) as HTMLInputElement).value;
+      form.querySelector(`[data-team-chips=${side}]`)!.replaceChildren(
+        ...teamsFor(picked).map((t) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.dataset.team = t;
+          b.dataset.side = side;
+          b.textContent = t;
+          b.classList.toggle('on', sameTeam(t, current));
+          return b;
+        }),
+      );
     }
+    renderGoalLog();
   }
+
+  // --- Goles con tiempo ---
+  let goals: Goal[] = [];
+  let startedAt: number | undefined;
+
+  const clockFmt = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const minuteOf = (at: number, start = at) => Math.max(1, Math.floor((at - start) / 60000) + 1);
+  const pickedPlayer = (side: string) => form.querySelector<HTMLInputElement>(`[name=${side}Player]:checked`)?.value;
+
+  // Ajusta la lista de goles de un lado a la cantidad pedida: suma con la hora actual o saca el último
+  function setGoals(side: 'home' | 'away', n: number) {
+    n = Math.min(99, Math.max(0, Math.trunc(n) || 0));
+    let count = goals.filter((g) => g.side === side).length;
+    while (count < n) {
+      const now = Date.now();
+      startedAt ??= now;
+      goals.push({ side, at: now });
+      count++;
+    }
+    while (count > n) {
+      const last = goals.map((g) => g.side).lastIndexOf(side);
+      goals.splice(last, 1);
+      count--;
+    }
+    (form.elements.namedItem(`${side}Goals`) as HTMLInputElement).value = String(n);
+  }
+
+  function renderGoalLog() {
+    const panel = $('#goal-panel');
+    panel.hidden = !goals.length && !startedAt;
+    $('#match-clock').textContent = startedAt
+      ? `⏱ ${minuteOf(Date.now(), startedAt)}' · empezó ${clockFmt.format(startedAt)}`
+      : '';
+    $('#goal-empty').hidden = goals.length > 0;
+    $('#goal-log').replaceChildren(
+      ...goals.map((g) => {
+        const li = document.createElement('li');
+        li.className = g.side;
+        const player = pickedPlayer(g.side) ?? (g.side === 'home' ? 'Local' : 'Visitante');
+        li.style.setProperty('--c', colors.get(player) ?? '#71717a');
+        const min = document.createElement('b');
+        min.textContent = `${minuteOf(g.at, startedAt)}'`;
+        const dot = document.createElement('i');
+        const name = document.createElement('span');
+        name.textContent = player;
+        const time = document.createElement('small');
+        time.textContent = clockFmt.format(g.at);
+        li.append(min, dot, name, time);
+        return li;
+      }),
+    );
+  }
+
+  // El reloj del partido avanza mientras el panel está abierto
+  setInterval(() => {
+    if (sheet.open && startedAt) renderGoalLog();
+  }, 15000);
   // --- Borrador ---
   const draftFields = ['homePlayer', 'awayPlayer', 'homeTeam', 'awayTeam', 'homeGoals', 'awayGoals', 'date'] as const;
-  type Draft = Partial<Record<(typeof draftFields)[number], string>> & { open?: boolean };
+  type Draft = Partial<Record<(typeof draftFields)[number], string>> & { open?: boolean; goals?: Goal[]; startedAt?: number };
 
   const todayLocal = () => {
     const d = new Date();
@@ -1120,13 +1395,13 @@ const tabs = [
 
   function readDraft(): Draft {
     const fd = new FormData(form);
-    const draft: Draft = { open: sheet.open };
+    const draft: Draft = { open: sheet.open, goals, startedAt };
     for (const k of draftFields) draft[k] = String(fd.get(k) ?? '');
     return draft;
   }
 
   const hasData = (d: Draft) =>
-    Boolean(d.homePlayer || d.awayPlayer || d.homeTeam || d.awayTeam || Number(d.homeGoals) || Number(d.awayGoals));
+    Boolean(d.homePlayer || d.awayPlayer || d.homeTeam || d.awayTeam || Number(d.homeGoals) || Number(d.awayGoals) || d.goals?.length);
 
   function saveDraft() {
     const draft = readDraft();
@@ -1141,8 +1416,14 @@ const tabs = [
     }
   }
 
+  function resetGoals() {
+    goals = [];
+    startedAt = undefined;
+  }
+
   function clearDraft() {
     form.reset();
+    resetGoals();
     (field('date') as HTMLInputElement).value = todayLocal();
     syncForm();
     saveDraft();
@@ -1165,15 +1446,29 @@ const tabs = [
         if (roster.includes(v)) f.value = v;
       } else f.value = v;
     }
+    if (Array.isArray(draft.goals)) {
+      goals = draft.goals.filter((g) => (g?.side === 'home' || g?.side === 'away') && Number.isFinite(g.at));
+    }
+    if (Number.isFinite(draft.startedAt)) startedAt = draft.startedAt;
+    // Los números del marcador y la lista de goles siempre coinciden
+    setGoals('home', Number((field('homeGoals') as HTMLInputElement).value));
+    setGoals('away', Number((field('awayGoals') as HTMLInputElement).value));
     syncForm();
     if (draft.open) sheet.showModal();
   }
 
-  form.addEventListener('change', () => {
+  form.addEventListener('change', (e) => {
+    // El partido arranca al elegir el primer jugador o cargar el primer gol
+    if ((e.target as HTMLInputElement).name?.endsWith('Player')) startedAt ??= Date.now();
     syncForm();
     saveDraft();
   });
-  form.addEventListener('input', () => {
+  form.addEventListener('input', (e) => {
+    const t = e.target as HTMLInputElement;
+    if (t.name === 'homeGoals' || t.name === 'awayGoals') {
+      if (t.value === '') return;
+      setGoals(t.name === 'homeGoals' ? 'home' : 'away', Number(t.value));
+    }
     syncForm();
     saveDraft();
   });
@@ -1181,10 +1476,17 @@ const tabs = [
   $('#clear-draft').addEventListener('click', clearDraft);
 
   form.addEventListener('click', (e) => {
+    const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-team]');
+    if (chip) {
+      (form.elements.namedItem(`${chip.dataset.side}Team`) as HTMLInputElement).value = chip.dataset.team!;
+      syncForm();
+      saveDraft();
+      return;
+    }
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-step]');
     if (!btn) return;
     const input = form.elements.namedItem(btn.dataset.step!) as HTMLInputElement;
-    input.value = String(Math.min(99, Math.max(0, (Number(input.value) || 0) + Number(btn.dataset.delta))));
+    setGoals(btn.dataset.step === 'homeGoals' ? 'home' : 'away', (Number(input.value) || 0) + Number(btn.dataset.delta));
     navigator.vibrate?.(10);
     syncForm();
     saveDraft();
@@ -1219,6 +1521,8 @@ const tabs = [
       awayPlayer: str('awayPlayer'),
       awayTeam: str('awayTeam'),
       awayGoals: Math.min(99, Math.max(0, Math.trunc(Number(str('awayGoals'))) || 0)),
+      goals: [...goals].sort((a, b) => a.at - b.at),
+      startedAt,
     };
     if (!m.homePlayer || !m.awayPlayer) {
       formError.textContent = 'Elegí quién jugó de local y de visitante';
@@ -1230,12 +1534,14 @@ const tabs = [
     }
     formError.textContent = '';
     sheet.close();
+    rememberTeams([m.homeTeam, m.awayTeam]);
     update(() => {
       matches.push(m);
       save();
       render();
     });
     form.reset();
+    resetGoals();
     (field('date') as HTMLInputElement).value = m.date;
     syncForm();
     try {
@@ -1271,6 +1577,7 @@ const tabs = [
       const added = incoming.filter((m) => !known.has(m.id));
       update(() => {
         matches.push(...added);
+        rememberTeams(added.flatMap((m) => [m.homeTeam, m.awayTeam]).filter((t) => typeof t === 'string'));
         save();
         render();
       });
