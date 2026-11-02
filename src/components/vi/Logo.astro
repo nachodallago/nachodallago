@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { logos } from '../../data/logos';
+
+interface Props {
+  id: string;
+  size?: number;
+  class?: string;
+}
+
+const { id, size = 32, class: className = '' } = Astro.props;
+const def = logos[id];
+if (!def) throw new Error(`Logo desconocido: ${id}`);
+
+const raw = import.meta.glob<string>('../../assets/logos/*.svg', { query: '?raw', import: 'default', eager: true });
+const files = import.meta.glob<ImageMetadata>('../../assets/logos/*.{png,svg}', { import: 'default', eager: true });
+
+const key = 'file' in def ? `../../assets/logos/${def.file}` : '';
+// Íconos de Simple Icons: 24x24 con un solo path, los pintamos inline con el color de la marca
+const svgPaths =
+  def.kind === 'svg' ? [...(raw[key] ?? '').matchAll(/<path[^>]*\sd="([^"]+)"/g)].map((m) => m[1]) : [];
+const img = def.kind === 'img' ? files[key] : undefined;
+const wide = def.kind === 'img' && def.wide;
+const isSvgFile = key.endsWith('.svg');
+---
+
+{
+  def.kind === 'svg' && (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill={def.color}
+      role="img"
+      aria-label={def.name}
+      class={className}
+    >
+      <title>{def.name}</title>
+      {svgPaths.map((d) => <path d={d} />)}
+    </svg>
+  )
+}
+{
+  img && (
+    <Image
+      src={img}
+      alt={def.name}
+      height={wide ? Math.round(size * 0.75) : size}
+      width={wide ? Math.round(size * 0.75 * (img.width / img.height)) : size}
+      densities={isSvgFile ? undefined : [1, 2]}
+      loading="lazy"
+      class:list={[className, 'object-contain', !wide && 'rounded-[22%]']}
+      style={wide ? `height:${Math.round(size * 0.75)}px;width:auto` : `height:${size}px;width:${size}px`}
+    />
+  )
+}
+{
+  def.kind === 'word' && (
+    <span
+      role="img"
+      aria-label={def.name}
+      class:list={[className, 'logo-word']}
+      style={`--c:${def.color};font-size:${Math.round(size * 0.5)}px;height:${size}px`}
+    >
+      {def.name}
+    </span>
+  )
+}

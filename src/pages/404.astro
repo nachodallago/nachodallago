@@ -1,16 +1,21 @@
 ---
+import '@fontsource/anton/latin-400.css';
+import '../styles/vi.css';
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import Nav from '../components/vi/Nav.astro';
+import KeyArt from '../components/vi/KeyArt.astro';
 ---
 
-<Layout title="404 — Página no encontrada · Nacho Dal Lago" noindex>
-  <Header />
-  <main id="main" class="mx-auto flex min-h-[70dvh] max-w-3xl flex-col items-center justify-center px-5 text-center">
-    <p class="eyebrow">error 404</p>
-    <h1 class="mt-4 text-6xl font-semibold sm:text-8xl"><span class="text-gradient">404</span></h1>
-    <p class="mt-4 text-lg text-zinc-400">Ni la IA encontró esta página. Volvamos a lo importante.</p>
-    <a href="/" class="btn btn-primary mt-8">Volver al inicio</a>
+<Layout title="404 — Página no encontrada · Nacho Dal Lago" noindex decor={false} bodyClass="vi">
+  <Nav home={false} />
+  <main id="main" class="relative isolate flex min-h-[100svh] items-end overflow-hidden">
+    <div class="absolute inset-0 -z-20"><KeyArt id="ka-404" class="size-full" /></div>
+    <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-[#07040d] via-[#07040d]/50 to-[#07040d]/30"></div>
+    <div class="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-8 sm:pb-24">
+      <p class="vi-kicker">Error 404</p>
+      <h1 class="vi-display mt-4 text-[30vw] lg:text-[16rem]"><span class="vi-sunset-text">Perdido</span></h1>
+      <p class="mt-4 max-w-xl text-lg text-white/75">Ni la IA encontró esta página. Volvamos a lo importante.</p>
+      <a href="/" class="vi-btn vi-btn-primary mt-8">Volver al inicio</a>
+    </div>
   </main>
-  <Footer />
 </Layout>

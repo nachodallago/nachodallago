@@ -6,9 +6,12 @@ interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
+  /** Fondo decorativo con grilla y halos (el de las páginas internas) */
+  decor?: boolean;
+  bodyClass?: string;
 }
 
-const { title = site.title, description = site.description, noindex = false } = Astro.props;
+const { title = site.title, description = site.description, noindex = false, decor = true, bodyClass } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
 
@@ -26,6 +29,11 @@ const jsonLd = {
       knowsAbout: [
         'Inteligencia Artificial',
         'Automatización de procesos',
+        'Automatización de empresas',
+        'Integración de ERP (Odoo, TOTVS)',
+        'MercadoLibre, MercadoPago y TiendaNube',
+        'Facturación electrónica ARCA',
+        'Claude, ChatGPT y ElevenLabs',
         'n8n',
         'Model Context Protocol',
         'Agentes de IA',
@@ -42,7 +50,8 @@ const jsonLd = {
       provider: { '@id': `${site.url}/#person` },
       areaServed: ['AR', 'LATAM', 'ES'],
       serviceType: [
-        'Automatizaciones con Inteligencia Artificial',
+        'Automatización de empresas con Inteligencia Artificial',
+        'Integración de sistemas y ERP',
         'Workflows con n8n',
         'Integraciones MCP',
         'Desarrollo de software con IA',
@@ -100,16 +109,20 @@ const jsonLd = {
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
-  <body>
+  <body class={bodyClass}>
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-acid focus:px-4 focus:py-2 focus:text-ink-950"
       >Saltar al contenido</a
     >
-    <div aria-hidden="true" class="bg-parallax pointer-events-none absolute inset-x-0 top-0 -z-10 h-[52rem]">
-      <div class="bg-glow absolute inset-0"></div>
-      <div class="bg-grid absolute inset-0"></div>
-    </div>
+    {
+      decor && (
+        <div aria-hidden="true" class="bg-parallax pointer-events-none absolute inset-x-0 top-0 -z-10 h-[52rem]">
+          <div class="bg-glow absolute inset-0" />
+          <div class="bg-grid absolute inset-0" />
+        </div>
+      )
+    }
     <slot />
   </body>
 </html>

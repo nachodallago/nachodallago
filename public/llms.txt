@@ -1,13 +1,20 @@
-# Nacho Dal Lago — Ingeniero en Inteligencia Artificial
+# Nacho Dal Lago — Ingeniero de Automatización e IA
 
-> Programador Gen Z (programando desde 2012) convertido en Ingeniero en IA. Con base en Argentina. Automatiza procesos con agentes de IA, workflows en n8n y servidores conectados a la IA vía Model Context Protocol (MCP).
+> Programador desde 2012 que pasó de "picar código" a ingeniero de automatización de empresas. Con base en Argentina, trabaja para LATAM y España. Conecta IA (Claude, ChatGPT, ElevenLabs), workflows en n8n y servidores vía Model Context Protocol (MCP) con los sistemas reales de las empresas.
 
 ## Servicios
 
-- Automatizaciones con IA: agentes que leen, clasifican, responden y deciden sobre emails, documentos, tickets y leads.
-- Workflows con n8n self-hosted: integración de CRM, WhatsApp, planillas, ERP y APIs, corriendo 24/7 con monitoreo.
-- Servidores conectados vía MCP: servidores, bases de datos y herramientas centralizadas y operables desde la IA.
-- Desarrollo full-stack aumentado con IA: entre 4 y 6 tareas entregadas por día en simultáneo, con una reducción muy significativa del porcentaje de error.
+- Agentes de IA con Claude y ChatGPT: leen, clasifican, responden y deciden sobre emails, documentos, tickets y leads.
+- Workflows con n8n self-hosted: CRM, WhatsApp, planillas, ERP y APIs corriendo 24/7 con monitoreo y alertas.
+- Integración de sistemas: ERPs (TOTVS, Odoo, Softcrates), Ecomexperts, MercadoLibre, MercadoPago, TiendaNube y facturación electrónica en ARCA.
+- Servidores conectados vía MCP: servidores, bases de datos y herramientas operables desde la IA.
+- Contenido con IA: voces con ElevenLabs, imágenes con Magnific y video con Higgsfield.
+- Datos y reportes automáticos con Google Analytics, Analytics Canvas y planillas.
+
+## Resultados
+
+- Entre 4 y 6 tareas entregadas por día en paralelo, con IA en cada paso.
+- Reducción muy significativa del porcentaje de error.
 
 ## Contacto
 

@@ -1,0 +1,174 @@
+---
+/**
+ * Key art original en SVG: atardecer, skyline de "racks de servidores",
+ * piso en grilla con flujos de datos. Todo vectorial, cero imágenes.
+ */
+interface Props {
+  class?: string;
+  id?: string;
+}
+const { class: className = '', id = 'ka' } = Astro.props;
+
+// PRNG determinístico para que el skyline sea siempre el mismo
+let seed = 7;
+const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+
+const W = 1600;
+const H = 1000;
+const HORIZON = 700;
+
+type Tower = { x: number; w: number; h: number; windows: { x: number; y: number; on: boolean }[]; antenna: boolean };
+const buildRow = (count: number, minH: number, maxH: number, minW: number, maxW: number) => {
+  const towers: Tower[] = [];
+  let x = -40;
+  while (x < W + 40 && towers.length < count) {
+    const w = minW + rand() * (maxW - minW);
+    const h = minH + rand() * (maxH - minH);
+    const windows: Tower['windows'] = [];
+    for (let wy = HORIZON - h + 14; wy < HORIZON - 10; wy += 12) {
+      for (let wx = x + 6; wx < x + w - 8; wx += 10) {
+        if (rand() > 0.55) windows.push({ x: wx, y: wy, on: rand() > 0.35 });
+      }
+    }
+    towers.push({ x, w, h, windows, antenna: rand() > 0.6 });
+    x += w + 2 + rand() * 18;
+  }
+  return towers;
+};
+const back = buildRow(60, 60, 220, 30, 80);
+const front = buildRow(40, 40, 150, 40, 110);
+
+// Grilla en perspectiva
+const vx = W / 2;
+const verticals = Array.from({ length: 41 }, (_, i) => (i - 20) * 140);
+const horizontals = Array.from({ length: 14 }, (_, i) => HORIZON + Math.pow(i + 1, 2.05) * 1.7);
+
+// Flujos de datos que corren hacia el horizonte
+const streams = [-6, -2, 3, 7].map((k) => ({ x2: vx + k * 140 * 3.2, x1: vx + k * 9 }));
+---
+
+<svg
+  class={className}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="xMidYMid slice"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+>
+  <defs>
+    <linearGradient id={`${id}-sky`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12062b" />
+      <stop offset=".32" stop-color="#3d1063" />
+      <stop offset=".55" stop-color="#b0247f" />
+      <stop offset=".66" stop-color="#ff4d7e" />
+      <stop offset=".72" stop-color="#ff9a5c" />
+    </linearGradient>
+    <linearGradient id={`${id}-sun`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff1a8" />
+      <stop offset=".45" stop-color="#ffb35c" />
+      <stop offset="1" stop-color="#ff3d8b" />
+    </linearGradient>
+    <linearGradient id={`${id}-floor`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a0b3d" />
+      <stop offset="1" stop-color="#07030f" />
+    </linearGradient>
+    <linearGradient id={`${id}-haze`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff5d8f" stop-opacity="0" />
+      <stop offset=".8" stop-color="#ff5d8f" stop-opacity=".55" />
+      <stop offset="1" stop-color="#ff9a5c" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id={`${id}-tower`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a0f4f" />
+      <stop offset="1" stop-color="#1a0726" />
+    </linearGradient>
+    <radialGradient id={`${id}-glow`} cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffb35c" stop-opacity=".7" />
+      <stop offset="1" stop-color="#ff3d8b" stop-opacity="0" />
+    </radialGradient>
+    <mask id={`${id}-stripes`}>
+      <rect width={W} height={H} fill="#fff" />
+      {Array.from({ length: 9 }, (_, i) => (
+        <rect x="0" y={560 + i * 17 + i * i * 0.6} width={W} height={2 + i * 1.6} fill="#000" />
+      ))}
+    </mask>
+    <linearGradient id={`${id}-stream`} x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#5ef2ff" stop-opacity="0" />
+      <stop offset=".5" stop-color="#5ef2ff" />
+      <stop offset="1" stop-color="#fff" />
+    </linearGradient>
+  </defs>
+
+  <rect width={W} height={H} fill={`url(#${id}-sky)`} />
+
+  <!-- Estrellas -->
+  <g fill="#fff">
+    {Array.from({ length: 70 }, () => (
+      <circle cx={rand() * W} cy={rand() * 380} r={rand() * 1.4 + 0.3} opacity={0.2 + rand() * 0.6} />
+    ))}
+  </g>
+
+  <!-- Sol -->
+  <circle cx={W / 2} cy="560" r="520" fill={`url(#${id}-glow)`} />
+  <g mask={`url(#${id}-stripes)`}>
+    <circle cx={W / 2} cy="520" r="250" fill={`url(#${id}-sun)`} />
+  </g>
+
+  <!-- Skyline lejano -->
+  <g fill="#5a1658" opacity=".85">
+    {back.map((t) => <rect x={t.x} y={HORIZON - t.h - 40} width={t.w} height={t.h + 40} />)}
+  </g>
+  <rect y={HORIZON - 160} width={W} height="160" fill={`url(#${id}-haze)`} />
+
+  <!-- Skyline cercano: racks con LEDs -->
+  <g>
+    {
+      front.map((t) => (
+        <g>
+          <rect x={t.x} y={HORIZON - t.h} width={t.w} height={t.h} fill={`url(#${id}-tower)`} />
+          <rect x={t.x} y={HORIZON - t.h} width={t.w} height="2" fill="#ff7aa8" opacity=".55" />
+          {t.antenna && (
+            <>
+              <rect x={t.x + t.w / 2 - 1} y={HORIZON - t.h - 34} width="2" height="34" fill="#3a0f4f" />
+              <circle class="ka-blink" cx={t.x + t.w / 2} cy={HORIZON - t.h - 36} r="2.6" fill="#ff3d5e" />
+            </>
+          )}
+          {t.windows.map((w) => (
+            <rect x={w.x} y={w.y} width="5" height="2" fill={w.on ? (rand() > 0.5 ? '#5ef2ff' : '#ffc46b') : '#4b1a5c'} opacity={w.on ? 0.9 : 0.6} />
+          ))}
+        </g>
+      ))
+    }
+  </g>
+
+  <!-- Piso con grilla -->
+  <rect y={HORIZON} width={W} height={H - HORIZON} fill={`url(#${id}-floor)`} />
+  <g stroke="#ff3d8b" stroke-width="1.2" opacity=".55">
+    {verticals.map((dx) => <line x1={vx + dx * 0.06} y1={HORIZON} x2={vx + dx * 3.2} y2={H} />)}
+    {horizontals.map((y) => <line x1="0" y1={y} x2={W} y2={y} opacity={Math.min(1, (y - HORIZON) / 120)} />)}
+  </g>
+  <g stroke={`url(#${id}-stream)`} stroke-width="3" stroke-linecap="round" fill="none">
+    {streams.map((s, i) => (
+      <line class="ka-stream" style={`animation-delay:${i * -0.9}s`} x1={s.x2} y1={H} x2={s.x1} y2={HORIZON} />
+    ))}
+  </g>
+  <rect y={HORIZON - 2} width={W} height="3" fill="#ffb3c9" opacity=".8" />
+</svg>
+
+<style>
+  .ka-blink {
+    animation: ka-blink 2.4s steps(2, jump-none) infinite;
+  }
+  .ka-stream {
+    stroke-dasharray: 60 520;
+    animation: ka-stream 3.2s linear infinite;
+  }
+  @keyframes ka-blink {
+    50% { opacity: 0.15; }
+  }
+  @keyframes ka-stream {
+    from { stroke-dashoffset: 580; }
+    to { stroke-dashoffset: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ka-blink, .ka-stream { animation: none; }
+  }
+</style>

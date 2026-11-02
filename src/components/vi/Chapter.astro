@@ -1,0 +1,131 @@
+---
+import { Image } from 'astro:assets';
+import Logo from './Logo.astro';
+import nacho from '../../assets/nacho.jpg';
+import { chapters } from '../../data/site';
+
+interface Props {
+  index: 0 | 1;
+}
+const c = chapters[Astro.props.index];
+const cold = c.id === 'programador';
+---
+
+<section id={c.id} class="vi-chapter py-24 sm:py-36" data-tone={cold ? 'cold' : 'warm'} aria-labelledby={`${c.id}-title`}>
+  <!-- Línea gigante que se desliza con el scroll -->
+  <div aria-hidden="true" class="pointer-events-none mb-14 overflow-hidden sm:mb-20">
+    <p class="vi-bigline vi-display vi-outline text-[22vw] leading-none sm:text-[16vw]" data-shift={cold ? '-18' : '18'}>
+      {cold ? 'Capítulo I · El pasado · Capítulo I' : 'Capítulo II · El presente · Capítulo II'}
+    </p>
+  </div>
+
+  <div class:list={['mx-auto grid max-w-7xl gap-12 px-4 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20', !cold && 'lg:[direction:rtl]']}>
+    <!-- Póster del "personaje" -->
+    <div class="lg:[direction:ltr]">
+      <div class="vi-poster vi-reveal lg:sticky lg:top-28" data-poster>
+        <Image src={nacho} alt={`Nacho Dal Lago — ${c.name.join(' ')}`} width={640} height={800} loading="lazy" />
+        <span class="vi-poster-num" aria-hidden="true">{c.number}</span>
+        <div class="vi-poster-label">
+          <p class="vi-kicker !text-white/70">{c.kicker}</p>
+          <p class="vi-display mt-2 text-5xl sm:text-6xl">Nacho<br />Dal Lago</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:[direction:ltr]">
+      <p class="vi-kicker vi-reveal" style="color:var(--tone-b)">Capítulo {c.number}</p>
+      <h2 id={`${c.id}-title`} class="vi-display vi-reveal mt-3 text-[15vw] sm:text-8xl lg:text-[7.5rem]" style="--d:1">
+        {c.name[0]}<br /><span style="color:var(--tone-b)">{c.name[1]}</span>
+      </h2>
+
+      <blockquote class="vi-quote vi-reveal mt-10 text-3xl sm:text-5xl" style="--d:2">“{c.quote}”</blockquote>
+
+      <div class="mt-10 space-y-5 text-lg leading-relaxed text-white/75">
+        {c.body.map((p, i) => <p class="vi-reveal" style={`--d:${i}`}>{p}</p>)}
+      </div>
+
+      <dl class="mt-10 grid grid-cols-2 gap-4">
+        {
+          c.stats.map((s, i) => (
+            <div class="vi-reveal rounded-2xl border border-white/10 bg-white/[.03] p-5" style={`--d:${i}`}>
+              <dt class="text-sm text-white/55">{s.label}</dt>
+              <dd class="vi-display mt-2 text-5xl sm:text-6xl" style="color:var(--tone-c)">{s.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <ul class="vi-reveal mt-8 flex flex-wrap items-center gap-3" aria-label="Herramientas de esta etapa">
+        {
+          c.logos.map((id) => (
+            <li class="grid h-14 min-w-14 place-items-center rounded-xl border border-white/10 bg-white/[.04] px-3">
+              <Logo id={id} size={26} />
+            </li>
+          ))
+        }
+      </ul>
+
+      <!-- "Capturas" de cada etapa -->
+      <div class="mt-14 grid gap-5 sm:grid-cols-2">
+        {
+          cold ? (
+            <>
+              <figure class="vi-shot vi-reveal sm:col-span-2">
+                <div class="vi-shot-bar"><i /><i /><i /><span class="ml-2">checkout.php — 2015</span></div>
+                <pre class="overflow-x-auto p-4 text-[12px] leading-relaxed text-white/70"><code><span class="text-[#8892BF]">&lt;?php</span>
+<span class="text-white/40">// TODO: arreglar esto el lunes</span>
+$pedido = mysql_query(<span class="text-[#ffc46b]">"SELECT * FROM pedidos WHERE id=$_GET[id]"</span>);
+<span class="text-[#2ee6d6]">foreach</span> ($items <span class="text-[#2ee6d6]">as</span> $item) {'{'}
+  $total += $item[<span class="text-[#ffc46b]">'precio'</span>] * $item[<span class="text-[#ffc46b]">'cant'</span>]; <span class="text-white/40">// copiar a la factura a mano</span>
+{'}'}
+<span class="text-[#2ee6d6]">echo</span> <span class="text-[#ffc46b]">"&lt;script&gt;$('#total').html('$total')&lt;/script&gt;"</span>;</code></pre>
+              </figure>
+              <figure class="vi-shot vi-reveal" style="--d:1">
+                <div class="vi-shot-bar"><i /><i /><i /><span class="ml-2">bandeja de entrada</span></div>
+                <ul class="space-y-2 p-4 text-[12px]">
+                  <li class="flex justify-between gap-2"><span class="text-white/80">Cliente: “¿y mi factura?”</span><span class="text-[#ff7a59]">urgente</span></li>
+                  <li class="flex justify-between gap-2"><span class="text-white/80">Stock no coincide con ML</span><span class="text-[#ff7a59]">bug</span></li>
+                  <li class="flex justify-between gap-2"><span class="text-white/80">Cargar 40 pedidos al ERP</span><span class="text-white/40">manual</span></li>
+                </ul>
+              </figure>
+              <figure class="vi-shot vi-reveal flex flex-col justify-center p-5" style="--d:2">
+                <p class="text-[11px] tracking-widest text-white/45 uppercase">tareas hoy</p>
+                <p class="vi-display mt-1 text-6xl text-white">1<span class="text-white/30">/12</span></p>
+                <p class="mt-1 text-[11px] text-white/45">una a la vez, a mano</p>
+              </figure>
+            </>
+          ) : (
+            <>
+              <figure class="vi-shot vi-reveal sm:col-span-2">
+                <div class="vi-shot-bar"><i /><i /><i /><span class="ml-2">n8n · venta → factura</span><span class="ml-auto text-[#2ee6d6]">● activo</span></div>
+                <div class="flex items-center gap-2 overflow-x-auto p-5">
+                  {['mercadolibre', 'claude', 'odoo', 'mercadopago', 'arca', 'whatsapp'].map((id, i) => (
+                    <>
+                      {i > 0 && <span class="h-px w-6 shrink-0 bg-gradient-to-r from-[#ff3d8b] to-[#ffc46b]" />}
+                      <span class="grid size-12 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[.05]">
+                        <Logo id={id} size={24} />
+                      </span>
+                    </>
+                  ))}
+                </div>
+              </figure>
+              <figure class="vi-shot vi-reveal" style="--d:1">
+                <div class="vi-shot-bar"><i /><i /><i /><span class="ml-2">claude · mcp</span></div>
+                <div class="space-y-1.5 p-4 text-[12px]">
+                  <p class="text-white/45">&gt; ¿cuántas facturas fallaron hoy?</p>
+                  <p class="text-[#2ee6d6]">mcp://erp · query ok</p>
+                  <p class="text-white/80">0 errores. Todas las facturas del día emitidas en ARCA.</p>
+                </div>
+              </figure>
+              <figure class="vi-shot vi-reveal flex flex-col justify-center p-5" style="--d:2">
+                <p class="text-[11px] tracking-widest text-white/45 uppercase">tareas hoy</p>
+                <p class="vi-display vi-sunset-text mt-1 text-6xl">6<span class="opacity-50">/6</span></p>
+                <p class="mt-1 text-[11px] text-white/45">en paralelo, con IA en cada paso</p>
+              </figure>
+            </>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>

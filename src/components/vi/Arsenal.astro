@@ -1,0 +1,67 @@
+---
+import Logo from './Logo.astro';
+import { arsenal } from '../../data/site';
+import { logos } from '../../data/logos';
+
+const all = arsenal.flatMap((g) => g.logos);
+const rowA = all.filter((_, i) => i % 2 === 0);
+const rowB = all.filter((_, i) => i % 2 === 1);
+---
+
+<section id="arsenal" class="relative overflow-clip py-24 sm:py-36" aria-labelledby="arsenal-title">
+  <div aria-hidden="true" class="absolute inset-0 -z-10 bg-[radial-gradient(60rem_30rem_at_50%_0%,rgb(255_196_107/.08),transparent_70%)]"></div>
+
+  <div class="mx-auto max-w-7xl px-4 sm:px-8">
+    <p class="vi-kicker vi-reveal">Arsenal</p>
+    <h2 id="arsenal-title" class="vi-display vi-reveal mt-3 text-[15vw] sm:text-8xl lg:text-[7rem]" style="--d:1">
+      Las herramientas <span class="vi-sunset-text">del oficio</span>
+    </h2>
+    <p class="vi-reveal mt-6 max-w-2xl text-lg text-white/65" style="--d:2">
+      IA, automatización y los sistemas con los que trabajé: ERPs, marketplaces, pagos y facturación. Si tiene API, webhook o
+      base de datos, lo conecto.
+    </p>
+  </div>
+
+  <!-- Cintas de logos -->
+  <div class="mt-14 space-y-6" aria-hidden="true">
+    {
+      [rowA, rowB].map((row, r) => (
+        <div class="vi-marquee overflow-hidden">
+          <div class="vi-marquee-track items-center py-2" data-dir={r ? 'rev' : 'fwd'} style={`--dur:${r ? 60 : 50}s`}>
+            {[...row, ...row].map((id) => (
+              <span class="flex shrink-0 items-center gap-3 text-white/80">
+                <Logo id={id} size={34} />
+                <span class="vi-display text-3xl text-white/85 sm:text-4xl">{logos[id].name}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="mx-auto mt-20 max-w-7xl space-y-14 px-4 sm:px-8">
+    {
+      arsenal.map((g) => (
+        <div>
+          <h3 class="vi-reveal flex items-center gap-4 font-mono text-xs tracking-[0.22em] text-white/50 uppercase">
+            {g.title}
+            <span class="h-px flex-1 bg-white/10" />
+          </h3>
+          <ul class="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            {g.logos.map((id, i) => (
+              <li class="vi-logo-tile vi-reveal" style={`--d:${i % 7}`}>
+                <Logo id={id} size={36} />
+                <span>{logos[id].name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+    <p class="text-xs text-white/35">
+      Logos de marcas registradas de sus respectivos dueños, usados solo para indicar experiencia de uso. Íconos de Simple
+      Icons y de los sitios oficiales.
+    </p>
+  </div>
+</section>

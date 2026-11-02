@@ -1,0 +1,59 @@
+---
+import Logo from './Logo.astro';
+import { flow } from '../../data/site';
+---
+
+<section id="flujo" class="vi-flow" data-flow aria-labelledby="flujo-title">
+  <div class="vi-flow-stage">
+    <div aria-hidden="true" class="absolute inset-0 -z-10 bg-[radial-gradient(70rem_40rem_at_50%_110%,rgb(255_61_139/.22),transparent_60%),radial-gradient(40rem_30rem_at_100%_0%,rgb(124_58_237/.2),transparent_60%)]"></div>
+
+    <div class="mx-auto flex h-full max-w-7xl flex-col justify-center px-4 pt-16 sm:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="vi-kicker">En acción · una venta real, de punta a punta</p>
+          <h2 id="flujo-title" class="vi-display mt-3 text-[14vw] sm:text-8xl lg:text-[7rem]">
+            Una venta. <span class="vi-sunset-text">Cero manos.</span>
+          </h2>
+        </div>
+        <p class="font-mono text-sm text-white/50" aria-live="polite">
+          paso <span class="text-white" data-flow-step>1</span>/{flow.length}
+        </p>
+      </div>
+
+      <div class="relative mt-8 sm:mt-12">
+        <!-- Línea de progreso -->
+        <div class="vi-flow-line absolute top-0 bottom-0 left-[1.6rem] w-0.5 lg:top-[2.4rem] lg:right-0 lg:bottom-auto lg:left-0 lg:h-0.5 lg:w-auto" aria-hidden="true">
+          <span class="h-[calc(var(--flow-p,0)*100%)] w-full lg:h-full lg:w-[calc(var(--flow-p,0)*100%)]"></span>
+        </div>
+
+        <ol class="relative grid gap-2.5 sm:gap-3 lg:grid-cols-6 lg:gap-4">
+          {
+            flow.map((s, i) => (
+              <li class="vi-node flex items-center gap-4 p-2.5 sm:p-3 lg:flex-col lg:items-start lg:p-4" data-node={i}>
+                <div class="flex shrink-0 -space-x-2">
+                  {s.logos.map((id) => (
+                    <span class="grid size-[3.2rem] place-items-center rounded-xl border border-white/10 bg-[#0b0614] lg:size-14">
+                      <Logo id={id} size={26} />
+                    </span>
+                  ))}
+                </div>
+                <div class="min-w-0">
+                  <p class="vi-node-tag">
+                    0{i + 1} · {s.tag}
+                  </p>
+                  <p class="mt-0.5 font-semibold text-white sm:text-lg">{s.title}</p>
+                  <p class="hidden text-sm text-white/55 sm:block">{s.text}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <p class="mt-8 hidden max-w-2xl text-white/60 sm:block sm:text-lg">
+        Un ejemplo de lo que construyo: el pedido entra por MercadoLibre o TiendaNube y, sin que nadie toque nada, termina
+        cargado en el ERP, cobrado, facturado en ARCA y avisado al cliente.
+      </p>
+    </div>
+  </div>
+</section>

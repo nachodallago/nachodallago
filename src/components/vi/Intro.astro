@@ -1,0 +1,61 @@
+---
+import KeyArt from './KeyArt.astro';
+import Icon from '../Icon.astro';
+import { links, site } from '../../data/site';
+
+// Glifos "IA" dibujados a mano (viewBox 1070x600). El agujero del overlay es la ventana al key art.
+const glyphI = 'M100,60 H380 V150 H290 V450 H380 V540 H100 V450 H190 V150 H100 Z';
+const glyphA = 'M470,540 L640,60 H800 L970,540 H860 L825,440 H615 L580,540 Z';
+const glyphAHole = 'M655,350 H785 L720,160 Z';
+const big = 'M-80000,-80000 H80000 V80000 H-80000 Z';
+---
+
+<section id="top" class="vi-intro" data-intro aria-label="Presentación">
+  <div class="vi-intro-stage">
+    <div class="vi-intro-art"><KeyArt id="ka-intro" /></div>
+
+    <!-- Overlay negro con la palabra "IA" calada: al hacer scroll crece hasta abrir la escena -->
+    <svg class="vi-intro-mask" viewBox="0 0 1070 600" aria-hidden="true">
+      <defs>
+        <linearGradient id="ia-stroke" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffd27a" />
+          <stop offset=".5" stop-color="#ff3d8b" />
+          <stop offset="1" stop-color="#a855f7" />
+        </linearGradient>
+      </defs>
+      <path d={`${big} ${glyphI} ${glyphA} ${glyphAHole}`} fill="#07040d" fill-rule="evenodd" />
+      <path class="glyph-stroke" d={`${glyphI} ${glyphA} ${glyphAHole}`} />
+    </svg>
+
+    <div class="vi-intro-pre pointer-events-none absolute inset-x-0 top-24 text-center sm:top-28">
+      <p class="vi-kicker">{site.name} presenta</p>
+    </div>
+    <div class="vi-intro-pre pointer-events-none absolute inset-x-0 bottom-8 px-4 text-center">
+      <p class="vi-display text-2xl text-white/90 sm:text-3xl">De programador a ingeniero de automatización</p>
+      <div class="vi-scroll-hint mt-5"><span></span></div>
+    </div>
+
+    <div class="vi-intro-veil"></div>
+
+    <div class="vi-intro-title absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-4 pb-10 sm:px-8 sm:pb-16" data-intro-title>
+      <p class="vi-kicker mb-4">Ingeniero de automatización e IA · {site.location}</p>
+      <h1 class="vi-display text-[17vw] sm:text-[12vw] lg:text-[9.5rem]">
+        <span class="block">De picar código</span>
+        <span class="vi-sunset-text block">a automatizar empresas</span>
+      </h1>
+      <p class="mt-6 max-w-2xl text-base text-white/80 sm:text-xl">
+        Soy Nacho Dal Lago. Conecto <strong class="text-white">IA</strong>, <strong class="text-white">n8n</strong> y
+        <strong class="text-white">MCP</strong> con los sistemas de tu empresa —ERP, marketplaces, pagos y ARCA— para que la
+        operación corra sola, 24/7, con muchos menos errores.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a href={links.linkedin} target="_blank" rel="noopener" class="vi-btn vi-btn-primary">
+          Automaticemos tu empresa <Icon name="arrow" size={18} />
+        </a>
+        <a href="#historia" class="vi-btn vi-btn-ghost">Ver la historia</a>
+      </div>
+    </div>
+
+    <div class="vi-intro-end"></div>
+  </div>
+</section>

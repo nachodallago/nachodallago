@@ -1,0 +1,63 @@
+---
+import KeyArt from './KeyArt.astro';
+import Icon from '../Icon.astro';
+import { links, site } from '../../data/site';
+
+const socials = [
+  { href: links.linkedin, label: 'LinkedIn', icon: 'linkedin' },
+  { href: links.github, label: 'GitHub', icon: 'github' },
+  { href: links.instagram, label: 'Instagram', icon: 'instagram' },
+] as const;
+---
+
+<section id="contacto" class="relative isolate flex min-h-[100svh] items-end overflow-hidden" aria-labelledby="contacto-title">
+  <div class="absolute inset-x-0 -inset-y-[12%] -z-20" data-parallax="0.15"><KeyArt id="ka-outro" class="size-full" /></div>
+  <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-[#07040d] via-[#07040d]/60 to-[#07040d]"></div>
+
+  <div class="mx-auto w-full max-w-7xl px-4 pt-40 pb-16 sm:px-8 sm:pb-24">
+    <p class="vi-kicker vi-reveal">Disponible para proyectos · {site.location} → LATAM y España</p>
+    <h2 id="contacto-title" class="vi-display vi-reveal mt-4 text-[12vw] lg:text-[10.5rem]" style="--d:1">
+      ¿Automatizamos<br /><span class="vi-sunset-text">tu empresa?</span>
+    </h2>
+    <p class="vi-reveal mt-6 max-w-xl text-lg text-white/75" style="--d:2">
+      Contame qué proceso te está comiendo horas. Te digo cómo lo automatizaría, con qué herramientas y por dónde arrancar.
+    </p>
+    <div class="vi-reveal mt-8 flex flex-col gap-3 sm:flex-row" style="--d:3">
+      <a href={links.linkedin} target="_blank" rel="noopener" class="vi-btn vi-btn-primary">
+        <Icon name="linkedin" /> Escribime por LinkedIn
+      </a>
+      <a href={links.github} target="_blank" rel="noopener" class="vi-btn vi-btn-ghost">
+        <Icon name="github" /> Ver GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
+  <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 text-sm text-white/45 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+    <div>
+      <p class="text-white/75"><span class="vi-display vi-sunset-text mr-2 text-xl">NDL</span>© {new Date().getFullYear()} {site.name} · {site.role}</p>
+      <p class="mt-1">
+        Hecho con Astro y casi nada de JavaScript ·
+        <a href={links.repo} target="_blank" rel="noopener" class="underline decoration-white/20 underline-offset-4 hover:text-white">mirá el código</a>
+      </p>
+    </div>
+    <ul class="flex gap-2">
+      {
+        socials.map((s) => (
+          <li>
+            <a
+              href={s.href}
+              target="_blank"
+              rel="noopener me"
+              aria-label={s.label}
+              class="grid size-11 place-items-center rounded-full border border-white/15 text-white/60 transition-colors hover:border-[#ff3d8b]/60 hover:text-white"
+            >
+              <Icon name={s.icon} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>

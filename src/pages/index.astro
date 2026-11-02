@@ -1,30 +1,189 @@
 ---
+import '@fontsource/anton/latin-400.css';
+import '../styles/vi.css';
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Hero from '../components/Hero.astro';
-import Metrics from '../components/Metrics.astro';
-import Services from '../components/Services.astro';
-import Results from '../components/Results.astro';
-import Mcp from '../components/Mcp.astro';
-import Process from '../components/Process.astro';
-import Story from '../components/Story.astro';
-import Faq from '../components/Faq.astro';
-import Cta from '../components/Cta.astro';
-import Footer from '../components/Footer.astro';
+import Nav from '../components/vi/Nav.astro';
+import Intro from '../components/vi/Intro.astro';
+import Chapter from '../components/vi/Chapter.astro';
+import Flow from '../components/vi/Flow.astro';
+import Services from '../components/vi/Services.astro';
+import Arsenal from '../components/vi/Arsenal.astro';
+import Results from '../components/vi/Results.astro';
+import ProcessFaq from '../components/vi/ProcessFaq.astro';
+import Outro from '../components/vi/Outro.astro';
+
+const manifesto =
+  'Durante años escribí código línea por línea. Hasta que entendí algo: el código no era el trabajo. El trabajo era la operación de la empresa. Hoy la automatizo.';
 ---
 
-<Layout>
-  <Header />
+<Layout decor={false} bodyClass="vi no-js">
+  <Nav />
   <main id="main">
-    <Hero />
-    <Metrics />
+    <Intro />
+
+    <section class="relative mx-auto max-w-6xl px-4 py-28 sm:px-8 sm:py-44" aria-label="Manifiesto">
+      <p class="vi-display text-[11vw] leading-[0.95] sm:text-7xl lg:text-8xl" data-words>
+        {manifesto.split(' ').map((w) => <span class="vi-word">{w} </span>)}
+      </p>
+    </section>
+
+    <div id="historia">
+      <Chapter index={0} />
+      <Chapter index={1} />
+    </div>
+
+    <Flow />
     <Services />
-    <Mcp />
+    <Arsenal />
     <Results />
-    <Story />
-    <Process />
-    <Faq />
-    <Cta />
+    <ProcessFaq />
+    <Outro />
   </main>
-  <Footer />
+  <div class="vi-grain" aria-hidden="true"></div>
 </Layout>
+
+<style>
+  .vi-word {
+    opacity: var(--o, 0.14);
+    transition: opacity 0.2s linear;
+  }
+  :global(.no-js) .vi-word {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vi-word { opacity: 1; }
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  document.body.classList.remove('no-js');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+
+  // Reveals al entrar en pantalla
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      }
+    },
+    { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
+  );
+  document.querySelectorAll('.vi-reveal').forEach((el) => io.observe(el));
+
+  // Brillo que sigue al mouse en las tarjetas
+  document.querySelectorAll<HTMLElement>('[data-glow]').forEach((card) => {
+    card.addEventListener('pointermove', (ev) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${ev.clientX - r.left}px`);
+      card.style.setProperty('--my', `${ev.clientY - r.top}px`);
+    });
+  });
+
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const intro = document.querySelector<HTMLElement>('[data-intro]');
+  const introTitle = document.querySelector<HTMLElement>('[data-intro-title]');
+  const introMask = document.querySelector<SVGElement>('.vi-intro-mask');
+  const words = [...document.querySelectorAll<HTMLElement>('[data-words] .vi-word')];
+  const wordsBox = document.querySelector<HTMLElement>('[data-words]');
+  const flowEl = document.querySelector<HTMLElement>('[data-flow]');
+  const nodes = [...document.querySelectorAll<HTMLElement>('[data-node]')];
+  const stepLabel = document.querySelector<HTMLElement>('[data-flow-step]');
+  const biglines = [...document.querySelectorAll<HTMLElement>('[data-shift]')];
+  const posters = [...document.querySelectorAll<HTMLElement>('[data-poster]')];
+  const parallax = [...document.querySelectorAll<HTMLElement>('[data-parallax]')];
+
+  // Progreso 0→1 de una sección "sticky" (de que su top toca el viewport a que termina)
+  const stickyProgress = (el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    return clamp(-r.top / (r.height - innerHeight));
+  };
+  // Progreso 0→1 de un elemento cruzando el viewport
+  const viewProgress = (el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    return clamp((innerHeight - r.top) / (innerHeight + r.height));
+  };
+
+  let lastStep = -1;
+  const frame = () => {
+    const max = root.scrollHeight - innerHeight;
+    root.style.setProperty('--page-p', String(max > 0 ? scrollY / max : 0));
+    nav?.classList.toggle('is-solid', scrollY > innerHeight * 2.6);
+
+    if (reduced) return;
+
+    // Intro: la ventana "IA" crece hasta abrir la escena
+    if (intro) {
+      const p = stickyProgress(intro);
+      const z = clamp(p / 0.5);
+      const s = Math.pow(60, ease(z) * 0.35 + z * 0.65);
+      intro.style.setProperty('--mask-s', s.toFixed(3));
+      // El punto de zoom (centro de la "I") viaja al centro de la pantalla mientras crece
+      const mw = introMask?.getBoundingClientRect().width ?? 0;
+      intro.style.setProperty('--mask-x', `${((0.5 - 0.2243) * (mw / s) * ease(z)).toFixed(1)}px`);
+      intro.style.setProperty('--mask-o', String(1 - clamp((z - 0.82) / 0.18)));
+      intro.style.setProperty('--stroke-o', String(1 - clamp(z / 0.35)));
+      intro.style.setProperty('--art-s', (1.3 - 0.3 * ease(clamp(p / 0.6))).toFixed(4));
+      intro.style.setProperty('--pre-o', String(1 - clamp(p / 0.12)));
+      const t = clamp((p - 0.48) / 0.22);
+      intro.style.setProperty('--title-o', ease(t).toFixed(3));
+      intro.style.setProperty('--veil', String(0.25 * t));
+      intro.style.setProperty('--end-o', String(clamp((p - 0.9) / 0.1)));
+      introTitle?.classList.toggle('is-live', t > 0.6);
+    }
+
+    // Manifiesto: las palabras se encienden de a una
+    if (wordsBox && words.length) {
+      const p = clamp((viewProgress(wordsBox) - 0.15) / 0.45);
+      const lit = p * words.length;
+      words.forEach((w, i) => w.style.setProperty('--o', String(0.14 + 0.86 * clamp(lit - i))));
+    }
+
+    // Títulos gigantes que se deslizan
+    for (const el of biglines) {
+      const p = viewProgress(el);
+      el.style.setProperty('--shift', `${(p - 0.5) * Number(el.dataset.shift)}vw`);
+    }
+
+    for (const el of posters) {
+      el.style.setProperty('--poster-s', (1.15 - 0.15 * viewProgress(el)).toFixed(4));
+    }
+
+    for (const el of parallax) {
+      const p = viewProgress(el.parentElement!);
+      el.style.transform = `translateY(${(p - 0.5) * Number(el.dataset.parallax) * 100}%)`;
+    }
+
+    // Flujo: cada nodo se enciende a su turno
+    if (flowEl && nodes.length) {
+      const p = clamp((stickyProgress(flowEl) - 0.05) / 0.85);
+      flowEl.style.setProperty('--flow-p', p.toFixed(4));
+      const step = Math.min(nodes.length - 1, Math.floor(p * nodes.length));
+      if (step !== lastStep) {
+        nodes.forEach((n, i) => n.classList.toggle('is-on', i <= step));
+        if (stepLabel) stepLabel.textContent = String(step + 1);
+        lastStep = step;
+      }
+    }
+  };
+
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      frame();
+      ticking = false;
+    });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  frame();
+
+  if (reduced) nodes.forEach((n) => n.classList.add('is-on'));
+</script>
