@@ -77,7 +77,8 @@ const manifesto =
   document.querySelectorAll('.vi-reveal').forEach((el) => io.observe(el));
 
   // Brillo que sigue al mouse en las tarjetas
-  document.querySelectorAll<HTMLElement>('[data-glow]').forEach((card) => {
+  // (solo con mouse: en el celular no hay hover y nos ahorramos los listeners)
+  if (matchMedia('(hover: hover)').matches) document.querySelectorAll<HTMLElement>('[data-glow]').forEach((card) => {
     card.addEventListener('pointermove', (ev) => {
       const r = card.getBoundingClientRect();
       card.style.setProperty('--mx', `${ev.clientX - r.left}px`);
@@ -86,6 +87,8 @@ const manifesto =
   });
 
   const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const dock = document.querySelector<HTMLElement>('[data-dock]');
+  const contact = document.getElementById('contacto');
   const intro = document.querySelector<HTMLElement>('[data-intro]');
   const introTitle = document.querySelector<HTMLElement>('[data-intro-title]');
   const introMask = document.querySelector<SVGElement>('.vi-intro-mask');
@@ -113,7 +116,14 @@ const manifesto =
   const frame = () => {
     const max = root.scrollHeight - innerHeight;
     root.style.setProperty('--page-p', String(max > 0 ? scrollY / max : 0));
-    nav?.classList.toggle('is-solid', scrollY > innerHeight * 2.6);
+    const introEnd = intro ? intro.offsetTop + intro.offsetHeight - innerHeight : 0;
+    nav?.classList.toggle('is-solid', scrollY > introEnd);
+    // Dock mobile: aparece cuando ya no se ve el CTA del hero y se va al llegar al contacto
+    const inContact = contact ? contact.getBoundingClientRect().top < innerHeight * 0.85 : false;
+    // En la escena fija del flujo el dock taparía los últimos pasos
+    const fr = flowEl?.getBoundingClientRect();
+    const inFlow = fr ? fr.top < innerHeight * 0.5 && fr.bottom > innerHeight * 0.5 : false;
+    dock?.classList.toggle('is-visible', scrollY > introEnd && !inContact && !inFlow);
 
     if (reduced) return;
 
@@ -165,7 +175,10 @@ const manifesto =
       flowEl.style.setProperty('--flow-p', p.toFixed(4));
       const step = Math.min(nodes.length - 1, Math.floor(p * nodes.length));
       if (step !== lastStep) {
-        nodes.forEach((n, i) => n.classList.toggle('is-on', i <= step));
+        nodes.forEach((n, i) => {
+          n.classList.toggle('is-on', i <= step);
+          n.classList.toggle('is-current', i === step);
+        });
         if (stepLabel) stepLabel.textContent = String(step + 1);
         lastStep = step;
       }

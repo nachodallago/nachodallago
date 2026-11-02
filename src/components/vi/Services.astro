@@ -2,27 +2,28 @@
 import { services } from '../../data/site';
 ---
 
-<section id="servicios" class="relative py-24 sm:py-36" aria-labelledby="servicios-title">
+<section id="servicios" class="relative py-20 sm:py-36" aria-labelledby="servicios-title">
   <div class="mx-auto max-w-7xl px-4 sm:px-8">
     <div class="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
       <div>
         <p class="vi-kicker vi-reveal">Servicios</p>
-        <h2 id="servicios-title" class="vi-display vi-reveal mt-3 text-[15vw] sm:text-8xl lg:text-[7rem]" style="--d:1">
+        <h2 id="servicios-title" class="vi-display vi-h2 vi-reveal mt-3" style="--d:1">
           Lo que <span class="vi-sunset-text">hago hoy</span>
         </h2>
       </div>
-      <p class="vi-reveal max-w-xl text-lg text-white/65 lg:justify-self-end" style="--d:2">
+      <p class="vi-reveal max-w-xl text-white/65 sm:text-lg lg:justify-self-end" style="--d:2">
         Menos horas en tareas repetitivas, menos errores y más foco en lo que mueve el negocio. Cada proyecto arranca por el
         proceso que más duele.
       </p>
     </div>
 
-    <ul class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <p class="vi-swipe mt-10">Deslizá los servicios</p>
+    <ul class="vi-rail vi-reveal mt-3 sm:mt-14" style="--cols-sm:2;--cols-lg:3">
       {
         services.map((s, i) => (
-          <li class="vi-card vi-reveal flex flex-col p-6 sm:p-8" style={`--d:${i % 3}`} data-glow>
-            <span class="vi-display text-6xl text-white/10">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="vi-display mt-4 text-4xl">{s.title}</h3>
+          <li class="vi-card flex flex-col p-6 sm:p-8" data-glow>
+            <span class="vi-display text-5xl text-white/10 sm:text-6xl">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="vi-display mt-3 text-[2.1rem] sm:mt-4 sm:text-4xl">{s.title}</h3>
             <p class="mt-4 flex-1 text-white/65">{s.text}</p>
             <ul class="mt-6 flex flex-wrap gap-2">
               {s.tags.map((t) => (

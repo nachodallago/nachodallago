@@ -3,16 +3,17 @@ import Icon from '../Icon.astro';
 import { processSteps, faqs } from '../../data/site';
 ---
 
-<section id="proceso" class="relative py-24 sm:py-32" aria-labelledby="proceso-title">
+<section id="proceso" class="relative py-20 sm:py-32" aria-labelledby="proceso-title">
   <div class="mx-auto max-w-7xl px-4 sm:px-8">
     <p class="vi-kicker vi-reveal">Cómo trabajo</p>
-    <h2 id="proceso-title" class="vi-display vi-reveal mt-3 text-[15vw] sm:text-8xl" style="--d:1">
+    <h2 id="proceso-title" class="vi-display vi-h2 vi-reveal mt-3" style="--d:1">
       Cuatro <span class="vi-sunset-text">movimientos</span>
     </h2>
-    <ol class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <p class="vi-swipe mt-10">Deslizá los pasos</p>
+    <ol class="vi-rail vi-reveal mt-3 sm:mt-12" data-size="sm" style="--cols-sm:2;--cols-lg:4">
       {
         processSteps.map((s, i) => (
-          <li class="vi-card vi-reveal p-6" style={`--d:${i}`} data-glow>
+          <li class="vi-card p-6" data-glow>
             <span class="vi-display vi-sunset-text text-5xl">0{i + 1}</span>
             <h3 class="mt-4 text-xl font-semibold text-white">{s.title}</h3>
             <p class="mt-2 text-white/60">{s.text}</p>
@@ -23,11 +24,11 @@ import { processSteps, faqs } from '../../data/site';
   </div>
 </section>
 
-<section id="faq" class="relative py-24 sm:py-32" aria-labelledby="faq-title">
+<section id="faq" class="relative py-20 sm:py-32" aria-labelledby="faq-title">
   <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
     <div>
       <p class="vi-kicker vi-reveal">Preguntas frecuentes</p>
-      <h2 id="faq-title" class="vi-display vi-reveal mt-3 text-[15vw] sm:text-8xl lg:sticky lg:top-28" style="--d:1">
+      <h2 id="faq-title" class="vi-display vi-h2 vi-reveal mt-3 lg:sticky lg:top-28" style="--d:1">
         Antes de <span class="vi-sunset-text">arrancar</span>
       </h2>
     </div>
@@ -35,9 +36,9 @@ import { processSteps, faqs } from '../../data/site';
       {
         faqs.map((f) => (
           <details class="vi-faq group py-2">
-            <summary class="flex items-center justify-between gap-6 py-4 text-lg font-medium text-white sm:text-xl">
+            <summary class="flex min-h-14 items-center justify-between gap-4 py-3 text-[1.05rem] leading-snug font-medium text-white sm:gap-6 sm:py-4 sm:text-xl">
               {f.q}
-              <span class="plus grid size-9 shrink-0 place-items-center rounded-full border border-white/15 text-[#ffc46b]">
+              <span class="plus grid size-10 shrink-0 place-items-center rounded-full border border-white/15 text-[#ffc46b]">
                 <Icon name="plus" size={18} />
               </span>
             </summary>

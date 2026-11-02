@@ -27,28 +27,28 @@ const big = 'M-80000,-80000 H80000 V80000 H-80000 Z';
       <path class="glyph-stroke" d={`${glyphI} ${glyphA} ${glyphAHole}`} />
     </svg>
 
-    <div class="vi-intro-pre pointer-events-none absolute inset-x-0 top-24 text-center sm:top-28">
+    <div class="vi-intro-pre pointer-events-none absolute inset-x-0 top-[calc(5rem+env(safe-area-inset-top))] px-4 text-center sm:top-28">
       <p class="vi-kicker">{site.name} presenta</p>
     </div>
-    <div class="vi-intro-pre pointer-events-none absolute inset-x-0 bottom-8 px-4 text-center">
-      <p class="vi-display text-2xl text-white/90 sm:text-3xl">De programador a ingeniero de automatización</p>
+    <div class="vi-intro-pre pointer-events-none absolute inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] px-4 text-center">
+      <p class="vi-display mx-auto max-w-[16ch] text-[2.1rem] leading-[0.95] text-white/90 sm:max-w-none sm:text-3xl">De programador a ingeniero de automatización</p>
       <div class="vi-scroll-hint mt-5"><span></span></div>
     </div>
 
     <div class="vi-intro-veil"></div>
 
-    <div class="vi-intro-title absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-4 pb-10 sm:px-8 sm:pb-16" data-intro-title>
-      <p class="vi-kicker mb-4">Ingeniero de automatización e IA · {site.location}</p>
-      <h1 class="vi-display text-[17vw] sm:text-[12vw] lg:text-[9.5rem]">
+    <div class="vi-intro-title absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-8 sm:pb-16" data-intro-title>
+      <p class="vi-kicker mb-3 sm:mb-4">Ingeniero de automatización e IA · {site.location}</p>
+      <h1 class="vi-display vi-hero-h1">
         <span class="block">De picar código</span>
         <span class="vi-sunset-text block">a automatizar empresas</span>
       </h1>
-      <p class="mt-6 max-w-2xl text-base text-white/80 sm:text-xl">
+      <p class="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-white/80 sm:mt-6 sm:text-xl">
         Soy Nacho Dal Lago. Conecto <strong class="text-white">IA</strong>, <strong class="text-white">n8n</strong> y
         <strong class="text-white">MCP</strong> con los sistemas de tu empresa —ERP, marketplaces, pagos y ARCA— para que la
         operación corra sola, 24/7, con muchos menos errores.
       </p>
-      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div class="mt-6 grid gap-2.5 sm:mt-8 sm:flex sm:gap-3">
         <a href={links.linkedin} target="_blank" rel="noopener" class="vi-btn vi-btn-primary">
           Automaticemos tu empresa <Icon name="arrow" size={18} />
         </a>

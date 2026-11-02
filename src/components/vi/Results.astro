@@ -3,19 +3,19 @@ import Icon from '../Icon.astro';
 import { metrics, beforeAfter, timeline } from '../../data/site';
 ---
 
-<section id="resultados" class="relative py-24 sm:py-36" aria-labelledby="resultados-title">
+<section id="resultados" class="relative py-20 sm:py-36" aria-labelledby="resultados-title">
   <div class="mx-auto max-w-7xl px-4 sm:px-8">
     <p class="vi-kicker vi-reveal">Resultados</p>
-    <h2 id="resultados-title" class="vi-display vi-reveal mt-3 text-[15vw] sm:text-8xl lg:text-[7rem]" style="--d:1">
+    <h2 id="resultados-title" class="vi-display vi-h2 vi-reveal mt-3" style="--d:1">
       El antes <span class="vi-sunset-text">y el después</span>
     </h2>
 
-    <dl class="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 lg:grid-cols-4">
+    <dl class="mt-10 grid grid-cols-2 sm:mt-14 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 lg:grid-cols-4">
       {
         metrics.map((m, i) => (
-          <div class="vi-reveal bg-[#0b0614] p-6 sm:p-8" style={`--d:${i}`}>
-            <dd class="vi-display vi-sunset-text text-6xl sm:text-8xl">{m.value}</dd>
-            <dt class="mt-3 text-sm text-white/60 sm:text-base">{m.label}</dt>
+          <div class="vi-reveal bg-[#0b0614] p-4 sm:p-8" style={`--d:${i}`}>
+            <dd class="vi-display vi-sunset-text text-[3.25rem] sm:text-8xl">{m.value}</dd>
+            <dt class="mt-2 text-[13px] leading-snug text-white/60 sm:mt-3 sm:text-base">{m.label}</dt>
           </div>
         ))
       }
@@ -51,13 +51,13 @@ import { metrics, beforeAfter, timeline } from '../../data/site';
     </div>
 
     <!-- Línea de tiempo -->
-    <ol id="historia-timeline" class="relative mt-24 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+    <ol id="historia-timeline" class="relative mt-16 ml-3 grid gap-8 border-l border-white/15 pl-6 sm:mt-24 sm:ml-0 sm:gap-10 sm:border-0 sm:pl-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
       <span aria-hidden="true" class="absolute top-3 right-0 left-0 hidden h-px bg-gradient-to-r from-[#2ee6d6] via-[#ff3d8b] to-[#ffc46b] lg:block"></span>
       {
         timeline.map((t, i) => (
           <li class="vi-reveal relative" style={`--d:${i}`}>
-            <span aria-hidden="true" class="relative z-10 block size-6 rounded-full border-4 border-[#07040d] bg-gradient-to-br from-[#ffc46b] to-[#ff3d8b]" />
-            <p class="vi-display mt-5 text-4xl text-white/90">{t.year}</p>
+            <span aria-hidden="true" class="absolute top-1 -left-[2.2rem] z-10 block size-6 rounded-full sm:relative sm:top-0 sm:left-0 border-4 border-[#07040d] bg-gradient-to-br from-[#ffc46b] to-[#ff3d8b]" />
+            <p class="vi-display text-4xl text-white/90 sm:mt-5">{t.year}</p>
             <p class="mt-2 font-semibold text-white">{t.title}</p>
             <p class="mt-1 text-white/55">{t.text}</p>
           </li>
