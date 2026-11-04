@@ -24,15 +24,18 @@ const big = 'M-80000,-80000 H80000 V80000 H-80000 Z';
         </linearGradient>
       </defs>
       <path d={`${big} ${glyphI} ${glyphA} ${glyphAHole}`} fill="#07040d" fill-rule="evenodd" />
-      <path class="glyph-stroke" d={`${glyphI} ${glyphA} ${glyphAHole}`} />
+      <!-- Un path por glifo con pathLength=1: el contorno se "dibuja" al cargar -->
+      <path class="glyph-stroke" pathLength="1" style="--ld:0" d={glyphI} />
+      <path class="glyph-stroke" pathLength="1" style="--ld:.18s" d={glyphA} />
+      <path class="glyph-stroke" pathLength="1" style="--ld:.5s" d={glyphAHole} />
     </svg>
 
     <div class="vi-intro-pre pointer-events-none absolute inset-x-0 top-[calc(5rem+env(safe-area-inset-top))] px-4 text-center sm:top-28">
-      <p class="vi-kicker">{site.name} presenta</p>
+      <p class="vi-kicker vi-load" style="--ld:1.5s">{site.name} presenta</p>
     </div>
     <div class="vi-intro-pre pointer-events-none absolute inset-x-0 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] px-4 text-center">
-      <p class="vi-display mx-auto max-w-[16ch] text-[2.1rem] leading-[0.95] text-white/90 sm:max-w-none sm:text-3xl">De programador a ingeniero de automatización</p>
-      <div class="vi-scroll-hint mt-5"><span></span></div>
+      <p class="vi-load vi-display mx-auto max-w-[16ch] text-[2.1rem] leading-[0.95] text-white/90 sm:max-w-none sm:text-3xl" style="--ld:1.8s">De programador a ingeniero de automatización</p>
+      <div class="vi-scroll-hint vi-load mt-5" style="--ld:2.3s"><span></span></div>
     </div>
 
     <div class="vi-intro-veil"></div>

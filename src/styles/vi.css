@@ -211,6 +211,40 @@
     opacity: var(--stroke-o, 1);
     filter: drop-shadow(0 0 10px rgb(255 61 139 / 0.8));
   }
+  /* ---------- Secuencia de entrada al cargar la página ----------
+     1) se dibuja el contorno de "IA"  2) se enciende la escena adentro de las letras
+     3) un destello  4) entran el nav y los textos. Solo CSS: corre apenas se pinta. */
+  .vi-intro-mask .glyph-stroke {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    animation: vi-draw 1.4s cubic-bezier(.65, 0, .35, 1) var(--ld, 0s) forwards;
+  }
+  .vi-intro-art > svg {
+    opacity: 0;
+    animation: vi-art-in 1.6s var(--vi-ease) 1s forwards;
+  }
+  .vi-load {
+    opacity: 0;
+    animation: vi-load-in 1s var(--vi-ease) var(--ld, 0s) forwards;
+  }
+  .vi-nav-in { animation: vi-nav-in 0.9s var(--vi-ease) 1.6s both; }
+  @keyframes vi-draw {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes vi-art-in {
+    0% { opacity: 0; transform: scale(1.18); filter: brightness(2.4) saturate(0.4); }
+    35% { opacity: 1; filter: brightness(1.6) saturate(0.9); }
+    100% { opacity: 1; transform: none; filter: none; }
+  }
+  @keyframes vi-load-in {
+    from { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+    to { opacity: 1; transform: none; filter: none; }
+  }
+  @keyframes vi-nav-in {
+    from { opacity: 0; transform: translateY(-100%); }
+    to { opacity: 1; transform: none; }
+  }
+
   .vi-intro-pre {
     opacity: var(--pre-o, 1);
     transform: translateY(calc((1 - var(--pre-o, 1)) * -20px));
@@ -634,5 +668,10 @@
     .vi-marquee-track, .vi-swipe::after { animation: none; }
     .vi-bigline { transform: none; }
     .vi-dock { transition: none; }
+    .vi-intro-mask .glyph-stroke, .vi-intro-art > svg, .vi-load, .vi-nav-in {
+      animation: none;
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
   }
 }
