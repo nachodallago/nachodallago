@@ -11,6 +11,12 @@
 - Contenido con IA: voces con ElevenLabs, imágenes con Magnific y video con Higgsfield.
 - Datos y reportes automáticos con Google Analytics, Analytics Canvas y planillas.
 
+## Proyectos propios
+
+- Potencialo (https://potencialo.com): plataforma para emprendimientos y negocios locales. Caja, factura electrónica, turnos, pedidos, fiado y proveedores en un solo panel, con tienda, carta o agenda online y una asistente de IA.
+- Conecticut (https://conecticut.io): plataforma competitiva de Counter-Strike 2 en Argentina, con matchmaking 5v5 por ELO, rankings, temporadas y anticheat propio.
+- MyWallet: proyecto privado en desarrollo.
+
 ## Resultados
 
 - Entre 4 y 6 tareas entregadas por día en paralelo, con IA en cada paso.

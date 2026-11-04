@@ -21,6 +21,7 @@ export const nav = [
   { href: '#historia', label: 'Historia' },
   { href: '#flujo', label: 'En acción' },
   { href: '#servicios', label: 'Servicios' },
+  { href: '#proyectos', label: 'Proyectos' },
   { href: '#arsenal', label: 'Arsenal' },
   { href: '#faq', label: 'FAQ' },
 ];
@@ -72,6 +73,38 @@ export const flow = [
   { logos: ['arca'], tag: 'fiscal', title: 'Se factura en ARCA', text: 'Factura electrónica emitida y enviada.' },
   { logos: ['whatsapp', 'elevenlabs'], tag: 'aviso', title: 'El cliente se entera', text: 'WhatsApp con voz natural de ElevenLabs.' },
 ] as const;
+
+/** Proyectos propios. Las descripciones salen de cada sitio. */
+export const projects = [
+  {
+    id: 'potencialo',
+    name: 'Potencialo',
+    url: 'https://potencialo.com',
+    domain: 'potencialo.com',
+    kicker: 'SaaS · negocios locales',
+    tagline: 'La solución definitiva para emprendimientos y negocios locales.',
+    text: 'Caja, factura electrónica, turnos, pedidos, fiado y proveedores en un solo panel armado según el rubro, desde el celular. Con tienda, carta o agenda online y una asistente de IA que atiende a cada visitante y ayuda a cerrar la venta.',
+    tags: ['IA', 'Facturación ARCA', 'Mercado Pago', 'Mobile first'],
+    accent: '#8b5cf6',
+  },
+  {
+    id: 'conecticut',
+    name: 'Conecticut',
+    url: 'https://conecticut.io',
+    domain: 'conecticut.io',
+    kicker: 'Gaming · comunidad',
+    tagline: 'La plataforma competitiva de Counter-Strike 2 en Argentina.',
+    text: 'Matchmaking 5v5 por ELO en LA LIGA, veto de mapas en vivo, rankings, temporadas y anticheat propio del lado del servidor. Se entra con Steam, sin instalar nada, y con servidores en Argentina.',
+    tags: ['CS2', 'Matchmaking ELO', 'Anticheat', 'Steam'],
+    accent: '#ff3d8b',
+  },
+] as const;
+
+export const privateProject = {
+  name: 'MyWallet',
+  kicker: 'Proyecto privado',
+  text: 'Proyecto propio en desarrollo, de uso privado. Por ahora no tiene demo pública: los detalles quedan bajo llave.',
+};
 
 export const services = [
   {

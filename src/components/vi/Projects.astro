@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { projects, privateProject } from '../../data/site';
+import potencialoShot from '../../assets/projects/potencialo.png';
+import conecticutShot from '../../assets/projects/conecticut.png';
+import potencialoLogo from '../../assets/projects/potencialo-logo.svg';
+import conecticutLogo from '../../assets/projects/conecticut-logo.png';
+
+const media = {
+  potencialo: { shot: potencialoShot, logo: potencialoLogo },
+  conecticut: { shot: conecticutShot, logo: conecticutLogo },
+} as const;
+---
+
+<section id="proyectos" class="relative py-20 sm:py-36" aria-labelledby="proyectos-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-8">
+    <p class="vi-kicker vi-reveal">Proyectos propios</p>
+    <h2 id="proyectos-title" class="vi-display vi-h2 vi-reveal mt-3" style="--d:1">
+      Lo que <span class="vi-sunset-text">construyo</span>
+    </h2>
+    <p class="vi-reveal mt-5 max-w-2xl text-white/65 sm:mt-6 sm:text-lg" style="--d:2">
+      Además de automatizar empresas, armo y opero mis propios productos, de punta a punta.
+    </p>
+
+    <div class="mt-10 space-y-6 sm:mt-14 sm:space-y-10">
+      {
+        projects.map((p, i) => (
+          <article
+            class:list={['vi-project vi-reveal grid overflow-hidden lg:grid-cols-[1.35fr_1fr]', i % 2 === 1 && 'lg:[direction:rtl]']}
+            style={`--accent:${p.accent}`}
+            aria-labelledby={`p-${p.id}`}
+          >
+            <a href={p.url} target="_blank" rel="noopener" class="vi-project-shot group block lg:[direction:ltr]" tabindex="-1" aria-hidden="true">
+              <Image
+                src={media[p.id].shot}
+                alt=""
+                widths={[480, 800, 1280]}
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                loading="lazy"
+                class="size-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+              />
+            </a>
+            <div class="relative flex flex-col p-5 sm:p-8 lg:p-10 lg:[direction:ltr]">
+              <span aria-hidden="true" class="vi-display absolute top-3 right-5 text-7xl text-white/[.06] sm:text-8xl">
+                0{i + 1}
+              </span>
+              <div class="flex items-center gap-3">
+                <Image src={media[p.id].logo} alt="" width={44} height={44} class="size-11 rounded-xl" />
+                <p class="vi-kicker" style="color:var(--accent)">{p.kicker}</p>
+              </div>
+              <h3 id={`p-${p.id}`} class="vi-display mt-5 text-[3.4rem] sm:text-7xl">{p.name}</h3>
+              <p class="mt-3 text-lg font-medium text-white sm:text-xl">{p.tagline}</p>
+              <p class="mt-3 flex-1 text-white/65">{p.text}</p>
+              <ul class="mt-6 flex flex-wrap gap-2">
+                {p.tags.map((t) => (
+                  <li class="rounded-full border border-white/10 px-3 py-1 font-mono text-[11px] text-white/60">{t}</li>
+                ))}
+              </ul>
+              <a href={p.url} target="_blank" rel="noopener" class="vi-btn vi-btn-ghost mt-7 w-full sm:w-fit">
+                Visitar {p.domain} <Icon name="external" size={18} />
+              </a>
+            </div>
+          </article>
+        ))
+      }
+
+      <!-- Proyecto privado: tarjeta "clasificada" -->
+      <article class="vi-project vi-project-private vi-reveal relative overflow-hidden p-5 sm:p-10" aria-labelledby="p-mywallet">
+        <div aria-hidden="true" class="vi-redacted pointer-events-none absolute inset-0"></div>
+        <div class="relative grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-8">
+          <span class="grid size-16 place-items-center rounded-2xl border border-white/15 bg-white/[.04] text-[#ffc46b] sm:size-20">
+            <Icon name="lock" size={30} />
+          </span>
+          <div>
+            <p class="vi-kicker">{privateProject.kicker} · 03</p>
+            <h3 id="p-mywallet" class="vi-display mt-3 text-[3.4rem] sm:text-7xl">{privateProject.name}</h3>
+            <p class="mt-3 max-w-2xl text-white/65">{privateProject.text}</p>
+          </div>
+        </div>
+        <p aria-hidden="true" class="vi-stamp vi-display">Privado</p>
+      </article>
+    </div>
+  </div>
+</section>
