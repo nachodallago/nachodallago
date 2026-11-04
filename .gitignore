@@ -11,7 +11,7 @@ yarn-debug.log*
 pnpm-debug.log*
 
 # base local de la API de FC 26
-data/
+/data/
 
 # env
 .env
