@@ -75,6 +75,9 @@
   .vi-h2 { font-size: clamp(3.1rem, 14.5vw, 7.5rem); }
   /* Para títulos con palabras largas ("automatización") que no deben salirse del ancho */
   .vi-h2-long { font-size: clamp(2.6rem, 11.8vw, 7.5rem); }
+  @media (min-width: 1024px) {
+    .vi-h2-long { font-size: clamp(4rem, 5.6vw, 6.75rem); }
+  }
 
   /* ---------- Botones (mínimo 48px de alto: cómodos para el pulgar) ---------- */
   .vi-btn {
@@ -385,6 +388,7 @@
     aspect-ratio: 4 / 5;
     max-height: 62svh;
     width: 100%;
+    min-width: 0;
     border-radius: 1.25rem;
     overflow: hidden;
     background: linear-gradient(160deg, var(--tone-a), #05030a 80%);
