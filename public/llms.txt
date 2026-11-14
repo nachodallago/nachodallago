@@ -26,4 +26,3 @@
 
 - Web: https://nachodallago.com
 - LinkedIn: https://www.linkedin.com/in/nachodallago/
-- GitHub: https://github.com/nachodallago

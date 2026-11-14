@@ -12,9 +12,7 @@ export const site = {
 export const links = {
   whatsapp: 'https://wa.me/message/OXURXG6SKOEDK1',
   linkedin: 'https://www.linkedin.com/in/nachodallago/',
-  github: 'https://github.com/nachodallago',
   instagram: 'https://instagram.com/nachodallago',
-  repo: 'https://github.com/nachodallago/nachodallago',
 };
 
 export const nav = [
