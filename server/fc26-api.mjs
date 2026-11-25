@@ -164,7 +164,7 @@ function clean(m) {
   const goals = (Array.isArray(m.goals) ? m.goals : [])
     .slice(0, 200)
     .filter((g) => (g?.side === 'home' || g?.side === 'away') && time(g.at))
-    .map((g) => ({ side: g.side, at: time(g.at), ...(gameMinute(g.min) && { min: gameMinute(g.min) }) }));
+    .map((g) => ({ side: g.side, at: time(g.at), ...(gameMinute(g.min) && { min: gameMinute(g.min) }), ...(g.void === true && { void: true }) }));
   return {
     id, date, homePlayer, awayPlayer, homeGoals, awayGoals,
     homeTeam: text(m.homeTeam),
@@ -186,7 +186,7 @@ function cleanLive(m) {
   const goals = (Array.isArray(m.goals) ? m.goals : [])
     .slice(0, 200)
     .filter((g) => (g?.side === 'home' || g?.side === 'away') && time(g.at))
-    .map((g) => ({ side: g.side, at: time(g.at), ...(gameMinute(g.min) && { min: gameMinute(g.min) }) }));
+    .map((g) => ({ side: g.side, at: time(g.at), ...(gameMinute(g.min) && { min: gameMinute(g.min) }), ...(g.void === true && { void: true }) }));
   return {
     homePlayer: text(m.homePlayer),
     awayPlayer: text(m.awayPlayer),

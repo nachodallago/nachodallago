@@ -1535,6 +1535,19 @@ const tabs = [
       transition: transform .1s ease;
     }
     .fc-goal-btn:active { transform: scale(.95); }
+    .fc-goal-btn { position: relative; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+    .fc-hold-tip {
+      position: absolute; left: 50%; bottom: calc(100% + .5rem); transform: translateX(-50%);
+      width: max-content; max-width: 12rem; padding: .4rem .6rem; border-radius: .6rem;
+      background: #18181b; color: #fafafa; font-size: .72rem; font-weight: 700; line-height: 1.2;
+      text-transform: none; letter-spacing: 0; white-space: normal; text-align: center;
+      box-shadow: 0 6px 20px rgb(0 0 0 / .4); pointer-events: none; z-index: 20;
+    }
+    .fc-hold-tip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -.35rem; border: .35rem solid transparent; border-top-color: #18181b; }
+    .fc-goal-btn.fc-armed { background: #dc2626; color: #fff; }
+    .fc-goal-btn.fc-armed .fc-hold-tip { background: #dc2626; }
+    .fc-goal-btn.fc-armed .fc-hold-tip::after { border-top-color: #dc2626; }
+    .fc-void, .fc-void b { text-decoration: line-through; opacity: .55; }
     .fc-undo-btn {
       min-height: 2.5rem;
       padding: 0 1rem;
@@ -1814,7 +1827,8 @@ const tabs = [
   }
   type Tournament = { id: string; name: string; createdAt: number };
   // min: minuto del juego en que entró (los goles viejos no lo tienen: se usa el tiempo real)
-  type Goal = { side: 'home' | 'away'; at: number; min?: number };
+  // void: gol anulado (queda en la lista pero no suma)
+  type Goal = { side: 'home' | 'away'; at: number; min?: number; void?: boolean };
 
   const KEY = 'fc26-matches';
   // Partido a medio cargar: sobrevive a recargar la página
@@ -2260,7 +2274,8 @@ const tabs = [
     min.textContent = goalLabel(g, start);
     const time = document.createElement('small');
     time.textContent = clockFmt.format(g.at);
-    chip.append(min, ` ${player} `, time);
+    chip.append(min, ` ${player}${g.void ? ' (anulado)' : ''} `, time);
+    if (g.void) chip.classList.add('fc-void');
     return chip;
   }
 
@@ -3246,6 +3261,7 @@ const tabs = [
     // Goles con su minuto (los viejos sin minuto de juego usan el tiempo real)
     const start = m.startedAt ?? m.goals?.[0]?.at ?? 0;
     const goals = [...(m.goals ?? [])]
+      .filter((g) => !g.void)
       .map((g) => ({ ...g, minute: g.min ?? minuteOf(g.at, start) }))
       .sort((a, b) => a.minute - b.minute || a.at - b.at);
     const hasTimeline = goals.length > 0 && goals.length === m.homeGoals + m.awayGoals;
@@ -3454,7 +3470,7 @@ const tabs = [
     goals = (m.goals ?? []).map((g) => ({ ...g }));
     for (const side of ['home', 'away'] as const) {
       const want = side === 'home' ? m.homeGoals : m.awayGoals;
-      while (goals.filter((g) => g.side === side).length < want) goals.push({ side, at: m.startedAt ?? Date.now() });
+      while (goals.filter((g) => g.side === side && !g.void).length < want) goals.push({ side, at: m.startedAt ?? Date.now() });
     }
     duration = m.duration ?? duration;
     extraTime = Boolean(m.extraTime);
@@ -3704,7 +3720,8 @@ const tabs = [
           min.textContent = goalLabel(g, start);
           const time = document.createElement('small');
           time.textContent = clockFmt.format(g.at);
-          chip.append(min, ` ${player} `, time);
+          chip.append(min, ` ${player}${g.void ? ' (anulado)' : ''} `, time);
+          if (g.void) chip.classList.add('fc-void');
           return chip;
         }),
       );
@@ -3914,7 +3931,7 @@ const tabs = [
   // Ajusta la lista de goles de un lado a la cantidad pedida: suma con la hora actual o saca el último
   function setGoals(side: 'home' | 'away', n: number) {
     n = Math.min(99, Math.max(0, Math.trunc(n) || 0));
-    let count = goals.filter((g) => g.side === side).length;
+    let count = goals.filter((g) => g.side === side && !g.void).length;
     while (count < n) {
       // Un gol con el reloj parado lo arranca
       startClock();
@@ -3923,7 +3940,7 @@ const tabs = [
       count++;
     }
     while (count > n) {
-      const last = goals.map((g) => g.side).lastIndexOf(side);
+      const last = goals.map((g) => (g.void ? '' : g.side)).lastIndexOf(side);
       goals.splice(last, 1);
       count--;
     }
@@ -4071,7 +4088,8 @@ const tabs = [
         min.textContent = goalLabel(g, startedAt ?? g.at);
         const dot = document.createElement('i');
         const name = document.createElement('span');
-        name.textContent = player;
+        name.textContent = g.void ? `${player} (anulado)` : player;
+        if (g.void) li.classList.add('fc-void');
         const time = document.createElement('small');
         time.textContent = clockFmt.format(g.at);
         li.append(min, dot, name, time);
@@ -4354,6 +4372,11 @@ const tabs = [
     }
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-step]');
     if (!btn) return;
+    // Después de mantener apretado (gol anulado) el click no suma
+    if (btn.dataset.suppress) {
+      delete btn.dataset.suppress;
+      return;
+    }
     const input = form.elements.namedItem(btn.dataset.step!) as HTMLInputElement;
     const side = btn.dataset.step === 'homeGoals' ? 'home' : 'away';
     const scored = Number(btn.dataset.delta) > 0 && (Number(input.value) || 0) < 99;
@@ -4362,6 +4385,63 @@ const tabs = [
     syncForm();
     saveDraft();
     if (scored) celebrate(form.querySelector(`[data-preview-goals=${side}]`));
+  });
+
+  // --- Gol anulado: mantener apretado "+ GOL" y soltar ---
+  // A los 250 ms aparece el tooltip; a los 700 ms queda armado y al soltar se marca el gol anulado
+  form.querySelectorAll<HTMLButtonElement>('.fc-goal-btn').forEach((btn) => {
+    let tip: HTMLElement | null = null;
+    let showT = 0;
+    let armT = 0;
+    let armed = false;
+    const side = btn.dataset.step === 'homeGoals' ? 'home' : 'away';
+    const reset = () => {
+      clearTimeout(showT);
+      clearTimeout(armT);
+      tip?.remove();
+      tip = null;
+      btn.classList.remove('fc-armed');
+    };
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      armed = false;
+      reset();
+      showT = window.setTimeout(() => {
+        tip = document.createElement('span');
+        tip.className = 'fc-hold-tip';
+        tip.setAttribute('role', 'tooltip');
+        tip.textContent = 'Mantené y soltá para marcar gol anulado';
+        btn.append(tip);
+      }, 250);
+      armT = window.setTimeout(() => {
+        armed = true;
+        btn.classList.add('fc-armed');
+        if (tip) tip.textContent = 'Soltá → gol anulado';
+        navigator.vibrate?.(20);
+      }, 700);
+    });
+    btn.addEventListener('pointerup', () => {
+      const wasArmed = armed;
+      armed = false;
+      reset();
+      if (!wasArmed) return;
+      btn.dataset.suppress = '1';
+      // Si el navegador no manda el click, que no quede trabado
+      setTimeout(() => delete btn.dataset.suppress, 400);
+      startClock();
+      const now = Date.now();
+      goals.push({ side, at: now, min: goalMinute(gameSeconds(clockState(), now)), void: true });
+      navigator.vibrate?.([60, 40, 60]);
+      syncForm();
+      saveDraft();
+    });
+    // Si se va el dedo del botón, se cancela
+    for (const ev of ['pointerleave', 'pointercancel'] as const)
+      btn.addEventListener(ev, () => {
+        armed = false;
+        reset();
+      });
   });
 
   document.querySelectorAll('[data-open-sheet]').forEach((b) =>
