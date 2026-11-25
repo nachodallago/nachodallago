@@ -25,13 +25,13 @@ const media = {
 
     <div class="mt-10 space-y-6 sm:mt-14 sm:space-y-10">
       {
-        projects.map((p, i) => (
+        projects.map((p, i) => { const Shot = p.url ? 'a' : 'div'; return (
           <article
             class:list={['vi-project vi-reveal grid overflow-hidden lg:grid-cols-[1.35fr_1fr]', i % 2 === 1 && 'lg:[direction:rtl]']}
             style={`--accent:${p.accent}`}
             aria-labelledby={`p-${p.id}`}
           >
-            <a href={p.url} target="_blank" rel="noopener" class="vi-project-shot group block lg:[direction:ltr]" tabindex="-1" aria-hidden="true">
+            <Shot href={p.url ?? undefined} target={p.url ? '_blank' : undefined} rel={p.url ? 'noopener' : undefined} class="vi-project-shot group block lg:[direction:ltr]" tabindex="-1" aria-hidden="true">
               <Image
                 src={media[p.id].shot}
                 alt=""
@@ -40,7 +40,7 @@ const media = {
                 loading="lazy"
                 class="size-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
               />
-            </a>
+            </Shot>
             <div class="relative flex flex-col p-5 sm:p-8 lg:p-10 lg:[direction:ltr]">
               <span aria-hidden="true" class="vi-display absolute top-3 right-5 text-7xl text-white/[.06] sm:text-8xl">
                 0{i + 1}
@@ -57,12 +57,14 @@ const media = {
                   <li class="rounded-full border border-white/10 px-3 py-1 font-mono text-[11px] text-white/60">{t}</li>
                 ))}
               </ul>
-              <a href={p.url} target="_blank" rel="noopener" class="vi-btn vi-btn-ghost mt-7 w-full sm:w-fit">
-                Visitar {p.domain} <Icon name="external" size={18} />
-              </a>
+              {p.url && (
+                <a href={p.url} target="_blank" rel="noopener" class="vi-btn vi-btn-ghost mt-7 w-full sm:w-fit">
+                  Visitar {p.domain} <Icon name="external" size={18} />
+                </a>
+              )}
             </div>
           </article>
-        ))
+        ); })
       }
 
       <!-- Proyectos privados: tarjetas "clasificadas" -->

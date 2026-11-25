@@ -86,8 +86,8 @@ export const projects = [
   {
     id: 'conecticut',
     name: 'Conecticut',
-    url: 'https://conecticut.io',
-    domain: 'conecticut.io',
+    url: null,
+    domain: null,
     kicker: 'Colaboración · gaming',
     tagline: 'La plataforma competitiva de Counter-Strike 2 en Argentina.',
     text: 'Proyecto de unos amigos en el que colaboré dándoles una mano con el desarrollo. Matchmaking 5v5 por ELO en LA LIGA, veto de mapas en vivo, rankings, temporadas y anticheat propio del lado del servidor. Se entra con Steam, sin instalar nada, y con servidores en Argentina.',
