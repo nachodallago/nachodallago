@@ -27,15 +27,11 @@ export const logos: Record<string, LogoDef> = {
   analyticscanvas: { name: 'Analytics Canvas', kind: 'img', file: 'analyticscanvas.png' },
   'github-actions': { name: 'GitHub Actions', kind: 'svg', file: 'githubactions.svg', color: '#2088FF' },
 
-  // ERP, e-commerce y fiscal
-  totvs: { name: 'TOTVS', kind: 'svg', file: 'totvs.svg', color: '#FFFFFF' },
-  odoo: { name: 'Odoo', kind: 'svg', file: 'odoo.svg', color: '#C59BC0' },
-  softcrates: { name: 'Softcrates', kind: 'word', color: '#7DD3FC' },
+  // E-commerce y pagos
   ecomexperts: { name: 'Ecomexperts', kind: 'img', file: 'ecomexperts.png', wide: true },
   mercadolibre: { name: 'MercadoLibre', kind: 'img', file: 'mercadolibre.png' },
   mercadopago: { name: 'MercadoPago', kind: 'svg', file: 'mercadopago.svg', color: '#00B1EA' },
   tiendanube: { name: 'TiendaNube', kind: 'img', file: 'tiendanube.png' },
-  arca: { name: 'ARCA', kind: 'img', file: 'arca.svg', wide: true },
 
   // Código e infraestructura
   typescript: { name: 'TypeScript', kind: 'svg', file: 'typescript.svg', color: '#3178C6' },

@@ -4,7 +4,7 @@ export const site = {
   url: 'https://nachodallago.com',
   title: 'Nacho Dal Lago — Ingeniero de Automatización e IA para empresas',
   description:
-    'De programador que picaba código a ingeniero de automatización. Conecto IA (Claude, ChatGPT, ElevenLabs), n8n y tus sistemas —Odoo, TOTVS, MercadoLibre, MercadoPago, TiendaNube, ARCA— para que tu empresa opere sola, 24/7.',
+    'De programador que picaba código a ingeniero de automatización. Conecto IA (Claude, ChatGPT, ElevenLabs), n8n y tus sistemas —MercadoLibre, MercadoPago, TiendaNube— para que tu empresa opere sola, 24/7.',
   location: 'Argentina',
   startedCoding: 2012,
 };
@@ -51,7 +51,7 @@ export const chapters = [
     name: ['El ingeniero', 'de automatización'],
     quote: 'Ya no escribo código para una tarea. Diseño sistemas que hacen el trabajo solos.',
     body: [
-      'Puse la IA en el centro de todo. Hoy conecto agentes con Claude y ChatGPT, workflows en n8n y servidores vía MCP con los sistemas reales de las empresas: ERPs como Odoo y TOTVS, marketplaces, pasarelas de pago y ARCA.',
+      'Puse la IA en el centro de todo. Hoy conecto agentes con Claude y ChatGPT, workflows en n8n y servidores vía MCP con los sistemas reales de las empresas: marketplaces y pasarelas de pago.',
       'El resultado: procesos que corren 24/7, entre 4 y 6 entregas por día en paralelo y un porcentaje de error que cayó en picada. El código no desapareció: ahora trabaja para la operación.',
     ],
     stats: [
@@ -66,9 +66,7 @@ export const chapters = [
 export const flow = [
   { logos: ['mercadolibre', 'tiendanube'], tag: 'trigger', title: 'Entra una venta', text: 'Webhook de MercadoLibre o TiendaNube.' },
   { logos: ['claude', 'openai'], tag: 'agente IA', title: 'La IA la entiende', text: 'Valida datos, detecta errores y decide.' },
-  { logos: [], tag: 'erp', title: 'Se carga en el ERP', text: 'Pedido, stock y cliente en Odoo o TOTVS.' },
   { logos: ['mercadopago'], tag: 'cobro', title: 'Se concilia el pago', text: 'MercadoPago confirmado y conciliado.' },
-  { logos: [], tag: 'fiscal', title: 'Se factura en ARCA', text: 'Factura electrónica emitida y enviada.' },
   { logos: ['whatsapp', 'elevenlabs'], tag: 'aviso', title: 'El cliente se entera', text: 'WhatsApp con voz natural de ElevenLabs.' },
 ] as const;
 
@@ -82,7 +80,7 @@ export const projects = [
     kicker: 'SaaS · negocios locales',
     tagline: 'La solución definitiva para emprendimientos y negocios locales.',
     text: 'Caja, factura electrónica, turnos, pedidos, fiado y proveedores en un solo panel armado según el rubro, desde el celular. Con tienda, carta o agenda online y una asistente de IA que atiende a cada visitante y ayuda a cerrar la venta.',
-    tags: ['IA', 'Facturación ARCA', 'Mercado Pago', 'Mobile first'],
+    tags: ['IA', 'Factura electrónica', 'Mercado Pago', 'Mobile first'],
     accent: '#8b5cf6',
   },
   {
@@ -112,13 +110,13 @@ export const services = [
   },
   {
     title: 'Workflows con n8n',
-    text: 'Flujos self-hosted que conectan CRM, WhatsApp, planillas, ERP y APIs. Corren 24/7, con monitoreo, reintentos y alertas.',
+    text: 'Flujos self-hosted que conectan CRM, WhatsApp, planillas y APIs. Corren 24/7, con monitoreo, reintentos y alertas.',
     tags: ['n8n', 'Webhooks', 'APIs'],
   },
   {
     title: 'Integración de sistemas',
-    text: 'Odoo, TOTVS, MercadoLibre, MercadoPago, TiendaNube y ARCA hablando entre sí. Chau carga manual y doble tipeo.',
-    tags: ['ERP', 'E-commerce', 'Facturación'],
+    text: 'MercadoLibre, MercadoPago, TiendaNube y tus sistemas hablando entre sí. Chau carga manual y doble tipeo.',
+    tags: ['E-commerce', 'Pagos', 'APIs'],
   },
   {
     title: 'Servidores vía MCP',
@@ -184,7 +182,7 @@ export const arsenal = [
     logos: ['n8n', 'whatsapp', 'sheets', 'analytics', 'analyticscanvas', 'github-actions'],
   },
   {
-    title: 'ERP, e-commerce y fiscal',
+    title: 'E-commerce y pagos',
     logos: ['ecomexperts', 'mercadolibre', 'mercadopago', 'tiendanube'],
   },
   {
@@ -196,11 +194,11 @@ export const arsenal = [
 export const faqs = [
   {
     q: '¿Qué procesos de mi empresa se pueden automatizar?',
-    a: 'Casi cualquier tarea repetitiva con reglas más o menos claras: cargar pedidos en el ERP, facturar en ARCA, conciliar cobros de MercadoPago, responder consultas, clasificar emails y documentos, generar reportes o sincronizar stock entre MercadoLibre, TiendaNube y tu sistema. Si se repite todas las semanas, probablemente se puede automatizar.',
+    a: 'Casi cualquier tarea repetitiva con reglas más o menos claras: cargar pedidos, conciliar cobros de MercadoPago, responder consultas, clasificar emails y documentos, generar reportes o sincronizar stock entre MercadoLibre, TiendaNube y tu sistema. Si se repite todas las semanas, probablemente se puede automatizar.',
   },
   {
     q: '¿Con qué sistemas trabajás?',
-    a: 'Trabajé con ERPs como TOTVS, Odoo y Softcrates, con Ecomexperts, MercadoLibre, MercadoPago, TiendaNube y ARCA, y con herramientas de IA como Claude, ChatGPT, ElevenLabs, Magnific y Higgsfield. Si tu sistema tiene API, webhook o base de datos, se puede integrar.',
+    a: 'Trabajé con Ecomexperts, MercadoLibre, MercadoPago, TiendaNube y con herramientas de IA como Claude, ChatGPT, ElevenLabs, Magnific y Higgsfield. Si tu sistema tiene API, webhook o base de datos, se puede integrar.',
   },
   {
     q: '¿Qué es n8n y por qué lo uso?',

@@ -26,7 +26,7 @@ import { flow } from '../../data/site';
           <span class="h-[calc(var(--flow-p,0)*100%)] w-full lg:h-full lg:w-[calc(var(--flow-p,0)*100%)]"></span>
         </div>
 
-        <ol class="relative grid gap-2 sm:gap-3 lg:grid-cols-6 lg:gap-4">
+        <ol class="relative grid gap-2 sm:gap-3 lg:grid-cols-4 lg:gap-4">
           {
             flow.map((s, i) => (
               <li class="vi-node flex items-center gap-3 p-2 sm:gap-4 sm:p-3 lg:flex-col lg:items-start lg:p-4" data-node={i}>
@@ -52,7 +52,7 @@ import { flow } from '../../data/site';
 
       <p class="mt-8 hidden max-w-2xl text-white/60 sm:block sm:text-lg">
         Un ejemplo de lo que construyo: el pedido entra por MercadoLibre o TiendaNube y, sin que nadie toque nada, termina
-        cargado en el ERP, cobrado, facturado en ARCA y avisado al cliente.
+        cobrado y avisado al cliente.
       </p>
     </div>
   </div>
