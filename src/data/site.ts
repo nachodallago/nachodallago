@@ -18,7 +18,6 @@ export const links = {
 export const nav = [
   { href: '#historia', label: 'Historia' },
   { href: '#flujo', label: 'En acción' },
-  { href: '#servicios', label: 'Servicios' },
   { href: '#proyectos', label: 'Proyectos' },
   { href: '#arsenal', label: 'Arsenal' },
   { href: '#faq', label: 'FAQ' },
