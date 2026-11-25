@@ -58,7 +58,7 @@ export const chapters = [
       { value: '4–6', label: 'entregas por día' },
       { value: '24/7', label: 'workflows activos' },
     ],
-    logos: ['claude', 'openai', 'n8n', 'elevenlabs', 'mcp', 'odoo', 'totvs', 'arca'],
+    logos: ['claude', 'openai', 'n8n', 'elevenlabs', 'mcp'],
   },
 ] as const;
 
@@ -66,9 +66,9 @@ export const chapters = [
 export const flow = [
   { logos: ['mercadolibre', 'tiendanube'], tag: 'trigger', title: 'Entra una venta', text: 'Webhook de MercadoLibre o TiendaNube.' },
   { logos: ['claude', 'openai'], tag: 'agente IA', title: 'La IA la entiende', text: 'Valida datos, detecta errores y decide.' },
-  { logos: ['odoo', 'totvs'], tag: 'erp', title: 'Se carga en el ERP', text: 'Pedido, stock y cliente en Odoo o TOTVS.' },
+  { logos: [], tag: 'erp', title: 'Se carga en el ERP', text: 'Pedido, stock y cliente en Odoo o TOTVS.' },
   { logos: ['mercadopago'], tag: 'cobro', title: 'Se concilia el pago', text: 'MercadoPago confirmado y conciliado.' },
-  { logos: ['arca'], tag: 'fiscal', title: 'Se factura en ARCA', text: 'Factura electrónica emitida y enviada.' },
+  { logos: [], tag: 'fiscal', title: 'Se factura en ARCA', text: 'Factura electrónica emitida y enviada.' },
   { logos: ['whatsapp', 'elevenlabs'], tag: 'aviso', title: 'El cliente se entera', text: 'WhatsApp con voz natural de ElevenLabs.' },
 ] as const;
 
@@ -185,7 +185,7 @@ export const arsenal = [
   },
   {
     title: 'ERP, e-commerce y fiscal',
-    logos: ['totvs', 'odoo', 'softcrates', 'ecomexperts', 'mercadolibre', 'mercadopago', 'tiendanube', 'arca'],
+    logos: ['ecomexperts', 'mercadolibre', 'mercadopago', 'tiendanube'],
   },
   {
     title: 'Código e infraestructura',
