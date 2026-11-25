@@ -79,8 +79,8 @@ export const projects = [
     domain: 'potencialo.com',
     kicker: 'SaaS · negocios locales',
     tagline: 'La solución definitiva para emprendimientos y negocios locales.',
-    text: 'Caja, factura electrónica, turnos, pedidos, fiado y proveedores en un solo panel armado según el rubro, desde el celular. Con tienda, carta o agenda online y una asistente de IA que atiende a cada visitante y ayuda a cerrar la venta.',
-    tags: ['IA', 'Factura electrónica', 'Mercado Pago', 'Mobile first'],
+    text: 'Caja, turnos, pedidos, fiado y proveedores en un solo panel armado según el rubro, desde el celular. Con tienda, carta o agenda online y una asistente de IA que atiende a cada visitante y ayuda a cerrar la venta.',
+    tags: ['IA', 'Mercado Pago', 'Mobile first'],
     accent: '#8b5cf6',
   },
   {
@@ -88,19 +88,28 @@ export const projects = [
     name: 'Conecticut',
     url: 'https://conecticut.io',
     domain: 'conecticut.io',
-    kicker: 'Gaming · comunidad',
+    kicker: 'Colaboración · gaming',
     tagline: 'La plataforma competitiva de Counter-Strike 2 en Argentina.',
-    text: 'Matchmaking 5v5 por ELO en LA LIGA, veto de mapas en vivo, rankings, temporadas y anticheat propio del lado del servidor. Se entra con Steam, sin instalar nada, y con servidores en Argentina.',
+    text: 'Proyecto de unos amigos en el que colaboré dándoles una mano con el desarrollo. Matchmaking 5v5 por ELO en LA LIGA, veto de mapas en vivo, rankings, temporadas y anticheat propio del lado del servidor. Se entra con Steam, sin instalar nada, y con servidores en Argentina.',
     tags: ['CS2', 'Matchmaking ELO', 'Anticheat', 'Steam'],
     accent: '#ff3d8b',
   },
 ] as const;
 
-export const privateProject = {
-  name: 'MyWallet',
-  kicker: 'Proyecto privado',
-  text: 'Proyecto propio en desarrollo, de uso privado. Por ahora no tiene demo pública: los detalles quedan bajo llave.',
-};
+export const privateProjects = [
+  {
+    id: 'fc26',
+    name: 'FC 26 Resultados',
+    kicker: 'Proyecto privado',
+    text: 'App para registrar los partidos de EA SPORTS FC 26 con amigos: quién jugó, con qué equipo, goles, marcador en vivo y estadísticas. De uso privado, sin acceso público.',
+  },
+  {
+    id: 'mywallet',
+    name: 'MyWallet',
+    kicker: 'Proyecto privado',
+    text: 'Proyecto propio en desarrollo, de uso privado. Por ahora no tiene demo pública: los detalles quedan bajo llave.',
+  },
+];
 
 export const services = [
   {
