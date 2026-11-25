@@ -1,0 +1,27 @@
+---
+import { site } from '../../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer id="aviso" class="relative border-t border-white/10 py-14 sm:py-20" aria-labelledby="aviso-title">
+  <div class="mx-auto max-w-3xl px-4 sm:px-8">
+    <h2 id="aviso-title" class="vi-kicker">Aviso</h2>
+    <ul class="mt-5 space-y-4 text-sm leading-relaxed text-white/60">
+      <li>
+        <strong class="text-white/85">Esta web es un CV digital público.</strong> Muestra mi recorrido como programador y cómo
+        hoy aprovecho la IA en mi trabajo. No es una oferta de servicios ni tiene ningún fin comercial.
+      </li>
+      <li>
+        <strong class="text-white/85">Trabajo en relación de dependencia.</strong> Hoy trabajo exclusivamente para la empresa
+        que me contrató como empleado. No ofrezco servicios ni trabajo para otras empresas, y nada de lo publicado acá
+        busca generar un conflicto de intereses.
+      </li>
+      <li>
+        <strong class="text-white/85">Sin afiliación con marcas.</strong> Las marcas, productos, empresas y logos mencionados
+        pertenecen a sus respectivos dueños y se muestran solo como referencia de herramientas y tecnologías que conozco.
+        No estoy afiliado a ninguna de ellas ni trabajo en conjunto con ellas, y ninguna avala este sitio.
+      </li>
+    </ul>
+    <p class="mt-10 text-xs text-white/35">© {year} {site.name}</p>
+  </div>
+</footer>
