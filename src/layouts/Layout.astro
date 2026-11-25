@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { site, links, faqs } from '../data/site';
+import { site, links } from '../data/site';
 
 interface Props {
   title?: string;
@@ -37,14 +37,6 @@ const jsonLd = {
         'Desarrollo full-stack',
       ],
       sameAs: [links.linkedin, links.instagram],
-    },
-    {
-      '@type': 'FAQPage',
-      mainEntity: faqs.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a },
-      })),
     },
   ],
 };

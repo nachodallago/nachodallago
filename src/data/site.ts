@@ -20,7 +20,6 @@ export const nav = [
   { href: '#flujo', label: 'En acción' },
   { href: '#proyectos', label: 'Proyectos' },
   { href: '#arsenal', label: 'Arsenal' },
-  { href: '#faq', label: 'FAQ' },
 ];
 
 export const years = new Date().getFullYear() - site.startedCoding;
@@ -110,39 +109,6 @@ export const privateProjects = [
   },
 ];
 
-export const services = [
-  {
-    title: 'Agentes de IA',
-    text: 'Agentes con Claude y ChatGPT que leen, clasifican, responden y deciden sobre emails, documentos, tickets y leads. Tu equipo solo aprueba.',
-    tags: ['Claude', 'ChatGPT', 'RAG'],
-  },
-  {
-    title: 'Workflows con n8n',
-    text: 'Flujos self-hosted que conectan CRM, WhatsApp, planillas y APIs. Corren 24/7, con monitoreo, reintentos y alertas.',
-    tags: ['n8n', 'Webhooks', 'APIs'],
-  },
-  {
-    title: 'Integración de sistemas',
-    text: 'MercadoLibre, MercadoPago, TiendaNube y tus sistemas hablando entre sí. Chau carga manual y doble tipeo.',
-    tags: ['E-commerce', 'Pagos', 'APIs'],
-  },
-  {
-    title: 'Servidores vía MCP',
-    text: 'Servidores, bases de datos y herramientas conectados a la IA con Model Context Protocol. Todo se opera desde un solo lugar.',
-    tags: ['MCP', 'Docker', 'Dokploy'],
-  },
-  {
-    title: 'Contenido con IA',
-    text: 'Voces con ElevenLabs, imágenes con Magnific y video con Higgsfield, integrados a tus procesos de marketing y atención.',
-    tags: ['ElevenLabs', 'Magnific', 'Higgsfield'],
-  },
-  {
-    title: 'Datos y reportes',
-    text: 'Reportes que se arman solos con Google Analytics, Analytics Canvas y planillas. Los números llegan, no hay que ir a buscarlos.',
-    tags: ['Analytics', 'Dashboards', 'Sheets'],
-  },
-];
-
 export const metrics = [
   { value: '4–6', label: 'tareas entregadas por día, en paralelo' },
   { value: '24/7', label: 'workflows corriendo sin intervención' },
@@ -172,13 +138,6 @@ export const timeline = [
   { year: 'Hoy', title: 'Ingeniero de automatización', text: 'IA, n8n y MCP conectados a los sistemas de la empresa.' },
 ];
 
-export const processSteps = [
-  { title: 'Diagnóstico', text: 'Mapeamos tus procesos y elegimos qué automatizar primero según horas y errores ahorrados.' },
-  { title: 'Diseño', text: 'Disparadores, agentes, validaciones y en qué punto decide una persona.' },
-  { title: 'Construcción', text: 'n8n, LLMs y MCP sobre tu infraestructura. Versionado, documentado y testeado.' },
-  { title: 'Operar y mejorar', text: 'Monitoreo, métricas y ajustes. La automatización mejora con cada ejecución.' },
-];
-
 /** Logos agrupados para la sección "Arsenal" */
 export const arsenal = [
   {
@@ -199,29 +158,3 @@ export const arsenal = [
   },
 ] as const;
 
-export const faqs = [
-  {
-    q: '¿Qué procesos de mi empresa se pueden automatizar?',
-    a: 'Casi cualquier tarea repetitiva con reglas más o menos claras: cargar pedidos, conciliar cobros de MercadoPago, responder consultas, clasificar emails y documentos, generar reportes o sincronizar stock entre MercadoLibre, TiendaNube y tu sistema. Si se repite todas las semanas, probablemente se puede automatizar.',
-  },
-  {
-    q: '¿Con qué sistemas trabajás?',
-    a: 'Trabajé con Ecomexperts, MercadoLibre, MercadoPago, TiendaNube y con herramientas de IA como Claude, ChatGPT, ElevenLabs, Magnific y Higgsfield. Si tu sistema tiene API, webhook o base de datos, se puede integrar.',
-  },
-  {
-    q: '¿Qué es n8n y por qué lo uso?',
-    a: 'n8n es una plataforma de automatización de workflows open source. La uso self-hosted porque conecta cientos de apps, permite sumar agentes de IA en cualquier paso y los datos quedan en tu infraestructura, sin pagar por cada ejecución.',
-  },
-  {
-    q: '¿Qué es MCP (Model Context Protocol)?',
-    a: 'Es el estándar abierto que permite que una IA se conecte de forma segura a herramientas y datos reales: servidores, bases de datos, repositorios o APIs. Con MCP la IA deja de adivinar y trabaja con el contexto real de tu negocio.',
-  },
-  {
-    q: '¿Mis datos están seguros?',
-    a: 'Sí. Priorizo soluciones self-hosted, credenciales con permisos mínimos y validación humana en los pasos críticos. Vos decidís qué ve la IA y qué no.',
-  },
-  {
-    q: '¿Cuánto tarda una automatización en estar funcionando?',
-    a: 'Arrancamos por el proceso de mayor impacto para tener un primer flujo en producción rápido y medir resultados reales. Después escalamos al resto de la operación.',
-  },
-];
