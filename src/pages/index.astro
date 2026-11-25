@@ -87,8 +87,6 @@ const manifesto =
   });
 
   const nav = document.querySelector<HTMLElement>('[data-nav]');
-  const dock = document.querySelector<HTMLElement>('[data-dock]');
-  const contact = document.getElementById('contacto');
   const intro = document.querySelector<HTMLElement>('[data-intro]');
   const introTitle = document.querySelector<HTMLElement>('[data-intro-title]');
   const introMask = document.querySelector<SVGElement>('.vi-intro-mask');
@@ -118,12 +116,6 @@ const manifesto =
     root.style.setProperty('--page-p', String(max > 0 ? scrollY / max : 0));
     const introEnd = intro ? intro.offsetTop + intro.offsetHeight - innerHeight : 0;
     nav?.classList.toggle('is-solid', scrollY > introEnd);
-    // Dock mobile: aparece cuando ya no se ve el CTA del hero y se va al llegar al contacto
-    const inContact = contact ? contact.getBoundingClientRect().top < innerHeight * 0.85 : false;
-    // En la escena fija del flujo el dock taparía los últimos pasos
-    const fr = flowEl?.getBoundingClientRect();
-    const inFlow = fr ? fr.top < innerHeight * 0.5 && fr.bottom > innerHeight * 0.5 : false;
-    dock?.classList.toggle('is-visible', scrollY > introEnd && !inContact && !inFlow);
 
     if (reduced) return;
 
