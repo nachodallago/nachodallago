@@ -29,7 +29,6 @@ const jsonLd = {
       knowsAbout: [
         'Inteligencia Artificial',
         'Automatización de procesos',
-        'Automatización de empresas',
         'MercadoLibre, MercadoPago y TiendaNube',
         'Claude, ChatGPT y ElevenLabs',
         'n8n',
@@ -38,22 +37,6 @@ const jsonLd = {
         'Desarrollo full-stack',
       ],
       sameAs: [links.linkedin, links.instagram],
-    },
-    {
-      '@type': 'ProfessionalService',
-      '@id': `${site.url}/#service`,
-      name: `${site.name} — Automatizaciones con IA`,
-      url: site.url,
-      description: site.description,
-      provider: { '@id': `${site.url}/#person` },
-      areaServed: ['AR', 'LATAM', 'ES'],
-      serviceType: [
-        'Automatización de empresas con Inteligencia Artificial',
-        'Integración de sistemas',
-        'Workflows con n8n',
-        'Integraciones MCP',
-        'Desarrollo de software con IA',
-      ],
     },
     {
       '@type': 'FAQPage',

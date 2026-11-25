@@ -2,9 +2,9 @@ export const site = {
   name: 'Nacho Dal Lago',
   role: 'Ingeniero de Automatización e IA',
   url: 'https://nachodallago.com',
-  title: 'Nacho Dal Lago — Ingeniero de Automatización e IA para empresas',
+  title: 'Nacho Dal Lago — Ingeniero de Automatización e IA',
   description:
-    'De programador que picaba código a ingeniero de automatización. Conecto IA (Claude, ChatGPT, ElevenLabs), n8n y tus sistemas —MercadoLibre, MercadoPago, TiendaNube— para que tu empresa opere sola, 24/7.',
+    'Programador desde 2012, hoy ingeniero de automatización e IA. Conecto IA (Claude, ChatGPT, ElevenLabs), n8n y MCP con los sistemas de la empresa —MercadoLibre, MercadoPago, TiendaNube— para que la operación corra sola, 24/7.',
   location: 'Argentina',
   startedCoding: 2012,
 };
@@ -50,7 +50,7 @@ export const chapters = [
     name: ['El ingeniero', 'de automatización'],
     quote: 'Ya no escribo código para una tarea. Diseño sistemas que hacen el trabajo solos.',
     body: [
-      'Puse la IA en el centro de todo. Hoy conecto agentes con Claude y ChatGPT, workflows en n8n y servidores vía MCP con los sistemas reales de las empresas: marketplaces y pasarelas de pago.',
+      'Puse la IA en el centro de todo. Hoy conecto agentes con Claude y ChatGPT, workflows en n8n y servidores vía MCP con los sistemas de la empresa: marketplaces y pasarelas de pago.',
       'El resultado: procesos que corren 24/7, entre 4 y 6 entregas por día en paralelo y un porcentaje de error que cayó en picada. El código no desapareció: ahora trabaja para la operación.',
     ],
     stats: [
@@ -169,7 +169,7 @@ export const timeline = [
   { year: String(site.startedCoding), title: 'Primera línea de código', text: 'Autodidacta. Nunca más paré.' },
   { year: `${site.startedCoding + 2}+`, title: 'Full-stack developer', text: 'Web, mobile y cloud. Integraciones con MercadoLibre y e-commerce.' },
   { year: 'El quiebre', title: 'La IA al centro', text: 'Las entregas se multiplican y los errores caen en picada.' },
-  { year: 'Hoy', title: 'Ingeniero de automatización', text: 'IA, n8n y MCP conectados a los sistemas de las empresas.' },
+  { year: 'Hoy', title: 'Ingeniero de automatización', text: 'IA, n8n y MCP conectados a los sistemas de la empresa.' },
 ];
 
 export const processSteps = [

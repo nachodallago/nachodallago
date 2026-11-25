@@ -1,20 +1,12 @@
 # Nacho Dal Lago — Ingeniero de Automatización e IA
 
-> Programador desde 2012 que pasó de "picar código" a ingeniero de automatización de empresas. Con base en Argentina, trabaja para LATAM y España. Conecta IA (Claude, ChatGPT, ElevenLabs), workflows en n8n y servidores vía Model Context Protocol (MCP) con los sistemas reales de las empresas.
+> Programador desde 2012, hoy ingeniero de automatización e IA con base en Argentina. Conecta IA (Claude, ChatGPT, ElevenLabs), workflows en n8n y servidores vía Model Context Protocol (MCP) con los sistemas de la empresa.
 
-## Servicios
+## Proyectos
 
-- Agentes de IA con Claude y ChatGPT: leen, clasifican, responden y deciden sobre emails, documentos, tickets y leads.
-- Workflows con n8n self-hosted: CRM, WhatsApp, planillas, ERP y APIs corriendo 24/7 con monitoreo y alertas.
-- Integración de sistemas: ERPs (TOTVS, Odoo, Softcrates), Ecomexperts, MercadoLibre, MercadoPago, TiendaNube y facturación electrónica en ARCA.
-- Servidores conectados vía MCP: servidores, bases de datos y herramientas operables desde la IA.
-- Contenido con IA: voces con ElevenLabs, imágenes con Magnific y video con Higgsfield.
-- Datos y reportes automáticos con Google Analytics, Analytics Canvas y planillas.
-
-## Proyectos propios
-
-- Potencialo (https://potencialo.com): plataforma para emprendimientos y negocios locales. Caja, factura electrónica, turnos, pedidos, fiado y proveedores en un solo panel, con tienda, carta o agenda online y una asistente de IA.
+- Potencialo (https://potencialo.com): plataforma para emprendimientos y negocios locales. Caja, turnos, pedidos, fiado y proveedores en un solo panel, con tienda, carta o agenda online y una asistente de IA.
 - Conecticut: proyecto de unos amigos en el que colaboré; plataforma competitiva de Counter-Strike 2 en Argentina, con matchmaking 5v5 por ELO, rankings, temporadas y anticheat propio.
+- FC 26 Resultados: app privada para registrar partidos de EA SPORTS FC 26 con amigos.
 - MyWallet: proyecto privado en desarrollo.
 
 ## Resultados
@@ -22,7 +14,6 @@
 - Entre 4 y 6 tareas entregadas por día en paralelo, con IA en cada paso.
 - Reducción muy significativa del porcentaje de error.
 
-## Contacto
+## Web
 
-- Web: https://nachodallago.com
-- LinkedIn: https://www.linkedin.com/in/nachodallago/
+- https://nachodallago.com
